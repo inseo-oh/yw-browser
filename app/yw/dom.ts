@@ -41,6 +41,9 @@ export class $Element extends $Node {
         super();
         this.localName = localName;
     }
+    fn() {
+        console.log("hello, world!");
+    }
     get csm(): ComputedStyleMap {
         if (this.__csm === null) {
             throw Error("csm hasn't been set yet");

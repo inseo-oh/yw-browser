@@ -1,7 +1,7 @@
 "use client";
 
-import { SyntheticEvent, useRef } from "react";
-import { WorkerInterface } from "./yw/worker_api";
+import { useEffect, useRef } from "react";
+import { RemoteNode, WorkerInterface } from "./yw/worker_api";
 import {
     $Attr,
     $Document,
@@ -12,15 +12,20 @@ import {
     printDOMTree,
 } from "./yw/dom";
 
-function buildYwDomFor(node: Node, parentNode: $Node | null): $Node {
-    let resNode;
+async function buildYwDomFor(
+    workerIf: WorkerInterface,
+    node: Node,
+    parentNode: $Node | null,
+): Promise<RemoteNode> {
+    let resNode: RemoteNode;
     switch (node.nodeType) {
-        case Node.DOCUMENT_NODE:
-            resNode = new $Document();
+        case Node.DOCUMENT_NODE: {
+            resNode = await workerIf.createDocument();
             break;
+        }
         case Node.DOCUMENT_TYPE_NODE: {
             const doctypeNode = node as DocumentType;
-            resNode = new $DocumentType(
+            resNode = await workerIf.createDocumentType(
                 doctypeNode.name,
                 doctypeNode.publicId,
                 doctypeNode.systemId,
@@ -29,7 +34,7 @@ function buildYwDomFor(node: Node, parentNode: $Node | null): $Node {
         }
         case Node.ELEMENT_NODE: {
             const elementNode = node as Element;
-            resNode = new $Element(elementNode.localName);
+            resNode = await workerIf.createElement(elementNode.localName);
             for (const attr of elementNode.attributes) {
                 resNode.attrs.push(new $Attr(attr.name, attr.value));
             }
@@ -51,32 +56,42 @@ function buildYwDomFor(node: Node, parentNode: $Node | null): $Node {
     }
     return resNode;
 }
-function buildYwDom(iframe: HTMLIFrameElement): $Node {
+async function buildYwDom(
+    workerIf: WorkerInterface,
+    iframe: HTMLIFrameElement,
+): Promise<RemoteNode> {
     if (iframe.contentDocument === null) {
         throw new Error("iframe content document is not accessible");
     }
-    return buildYwDomFor(iframe.contentDocument, null);
+    return buildYwDomFor(workerIf, iframe.contentDocument, null);
 }
 
 export default function Contents() {
     const workerIf = useRef<WorkerInterface>(null);
+    const ifr = useRef<HTMLIFrameElement>(null);
 
-    const onIframeLoad = function (
-        e: SyntheticEvent<HTMLIFrameElement, Event>,
-    ) {
-        const iframe = e.target as HTMLIFrameElement;
+    const initWorker = async function (fr: HTMLIFrameElement) {
         console.log("iframe loaded");
-        const doc = buildYwDom(iframe);
-        printDOMTree(doc);
-        
         if (workerIf.current === null) {
             const worker = new Worker(new URL("./yw/main.ts", import.meta.url));
             workerIf.current = new WorkerInterface(worker);
         }
-        workerIf.current.calculateCsm(
-            doc.children.filter((v) => v instanceof $Element)[0],
-        );
+        const doc = await buildYwDom(workerIf.current, fr);
+        // printDOMTree(doc);
     };
+    useEffect(() => {
+        if (ifr.current === null) {
+            return;
+        }
+        if (ifr.current.contentDocument?.readyState === "complete") {
+            console.log("already loaded");
+            initWorker(ifr.current);
+        } else {
+            ifr.current.addEventListener("load", function () {
+                initWorker(this);
+            });
+        }
+    }, [ifr]);
 
-    return <iframe src="/demo/index.html" onLoad={onIframeLoad}></iframe>;
+    return <iframe src="/demo/index.html" ref={ifr}></iframe>;
 }
