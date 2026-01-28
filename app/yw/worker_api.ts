@@ -12,8 +12,18 @@ export class RemoteNode {
     }
 }
 export class RemoteElement extends RemoteNode {
-    
-};
+    async appendAttribute(name: string, value: string) {
+        this.wi.handleSimpleResponse(
+            "appendAttributeToElement",
+            await this.wi.request({
+                cmd: "appendAttributeToElement",
+                elemSlot: this.slot,
+                attrName: name,
+                attrValue: value,
+            }),
+        );
+    }
+}
 
 export type WorkerRequest =
     | {
@@ -32,6 +42,12 @@ export type WorkerRequest =
     | {
           cmd: "createElement";
           localName: string;
+      }
+    | {
+          cmd: "appendAttributeToElement";
+          elemSlot: number;
+          attrName: string;
+          attrValue: string;
       };
 
 export type WorkerNodeCreationResponse<C> = {
@@ -47,7 +63,8 @@ export type WorkerOkResponse =
     | WorkerSimpleResponse<"detachNode">
     | WorkerNodeCreationResponse<"createDocument">
     | WorkerNodeCreationResponse<"createDocumentType">
-    | WorkerNodeCreationResponse<"createElement">;
+    | WorkerNodeCreationResponse<"createElement">
+    | WorkerSimpleResponse<"appendAttributeToElement">;
 
 export type WorkerErrorResponse = {
     type: "error";
@@ -125,7 +142,7 @@ export class WorkerInterface {
         }
         return new RemoteNode(this, res.attachedSlot);
     }
-    async createElement(localName: string): Promise<RemoteNode> {
+    async createElement(localName: string): Promise<RemoteElement> {
         const res = await this.request({
             cmd: "createElement",
             localName,
@@ -133,7 +150,7 @@ export class WorkerInterface {
         if (res.cmd !== "createElement") {
             throw Error(`bad cmd ${res.cmd} in response`);
         }
-        return new RemoteNode(this, res.attachedSlot);
+        return new RemoteElement(this, res.attachedSlot);
     }
     async detachNode(slot: number): Promise<void> {
         this.handleSimpleResponse(

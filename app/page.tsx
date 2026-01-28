@@ -2,15 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { RemoteNode, WorkerInterface } from "./yw/worker_api";
-import {
-    $Attr,
-    $Document,
-    $DocumentType,
-    $Element,
-    $Node,
-    $Text,
-    printDOMTree,
-} from "./yw/dom";
+import { $Node, $Text } from "./yw/dom";
 
 async function buildYwDomFor(
     workerIf: WorkerInterface,
@@ -34,10 +26,11 @@ async function buildYwDomFor(
         }
         case Node.ELEMENT_NODE: {
             const elementNode = node as Element;
-            resNode = await workerIf.createElement(elementNode.localName);
+            const resElem = await workerIf.createElement(elementNode.localName);
             for (const attr of elementNode.attributes) {
-                resNode.attrs.push(new $Attr(attr.name, attr.value));
+                await resElem.appendAttribute(attr.name, attr.value);
             }
+            resNode = resElem;
             break;
         }
         case Node.TEXT_NODE: {
@@ -46,13 +39,12 @@ async function buildYwDomFor(
             break;
         }
         default:
-            console.log("TODO: node type " + node.nodeType);
-            resNode = new $Node();
+            throw Error("TODO: node type " + node.nodeType);
             break;
     }
     resNode.parentNode = parentNode;
     for (const child of node.childNodes) {
-        resNode.children.push(buildYwDomFor(child, resNode));
+        resNode.children.push(buildYwDomFor(workerIf, child, resNode));
     }
     return resNode;
 }

@@ -1,4 +1,4 @@
-import { $Document, $DocumentType, $Element, $Node } from "./dom";
+import { $Attr, $Document, $DocumentType, $Element, $Node } from "./dom";
 import {
     WorkerErrorResponse,
     WorkerOkResponse,
@@ -36,6 +36,13 @@ function detachNodeFromSlot(slot: number) {
     }
     nodeSlots[slot] = null;
 }
+function nodeFromSlot(slot: number): $Node {
+    const n = nodeSlots[slot];
+    if (n === null) {
+        throw Error(`Node slot ${slot} is empty`);
+    }
+    return n;
+}
 
 self.onmessage = function (msgEvent: MessageEvent<WorkerRequest>) {
     const msg = msgEvent.data;
@@ -65,6 +72,17 @@ self.onmessage = function (msgEvent: MessageEvent<WorkerRequest>) {
                 const doc = new $Element(localName);
                 const attachedSlot = attachNodeToSlot(doc);
                 sendOkResponse({ cmd, type: "ok", attachedSlot });
+                break;
+            }
+            case "appendAttributeToElement": {
+                const { attrName, attrValue, elemSlot } = msg;
+                const elem = nodeSlots[elemSlot];
+                if (!(elem instanceof $Element)) {
+                    sendErrorResponse(cmd, `Element is not an element`);
+                    break;
+                }
+                elem.attrs.push(new $Attr(attrName, attrValue));
+                sendOkResponse({ cmd, type: "ok" });
                 break;
             }
             default:
