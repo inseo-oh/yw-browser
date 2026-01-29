@@ -1,21 +1,26 @@
-import { $Attr, $Document, $DocumentType, $Element, $Node } from "./dom";
+import { $Attr, $Document, $DocumentType, $Element, $Node, $Text } from "./dom";
 import {
+    unwrapWorkerParams,
+    WorkerCommand,
     WorkerErrorResponse,
     WorkerOkResponse,
+    WorkerParams,
     WorkerRequest,
+    WorkerReturnType,
 } from "./worker_api";
 
 console.log("YW started");
 
-function sendErrorResponse(cmd: string, msg: string) {
+function sendErrorResponse(requestId: number, cmd: string, msg: string) {
     const resp: WorkerErrorResponse = {
         type: "error",
         cmd,
-        msg,
+        requestId,
+        data: msg,
     };
     self.postMessage(resp);
 }
-function sendOkResponse(resp: WorkerOkResponse) {
+function sendOkResponse<C extends WorkerCommand>(resp: WorkerOkResponse<C>) {
     self.postMessage(resp);
 }
 const nodeSlots: ($Node | null)[] = [];
@@ -36,61 +41,99 @@ function detachNodeFromSlot(slot: number) {
     }
     nodeSlots[slot] = null;
 }
-function nodeFromSlot(slot: number): $Node {
-    const n = nodeSlots[slot];
-    if (n === null) {
-        throw Error(`Node slot ${slot} is empty`);
-    }
-    return n;
+function handleCommand<C extends WorkerCommand>(
+    request: WorkerRequest<C>,
+    unpacked: (...args: WorkerParams<C>) => WorkerReturnType<C>,
+) {
+    const data = unpacked(...request.args);
+    sendOkResponse({
+        requestId: request.requestId,
+        cmd: request.cmd,
+        type: "ok",
+        data,
+    });
 }
 
-self.onmessage = function (msgEvent: MessageEvent<WorkerRequest>) {
+self.onmessage = function (msgEvent: MessageEvent) {
     const msg = msgEvent.data;
-    const { cmd } = msg;
+    const { cmd, requestId } = msg;
     try {
-        switch (cmd) {
+        switch (cmd as WorkerCommand) {
             case "detachNode": {
-                const { slot } = msg;
+                const { slot } = msg.args;
                 detachNodeFromSlot(slot);
-                sendOkResponse({ cmd, type: "ok" });
+                sendOkResponse({ requestId, cmd, type: "ok", data: null });
             }
             case "createDocument": {
                 const doc = new $Document();
                 const attachedSlot = attachNodeToSlot(doc);
-                sendOkResponse({ cmd, type: "ok", attachedSlot });
+                sendOkResponse({
+                    requestId,
+                    cmd,
+                    type: "ok",
+                    data: { slot: attachedSlot },
+                });
                 break;
             }
             case "createDocumentType": {
-                const { name, publicId, systemId } = msg;
+                const { name, publicId, systemId } = msg.args;
                 const doc = new $DocumentType(name, publicId, systemId);
                 const attachedSlot = attachNodeToSlot(doc);
-                sendOkResponse({ cmd, type: "ok", attachedSlot });
+                sendOkResponse({
+                    requestId,
+                    cmd,
+                    type: "ok",
+                    data: { slot: attachedSlot },
+                });
                 break;
             }
             case "createElement": {
-                const { localName } = msg;
+                const { localName } = msg.args;
                 const doc = new $Element(localName);
                 const attachedSlot = attachNodeToSlot(doc);
-                sendOkResponse({ cmd, type: "ok", attachedSlot });
+                sendOkResponse({
+                    requestId,
+                    cmd,
+                    type: "ok",
+                    data: { slot: attachedSlot },
+                });
+                break;
+            }
+            case "createText": {
+                const { localName } = msg.args;
+                const text = new $Text(localName);
+                const attachedSlot = attachNodeToSlot(text);
+                sendOkResponse({
+                    requestId,
+                    cmd,
+                    type: "ok",
+                    data: { slot: attachedSlot },
+                });
                 break;
             }
             case "appendAttributeToElement": {
-                const { attrName, attrValue, elemSlot } = msg;
+                const { attrName, attrValue, elemSlot } = msg.args;
                 const elem = nodeSlots[elemSlot];
                 if (!(elem instanceof $Element)) {
-                    sendErrorResponse(cmd, `Element is not an element`);
+                    sendErrorResponse(requestId, cmd, "bad elemSlot");
                     break;
                 }
                 elem.attrs.push(new $Attr(attrName, attrValue));
-                sendOkResponse({ cmd, type: "ok" });
+                sendOkResponse({ requestId, cmd, type: "ok", data: null });
                 break;
             }
+            case "setNodeParent": {
+                unwrapWorkerParams<"setNodeParent">(
+                    msg.args,
+                    (nodeSlot, parentSlot) => {},
+                );
+            }
             default:
-                sendErrorResponse(cmd, `Unrecognized command`);
+                sendErrorResponse(requestId, cmd, `bad command`);
                 break;
         }
     } catch (e) {
         console.error(e);
-        sendErrorResponse(cmd, `Uncaught exception: ${e}`);
+        sendErrorResponse(requestId, cmd, `uncaught exception: ${e}`);
     }
 };

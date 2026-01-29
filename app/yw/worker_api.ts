@@ -1,95 +1,99 @@
+type NodeSlot = number;
+
 export class RemoteNode {
     wi: WorkerInterface;
-    slot: number;
+    slot: NodeSlot;
 
-    constructor(wi: WorkerInterface, slot: number) {
+    constructor(wi: WorkerInterface, slot: NodeSlot) {
         this.wi = wi;
         this.slot = slot;
     }
-    detach() {
-        this.wi.detachNode(this.slot);
+    async detach() {
+        await this.wi.request("detachNode", [], this.slot);
         this.slot = -1;
+    }
+    async setNodeParent(par: RemoteNode) {
+        await this.wi.request("setNodeParent", [], this.slot, par.slot);
     }
 }
 export class RemoteElement extends RemoteNode {
     async appendAttribute(name: string, value: string) {
-        this.wi.handleSimpleResponse(
+        await this.wi.request(
             "appendAttributeToElement",
-            await this.wi.request({
-                cmd: "appendAttributeToElement",
-                elemSlot: this.slot,
-                attrName: name,
-                attrValue: value,
-            }),
+            [],
+            this.slot,
+            name,
+            value,
         );
     }
 }
 
-export type WorkerRequest =
-    | {
-          cmd: "detachNode";
-          slot: number;
-      }
-    | {
-          cmd: "createDocument";
-      }
-    | {
-          cmd: "createDocumentType";
-          name: string;
-          publicId: string;
-          systemId: string;
-      }
-    | {
-          cmd: "createElement";
-          localName: string;
-      }
-    | {
-          cmd: "appendAttributeToElement";
-          elemSlot: number;
-          attrName: string;
-          attrValue: string;
-      };
+interface WorkerAnyRequest {
+    detachNode(slot: NodeSlot): void;
+    createDocument(): NodeSlot;
+    createDocumentType(
+        name: string,
+        publicId: string,
+        systemId: string,
+    ): NodeSlot;
+    createElement(localName: string): NodeSlot;
+    createText(data: string): NodeSlot;
+    appendAttributeToElement(
+        elemSlot: NodeSlot,
+        attrName: string,
+        attrValue: string,
+    ): void;
+    setNodeParent(nodeSlot: NodeSlot, parentSlot: NodeSlot): void;
+}
+export type WorkerCommand = keyof WorkerAnyRequest;
+export type WorkerParams<C extends WorkerCommand> = Parameters<
+    WorkerAnyRequest[C]
+>;
+export type WorkerReturnType<C extends WorkerCommand> = ReturnType<
+    WorkerAnyRequest[C]
+>;
 
-export type WorkerNodeCreationResponse<C> = {
-    type: "ok";
+export type WorkerRequest<C extends WorkerCommand> = {
     cmd: C;
-    attachedSlot: number;
+    requestId: number;
+    args: WorkerParams<C>;
 };
-export type WorkerSimpleResponse<C> = {
-    type: "ok";
-    cmd: C;
-};
-export type WorkerOkResponse =
-    | WorkerSimpleResponse<"detachNode">
-    | WorkerNodeCreationResponse<"createDocument">
-    | WorkerNodeCreationResponse<"createDocumentType">
-    | WorkerNodeCreationResponse<"createElement">
-    | WorkerSimpleResponse<"appendAttributeToElement">;
 
-export type WorkerErrorResponse = {
-    type: "error";
-    cmd: string;
-    msg: string;
+export type WorkerResponse<T, C, R> = {
+    type: T;
+    requestId: number;
+    cmd: C;
+    data: R;
 };
+export type WorkerOkResponse<C extends WorkerCommand> = WorkerResponse<
+    "ok",
+    C,
+    ReturnType<WorkerAnyRequest[C]>
+>;
+export type WorkerErrorResponse = WorkerResponse<"error", string, string>;
 
 export class WorkerInterface {
-    requestQueue: {
-        req: WorkerRequest;
-        resolve: (res: WorkerOkResponse) => void;
-        reject: (msg: string) => void;
-    }[] = [];
+    pendingRequests = new Map<
+        number,
+        {
+            resolve: (res: unknown) => void;
+            reject: (msg: string) => void;
+        }
+    >();
     worker: Worker;
+    nextReqId = 0;
 
     constructor(worker: Worker) {
         this.worker = worker;
-        this.worker.onmessage = (
-            ev: MessageEvent<WorkerOkResponse | WorkerErrorResponse>,
-        ) => {
-            const queuedReq = this.requestQueue[0];
-            this.requestQueue.splice(0, 1);
+        this.worker.onmessage = (ev: MessageEvent) => {
+            const queuedReq = this.pendingRequests.get(ev.data.requestId);
+            if (queuedReq === undefined) {
+                console.error(`no such request with ID ${ev.data.requestId}`);
+                return;
+            }
             if (ev.data.type === "error") {
                 queuedReq.reject(
-                    `Request ${queuedReq.req.cmd} failed: ${ev.data.msg}`,
+                    `Request ${ev.data.cmd} failed: ${ev.data.msg}`,
                 );
             } else {
                 queuedReq.resolve(ev.data);
@@ -97,65 +101,52 @@ export class WorkerInterface {
         };
     }
 
-    async request(
-        req: WorkerRequest,
-        transfer?: Transferable[],
-    ): Promise<WorkerOkResponse> {
-        if (transfer !== undefined) {
-            this.worker.postMessage(req, transfer);
-        } else {
-            this.worker.postMessage(req);
-        }
+    async request<C extends WorkerCommand, R extends WorkerRequest<C>>(
+        cmd: C,
+        transfer: Transferable[],
+        ...args: R["args"]
+    ): Promise<ReturnType<WorkerAnyRequest[C]>> {
+        const requestId = this.nextReqId++;
+        const req = { cmd, requestId, args };
+        this.worker.postMessage(req, transfer);
         return new Promise((resolve, reject) => {
-            this.requestQueue.push({ req, resolve, reject });
+            this.pendingRequests.set(requestId, {
+                resolve: (res) => {
+                    const okRes = res as WorkerOkResponse<C>;
+                    if (okRes.cmd !== req.cmd) {
+                        throw TypeError(`bad cmd ${okRes.cmd} in response`);
+                    }
+                    resolve(okRes.data);
+                },
+                reject,
+            });
         });
     }
 
-    async handleSimpleResponse<S>(
-        cmd: S,
-        res: WorkerOkResponse,
-    ): Promise<void> {
-        if (res.cmd !== cmd) {
-            throw Error(`bad cmd ${res.cmd} in response`);
-        }
-    }
     async createDocument(): Promise<RemoteNode> {
-        const res = await this.request({ cmd: "createDocument" });
-        if (res.cmd !== "createDocument") {
-            throw Error(`bad cmd ${res.cmd} in response`);
-        }
-        return new RemoteNode(this, res.attachedSlot);
+        const slot = await this.request("createDocument", []);
+        return new RemoteNode(this, slot);
     }
     async createDocumentType(
         name: string,
         publicId: string,
         systemId: string,
     ): Promise<RemoteNode> {
-        const res = await this.request({
-            cmd: "createDocumentType",
+        const slot = await this.request(
+            "createDocumentType",
+            [],
             name,
             publicId,
             systemId,
-        });
-        if (res.cmd !== "createDocumentType") {
-            throw Error(`bad cmd ${res.cmd} in response`);
-        }
-        return new RemoteNode(this, res.attachedSlot);
+        );
+        return new RemoteNode(this, slot);
     }
     async createElement(localName: string): Promise<RemoteElement> {
-        const res = await this.request({
-            cmd: "createElement",
-            localName,
-        });
-        if (res.cmd !== "createElement") {
-            throw Error(`bad cmd ${res.cmd} in response`);
-        }
-        return new RemoteElement(this, res.attachedSlot);
+        const slot = await this.request("createElement", [], localName);
+        return new RemoteElement(this, slot);
     }
-    async detachNode(slot: number): Promise<void> {
-        this.handleSimpleResponse(
-            "detachNode",
-            await this.request({ cmd: "detachNode", slot }),
-        );
+    async createText(localName: string): Promise<RemoteElement> {
+        const slot = await this.request("createText", [], localName);
+        return new RemoteElement(this, slot);
     }
 }

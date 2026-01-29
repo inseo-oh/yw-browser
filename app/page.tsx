@@ -35,7 +35,7 @@ async function buildYwDomFor(
         }
         case Node.TEXT_NODE: {
             const textNode = node as Text;
-            resNode = new $Text(textNode.data);
+            resNode = await workerIf.createText(textNode.data);
             break;
         }
         default:
