@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { RemoteNode, WorkerInterface } from "./yw/worker_api";
-import { $Node, $Text } from "./yw/dom";
+import { RemoteNode, WorkerInterface } from "./yw/worker";
 
-async function buildYwDomFor(
+async function buildYwDOMFor(
     workerIf: WorkerInterface,
     node: Node,
-    parentNode: $Node | null,
+    parentNode: RemoteNode | null,
 ): Promise<RemoteNode> {
     let resNode: RemoteNode;
     switch (node.nodeType) {
@@ -40,22 +39,23 @@ async function buildYwDomFor(
         }
         default:
             throw Error("TODO: node type " + node.nodeType);
-            break;
     }
-    resNode.parentNode = parentNode;
+    await resNode.setNodeParent(parentNode);
     for (const child of node.childNodes) {
-        resNode.children.push(buildYwDomFor(workerIf, child, resNode));
+        const childDom = await buildYwDOMFor(workerIf, child, resNode);
+        await resNode.appendChild(childDom);
+        await childDom.detach();
     }
     return resNode;
 }
-async function buildYwDom(
+async function buildYwDOM(
     workerIf: WorkerInterface,
     iframe: HTMLIFrameElement,
 ): Promise<RemoteNode> {
     if (iframe.contentDocument === null) {
         throw new Error("iframe content document is not accessible");
     }
-    return buildYwDomFor(workerIf, iframe.contentDocument, null);
+    return buildYwDOMFor(workerIf, iframe.contentDocument, null);
 }
 
 export default function Contents() {
@@ -65,11 +65,13 @@ export default function Contents() {
     const initWorker = async function (fr: HTMLIFrameElement) {
         console.log("iframe loaded");
         if (workerIf.current === null) {
-            const worker = new Worker(new URL("./yw/main.ts", import.meta.url));
+            const worker = new Worker(
+                new URL("./yw/worker.ts", import.meta.url),
+            );
             workerIf.current = new WorkerInterface(worker);
         }
-        const doc = await buildYwDom(workerIf.current, fr);
-        // printDOMTree(doc);
+        const doc = await buildYwDOM(workerIf.current, fr);
+        doc.printTree();
     };
     useEffect(() => {
         if (ifr.current === null) {
