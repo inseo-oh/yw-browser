@@ -1,4 +1,4 @@
-package io.github.inseooh.ywapr;
+package io.github.inseooh.ywapt;
 import java.util.Set;
 
 import javax.annotation.processing.AbstractProcessor;
