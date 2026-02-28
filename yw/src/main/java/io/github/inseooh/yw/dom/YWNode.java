@@ -28,11 +28,11 @@ public abstract class YWNode {
         return children;
     }
 
-    YWNode getParent() {
+    public YWNode getParent() {
         return parent;
     }
 
-    void setParent(YWNode parent) {
+    public void setParent(YWNode parent) {
         this.parent = parent;
     }
 
