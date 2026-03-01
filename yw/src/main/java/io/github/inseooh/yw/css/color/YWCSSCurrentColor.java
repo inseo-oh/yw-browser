@@ -2,7 +2,7 @@ package io.github.inseooh.yw.css.color;
 
 import java.awt.Color;
 
-public class YWCSSCurrentColor implements YWCSSColor {
+public class YWCSSCurrentColor extends YWCSSColor {
 	@Override
 	public Color toAWTColor() {
 		// currentColor values must be replaced with a real color.

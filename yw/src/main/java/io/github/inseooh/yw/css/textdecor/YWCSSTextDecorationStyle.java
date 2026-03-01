@@ -1,13 +1,16 @@
 package io.github.inseooh.yw.css.textdecor;
 
 import io.github.inseooh.yw.YWSyntaxError;
-import io.github.inseooh.yw.css.syntax.YWCSSToken;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 
-public enum YWCSSTextDeocrationStyle {
+@YWCSSType
+public enum YWCSSTextDecorationStyle {
 	SOLID, DOUBLE, DOTTED, DASHED, WAVY;
 
-	public static YWCSSTextDeocrationStyle parseTextTransform(YWCSSTokenStream ts) throws YWSyntaxError {
+	@YWCSSParserEntry
+	public static YWCSSTextDecorationStyle parseTextDecorationStyle(YWCSSTokenStream ts) throws YWSyntaxError {
 		if (ts.expectIdent("solid")) {
 			return SOLID;
 		}

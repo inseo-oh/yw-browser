@@ -7,7 +7,10 @@ package io.github.inseooh.yw.css.fonts;
 
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 
+@YWCSSType
 public enum YWCSSFontStretch {
 	ULTRA_CONDENSED,
 	EXTRA_CONDENSED,
@@ -18,7 +21,8 @@ public enum YWCSSFontStretch {
 	EXPANDED,
 	EXTRA_EXPANDED,
 	ULTRA_EXPANDED;
-	
+
+	@YWCSSParserEntry
 	public static YWCSSFontStretch parseFontStretch(YWCSSTokenStream ts) throws YWSyntaxError {
 		if (ts.expectIdent("ultra-condensed")) {
 			return ULTRA_CONDENSED;

@@ -3,7 +3,10 @@ package io.github.inseooh.yw.css.textdecor;
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSToken;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 
+@YWCSSType
 public class YWCSSTextDecorationLine {
 	private boolean underline = false;
 	private boolean overline = false;
@@ -41,8 +44,9 @@ public class YWCSSTextDecorationLine {
 	public void setBlink(boolean blink) {
 		this.blink = blink;
 	}
-	
-	public static YWCSSTextDecorationLine parseTextTransform(YWCSSTokenStream ts) throws YWSyntaxError {
+
+	@YWCSSParserEntry
+	public static YWCSSTextDecorationLine parseTextDecorationLine(YWCSSTokenStream ts) throws YWSyntaxError {
 		YWCSSTextDecorationLine res = new YWCSSTextDecorationLine();
 		boolean gotAny = false;
 		while (true) {
@@ -54,21 +58,21 @@ public class YWCSSTextDecorationLine {
 			boolean gotSomething = false;
 			gotAny = true;
 			switch (ident.getValue()) {
-			case "underline":
-				res.underline = true;
-				break;
-			case "overline":
-				res.overline = true;
-				break;
-			case "line-through":
-				res.lineThrough = true;
-				break;
-			case "blink":
-				res.blink = true;
-				break;
-			default:
-				gotSomething = false;
-				break;
+				case "underline":
+					res.underline = true;
+					break;
+				case "overline":
+					res.overline = true;
+					break;
+				case "line-through":
+					res.lineThrough = true;
+					break;
+				case "blink":
+					res.blink = true;
+					break;
+				default:
+					gotSomething = false;
+					break;
 			}
 			if (!gotSomething) {
 				ts.setCursor(cursorBeforeIdent);

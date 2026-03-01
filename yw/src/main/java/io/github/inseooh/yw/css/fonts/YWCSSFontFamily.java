@@ -8,6 +8,8 @@ package io.github.inseooh.yw.css.fonts;
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSToken;
 import io.github.inseooh.yw.css.syntax.YWCSSToken.Ident;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
 
 public class YWCSSFontFamily {
@@ -42,43 +44,62 @@ public class YWCSSFontFamily {
 		return family;
 	}
 
-	public static YWCSSFontFamily[] parseFontFamily(YWCSSTokenStream ts) throws YWSyntaxError {
-		YWCSSFontFamily[] families = ts.parseCommaSeparatedRepeation(new YWCSSFontFamily[0], () -> {
-			if (ts.expectIdent("serif")) {
-				return SERIF;
+	public static YWCSSFontFamily parseFontFamily(YWCSSTokenStream ts) throws YWSyntaxError {
+		if (ts.expectIdent("serif")) {
+			return SERIF;
+		}
+		if (ts.expectIdent("sans-serif")) {
+			return SANS_SERIF;
+		}
+		if (ts.expectIdent("cursive")) {
+			return CURSIVE;
+		}
+		if (ts.expectIdent("fantasy")) {
+			return FANTASY;
+		}
+		if (ts.expectIdent("monospace")) {
+			return MONOSPACE;
+		}
+		YWCSSToken.Str str = (YWCSSToken.Str) ts.expectToken(YWCSSToken.Type.STRING);
+		if (str != null) {
+			return new YWCSSFontFamily(str.getValue());
+		}
+		String[] idents = ts.parseRepeation(new String[0], () -> {
+			YWCSSToken.Ident ident = (Ident) ts.expectToken(YWCSSToken.Type.IDENT);
+			if (ident == null) {
+				return null;
 			}
-			if (ts.expectIdent("sans-serif")) {
-				return SANS_SERIF;
-			}
-			if (ts.expectIdent("cursive")) {
-				return CURSIVE;
-			}
-			if (ts.expectIdent("fantasy")) {
-				return FANTASY;
-			}
-			if (ts.expectIdent("monospace")) {
-				return MONOSPACE;
-			}
-			YWCSSToken.Str str = (YWCSSToken.Str) ts.expectToken(YWCSSToken.Type.STRING);
-			if (str != null) {
-				return new YWCSSFontFamily(str.getValue());
-			}
-			String[] idents = ts.parseRepeation(new String[0], () -> {
-				YWCSSToken.Ident ident = (Ident) ts.expectToken(YWCSSToken.Type.IDENT);
-				if (ident == null) {
-					return null;
-				}
-				return ident.getValue();
-			});
-			if (idents.length != 0) {
-				return new YWCSSFontFamily(String.join(" ", idents));
-			}
-			throw new YWSyntaxError();
+			return ident.getValue();
 		});
-		if (families.length != 0) {
-			return families;
+		if (idents.length != 0) {
+			return new YWCSSFontFamily(String.join(" ", idents));
 		}
 		throw new YWSyntaxError();
 	}
+
+	@YWCSSType
+	public static class FamilyList {
+		private final YWCSSFontFamily[] families;
+
+		public FamilyList(YWCSSFontFamily[] families) {
+			this.families = families;
+		}
+
+		public YWCSSFontFamily[] getFamilies() {
+			return families;
+		}
+
+		@YWCSSParserEntry
+		public static FamilyList parseFontFamilyList(YWCSSTokenStream ts) throws YWSyntaxError {
+			YWCSSFontFamily[] families = ts.parseCommaSeparatedRepeation(new YWCSSFontFamily[0], () -> {
+				return parseFontFamily(ts);
+			});
+			if (families.length != 0) {
+				return new FamilyList(families);
+			}
+			throw new YWSyntaxError();
+		}
+
+	};
 
 }

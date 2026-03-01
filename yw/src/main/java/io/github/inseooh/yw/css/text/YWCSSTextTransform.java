@@ -3,15 +3,18 @@ package io.github.inseooh.yw.css.text;
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSToken;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 
+@YWCSSType
 public class YWCSSTextTransform {
 	public enum CaseTransform {
 		CAPITALIZE, UPPERCASE, LOWERCASE
 	};
-	
+
 	private final CaseTransform caseTransform; /* May be null */
 	// TODO: full-width, full-size-kana
-	
+
 	YWCSSTextTransform(CaseTransform caseTransform) {
 		this.caseTransform = caseTransform;
 	}
@@ -19,21 +22,22 @@ public class YWCSSTextTransform {
 	public CaseTransform getCaseTransform() {
 		return caseTransform;
 	}
-	
+
 	public String apply(String text) {
 		if (caseTransform != null) {
 			switch (caseTransform) {
-			case CAPITALIZE:
-				return text.substring(1, 2).toUpperCase() + text.substring(2);
-			case LOWERCASE:
-				return text.toLowerCase();
-			case UPPERCASE:
-				return text.toUpperCase();
+				case CAPITALIZE:
+					return text.substring(1, 2).toUpperCase() + text.substring(2);
+				case LOWERCASE:
+					return text.toLowerCase();
+				case UPPERCASE:
+					return text.toUpperCase();
 			}
 		}
 		return text;
 	}
-	
+
+	@YWCSSParserEntry
 	public static YWCSSTextTransform parseTextTransform(YWCSSTokenStream ts) throws YWSyntaxError {
 		CaseTransform caseTransform = null;
 		while (caseTransform == null) {
@@ -46,18 +50,18 @@ public class YWCSSTextTransform {
 			if (caseTransform == null) {
 				gotSomething = true;
 				switch (ident.getValue()) {
-				case "capitalize":
-					caseTransform = CaseTransform.CAPITALIZE;
-					break;
-				case "uppercase":
-					caseTransform = CaseTransform.UPPERCASE;
-					break;
-				case "lowercase":
-					caseTransform = CaseTransform.UPPERCASE;
-					break;
-				default:
-					gotSomething = false;
-					break;
+					case "capitalize":
+						caseTransform = CaseTransform.CAPITALIZE;
+						break;
+					case "uppercase":
+						caseTransform = CaseTransform.UPPERCASE;
+						break;
+					case "lowercase":
+						caseTransform = CaseTransform.UPPERCASE;
+						break;
+					default:
+						gotSomething = false;
+						break;
 				}
 			}
 			// TODO: full-width, full-size-kana
@@ -72,5 +76,5 @@ public class YWCSSTextTransform {
 		}
 		throw new YWSyntaxError();
 	}
-	
+
 }

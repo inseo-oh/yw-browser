@@ -2,7 +2,7 @@ package io.github.inseooh.yw.css.color;
 
 import java.awt.Color;
 
-public class YWCSSRGBColor implements YWCSSColor {
+public class YWCSSRGBColor extends YWCSSColor {
 	private Color color;
 
 	public YWCSSRGBColor(Color color) {

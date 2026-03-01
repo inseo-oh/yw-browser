@@ -6,7 +6,10 @@ import java.util.Map;
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
 import io.github.inseooh.yw.css.values.YWCSSLength;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 
+@YWCSSType
 public interface YWCSSFontSize {
 	float toComputedValue(float parentFontSize);
 
@@ -41,38 +44,38 @@ public interface YWCSSFontSize {
 
 		public Absolute smaller() {
 			switch (this) {
-			case XX_SMALL:
-			case X_SMALL:
-				return XX_SMALL;
-			case SMALL:
-				return X_SMALL;
-			case MEDIUM:
-				return SMALL;
-			case LARGE:
-				return MEDIUM;
-			case X_LARGE:
-				return LARGE;
-			case XX_LARGE:
-				return X_LARGE;
+				case XX_SMALL:
+				case X_SMALL:
+					return XX_SMALL;
+				case SMALL:
+					return X_SMALL;
+				case MEDIUM:
+					return SMALL;
+				case LARGE:
+					return MEDIUM;
+				case X_LARGE:
+					return LARGE;
+				case XX_LARGE:
+					return X_LARGE;
 			}
 			throw new RuntimeException("Unknown size");
 		}
 
 		public Absolute larger() {
 			switch (this) {
-			case XX_SMALL:
-				return X_SMALL;
-			case X_SMALL:
-				return SMALL;
-			case SMALL:
-				return MEDIUM;
-			case MEDIUM:
-				return LARGE;
-			case LARGE:
-				return X_LARGE;
-			case X_LARGE:
-			case XX_LARGE:
-				return XX_LARGE;
+				case XX_SMALL:
+					return X_SMALL;
+				case X_SMALL:
+					return SMALL;
+				case SMALL:
+					return MEDIUM;
+				case MEDIUM:
+					return LARGE;
+				case LARGE:
+					return X_LARGE;
+				case X_LARGE:
+				case XX_LARGE:
+					return XX_LARGE;
 			}
 			throw new RuntimeException("Unknown size");
 		}
@@ -89,10 +92,10 @@ public interface YWCSSFontSize {
 		@Override
 		public float toComputedValue(float parentFontSize) {
 			switch (this) {
-			case LARGER:
-				return Absolute.fromPx(parentFontSize).larger().toComputedValue(parentFontSize);
-			case SMALLER:
-				return Absolute.fromPx(parentFontSize).larger().toComputedValue(parentFontSize);
+				case LARGER:
+					return Absolute.fromPx(parentFontSize).larger().toComputedValue(parentFontSize);
+				case SMALLER:
+					return Absolute.fromPx(parentFontSize).larger().toComputedValue(parentFontSize);
 			}
 			throw new RuntimeException("Unknown size");
 		}
@@ -115,6 +118,7 @@ public interface YWCSSFontSize {
 		}
 	}
 
+	@YWCSSParserEntry
 	public static YWCSSFontSize parseFontSize(YWCSSTokenStream ts) throws YWSyntaxError {
 		if (ts.expectIdent("xx-small")) {
 			return Absolute.XX_SMALL;
@@ -143,7 +147,7 @@ public interface YWCSSFontSize {
 		if (ts.expectIdent("smaller")) {
 			return Relative.SMALLER;
 		}
-		return new Length(YWCSSLength.parseLengthOrPercentage(ts));
+		return new Length(YWCSSLength.LengthOrPercentage.parseLengthOrPercentage(ts));
 	}
 
 }

@@ -3,7 +3,10 @@ package io.github.inseooh.yw.css.box;
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
 import io.github.inseooh.yw.css.values.YWCSSLength;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 
+@YWCSSType
 public class YWCSSMargin {
     public static final YWCSSMargin AUTO = new YWCSSMargin();
     private final YWCSSLength value;
@@ -13,6 +16,7 @@ public class YWCSSMargin {
         this.value = value;
         this.isAuto = false;
     }
+
     private YWCSSMargin() {
         this.value = null;
         this.isAuto = true;
@@ -26,10 +30,11 @@ public class YWCSSMargin {
         return isAuto;
     }
 
+    @YWCSSParserEntry
     public static YWCSSMargin parseMargin(YWCSSTokenStream ts) throws YWSyntaxError {
         if (ts.expectIdent("auto")) {
             return AUTO;
         }
-        return new YWCSSMargin(YWCSSLength.parseLengthOrPercentage(ts));
+        return new YWCSSMargin(YWCSSLength.LengthOrPercentage.parseLengthOrPercentage(ts));
     }
 }

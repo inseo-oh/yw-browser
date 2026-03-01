@@ -3,18 +3,21 @@ package io.github.inseooh.yw.css.display;
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSToken;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 
+@YWCSSType
 public class YWCSSDisplay {
 	public static final YWCSSDisplay NONE = new YWCSSDisplay(Type.NONE);
 
 	public enum OuterMode {
 		BLOCK, INLINE,
-//		RUN_IN
+		// RUN_IN
 	}
 
 	public enum InnerMode {
 		FLOW, FLOW_ROOT,
-//		TABLE, FLEX, GRID, RUBY
+		// TABLE, FLEX, GRID, RUBY
 	}
 
 	/**
@@ -57,6 +60,7 @@ public class YWCSSDisplay {
 		return type;
 	}
 
+	@YWCSSParserEntry
 	public static YWCSSDisplay parseDisplay(YWCSSTokenStream ts) throws YWSyntaxError {
 		// Try legacy keyword first --------------------------------------------
 		if (ts.expectIdent("inline-block")) {
@@ -64,15 +68,15 @@ public class YWCSSDisplay {
 		}
 		if (ts.expectIdent("inline-table")) {
 			// TODO
-//			return new YWCSSDisplay(OuterMode.INLINE, InnerMode.TABLE);
+			// return new YWCSSDisplay(OuterMode.INLINE, InnerMode.TABLE);
 		}
 		if (ts.expectIdent("inline-flex")) {
 			// TODO
-//			return new YWCSSDisplay(OuterMode.INLINE, InnerMode.FLEX);
+			// return new YWCSSDisplay(OuterMode.INLINE, InnerMode.FLEX);
 		}
 		if (ts.expectIdent("inline-grid")) {
 			// TODO
-//			return new YWCSSDisplay(OuterMode.INLINE, InnerMode.GRID);
+			// return new YWCSSDisplay(OuterMode.INLINE, InnerMode.GRID);
 		}
 		// Try < display-outside > < display-inside > ------------------------------
 
@@ -88,44 +92,44 @@ public class YWCSSDisplay {
 			if (outerMode == null) {
 				gotSomething = true;
 				switch (ident.getValue()) {
-				case "block":
-					outerMode = OuterMode.BLOCK;
-					break;
-				case "inline":
-					outerMode = OuterMode.INLINE;
-					break;
-//				case "run-in":
-//					outerMode = OuterMode.RUN_IN;
-//					break;
-				default:
-					gotSomething = false;
-					break;
+					case "block":
+						outerMode = OuterMode.BLOCK;
+						break;
+					case "inline":
+						outerMode = OuterMode.INLINE;
+						break;
+					// case "run-in":
+					// outerMode = OuterMode.RUN_IN;
+					// break;
+					default:
+						gotSomething = false;
+						break;
 				}
 			}
 			if (innerMode == null) {
 				gotSomething = true;
 				switch (ident.getValue()) {
-				case "flow":
-					innerMode = InnerMode.FLOW;
-					break;
-				case "flow-root":
-					innerMode = InnerMode.FLOW_ROOT;
-					break;
-//				case "table":
-//					innerMode = InnerMode.TABLE;
-//					break;
-//				case "flex":
-//					innerMode = InnerMode.FLEX;
-//					break;
-//				case "grid":
-//					innerMode = InnerMode.GRID;
-//					break;
-//				case "ruby":
-//					innerMode = InnerMode.RUBY;
-//					break;
-				default:
-					gotSomething = false;
-					break;
+					case "flow":
+						innerMode = InnerMode.FLOW;
+						break;
+					case "flow-root":
+						innerMode = InnerMode.FLOW_ROOT;
+						break;
+					// case "table":
+					// innerMode = InnerMode.TABLE;
+					// break;
+					// case "flex":
+					// innerMode = InnerMode.FLEX;
+					// break;
+					// case "grid":
+					// innerMode = InnerMode.GRID;
+					// break;
+					// case "ruby":
+					// innerMode = InnerMode.RUBY;
+					// break;
+					default:
+						gotSomething = false;
+						break;
 				}
 			}
 			if (!gotSomething) {
@@ -137,11 +141,11 @@ public class YWCSSDisplay {
 			if (innerMode == null) {
 				innerMode = InnerMode.FLOW;
 			} else if (outerMode == null) {
-//				if (innerMode == InnerMode.RUBY) {
-//					outerMode = OuterMode.INLINE;
-//				} else {
+				// if (innerMode == InnerMode.RUBY) {
+				// outerMode = OuterMode.INLINE;
+				// } else {
 				outerMode = OuterMode.BLOCK;
-//				}
+				// }
 			}
 			return new YWCSSDisplay(outerMode, innerMode);
 		}

@@ -3,16 +3,18 @@ package io.github.inseooh.yw.css.sizing;
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
 import io.github.inseooh.yw.css.values.YWCSSLength;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 
 public class YWCSSSize {
-//	public static final YWCSSSize NONE = new YWCSSSize(Type.NONE);
+	// public static final YWCSSSize NONE = new YWCSSSize(Type.NONE);
 	public static final YWCSSSize AUTO = new YWCSSSize(Type.AUTO);
-//	public static final YWCSSSize MIN_CONTENT = new YWCSSSize(Type.MIN_CONTENT);
-//	public static final YWCSSSize MAX_CONTENT = new YWCSSSize(Type.MAX_CONTENT);
-//	public static final YWCSSSize FIT_CONTENT = new YWCSSSize(Type.FIT_CONTENT);
+	// public static final YWCSSSize MIN_CONTENT = new YWCSSSize(Type.MIN_CONTENT);
+	// public static final YWCSSSize MAX_CONTENT = new YWCSSSize(Type.MAX_CONTENT);
+	// public static final YWCSSSize FIT_CONTENT = new YWCSSSize(Type.FIT_CONTENT);
 
 	public enum Type {
-//		NONE, MIN_CONTENT, MAX_CONTENT, FIT_CONTENT,
+		// NONE, MIN_CONTENT, MAX_CONTENT, FIT_CONTENT,
 		AUTO,
 		MANUAL_SIZE
 	}
@@ -40,21 +42,22 @@ public class YWCSSSize {
 	public YWCSSLength getSize() {
 		return size;
 	}
-	
+
 	public float computeUsedValue(float fontSize, float containerSize) {
 		switch (type) {
-		case AUTO:
-			throw new RuntimeException("auto size must be handled by caller");
-		case MANUAL_SIZE:
-			return size.toPx(fontSize, containerSize);
+			case AUTO:
+				throw new RuntimeException("auto size must be handled by caller");
+			case MANUAL_SIZE:
+				return size.toPx(fontSize, containerSize);
 		}
 		throw new RuntimeException("bad size type");
 	}
-	
-	public static class ParseOptions {
+
+	private static class ParseOptions {
 		public boolean acceptAuto = false;
 	};
-	public static YWCSSSize parseSizeValue(YWCSSTokenStream ts, ParseOptions options) throws YWSyntaxError {
+
+	private static YWCSSSize parseSize(YWCSSTokenStream ts, ParseOptions options) throws YWSyntaxError {
 		if (options.acceptAuto && ts.expectIdent("auto")) {
 			return AUTO;
 		}
@@ -62,10 +65,21 @@ public class YWCSSSize {
 		// TODO: min-content
 		// TODO: max-content
 		// TODO: fit-content
-		return new YWCSSSize(YWCSSLength.parseLengthOrPercentage(ts));
+		return new YWCSSSize(YWCSSLength.LengthOrPercentage.parseLengthOrPercentage(ts));
 	}
-	public static YWCSSSize parseSizeValue(YWCSSTokenStream ts) throws YWSyntaxError {
-		return parseSizeValue(ts, new ParseOptions());
+
+	public static YWCSSSize parseSize(YWCSSTokenStream ts) throws YWSyntaxError {
+		return parseSize(ts, new ParseOptions());
+	}
+
+	@YWCSSType
+	public static class SizeOrAuto {
+		@YWCSSParserEntry
+		public static YWCSSSize parseSizeOrAuto(YWCSSTokenStream ts) throws YWSyntaxError {
+			ParseOptions options = new ParseOptions();
+			options.acceptAuto = true;
+			return parseSize(ts, options);
+		}
 	}
 
 }

@@ -3,16 +3,20 @@
  * SPDX-License-Identifier: BSD-3-Clause
  * See LICENSE for details, and LICENSE_WHATWG_SPECS for WHATWG license information.
  */
-package io.github.inseooh.yw.css;
+package io.github.inseooh.yw.css.css2;
 
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 
+@YWCSSType
 public enum YWCSSFloat {
 	NONE,
 	LEFT,
 	RIGHT;
-	
+
+	@YWCSSParserEntry
 	public static YWCSSFloat parseFloat(YWCSSTokenStream ts) throws YWSyntaxError {
 		if (ts.expectIdent("none")) {
 			return NONE;

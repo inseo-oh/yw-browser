@@ -3,11 +3,14 @@ package io.github.inseooh.yw.css.values;
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSToken;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
+import io.github.inseooh.ywapt.YWCSSParserEntry;
+import io.github.inseooh.ywapt.YWCSSType;
 
 /**
  * @see <a href="https://www.w3.org/TR/css-values-3/#length-value">Relevant
- * section in CSS specification</a>
+ *      section in CSS specification</a>
  */
+@YWCSSType
 public class YWCSSLength {
     public enum Unit {
         PERCENTAGE,
@@ -139,29 +142,39 @@ public class YWCSSLength {
         return new YWCSSLength(lenValue, lenUnit);
     }
 
+    @YWCSSParserEntry
     public static YWCSSLength parseLength(YWCSSTokenStream ts) throws YWSyntaxError {
         return parseLength(ts, new ParseOptions());
     }
 
-    public static YWCSSLength parsePercentage(YWCSSTokenStream ts) throws YWSyntaxError {
-        YWCSSToken.Percentage tk = (YWCSSToken.Percentage) ts.expectToken(YWCSSToken.Type.PERCENTAGE);
-        if (tk == null) {
+    @YWCSSType
+    public static class Percentage {
+        @YWCSSParserEntry
+        public static YWCSSLength parsePercentage(YWCSSTokenStream ts) throws YWSyntaxError {
+            YWCSSToken.Percentage tk = (YWCSSToken.Percentage) ts.expectToken(YWCSSToken.Type.PERCENTAGE);
+            if (tk == null) {
+                throw new YWSyntaxError();
+            }
+            return new YWCSSLength(tk.getValue(), YWCSSLength.Unit.PERCENTAGE);
+        }
+    }
+
+    @YWCSSType
+    public static class LengthOrPercentage {
+        public static YWCSSLength parseLengthOrPercentage(YWCSSTokenStream ts, ParseOptions options)
+                throws YWSyntaxError {
+            if (ts.expectToken(YWCSSToken.Type.DIMENSION) != null) {
+                return parseLength(ts, options);
+            }
+            if (ts.expectToken(YWCSSToken.Type.PERCENTAGE) != null) {
+                return Percentage.parsePercentage(ts);
+            }
             throw new YWSyntaxError();
         }
-        return new YWCSSLength(tk.getValue(), YWCSSLength.Unit.PERCENTAGE);
-    }
 
-    public static YWCSSLength parseLengthOrPercentage(YWCSSTokenStream ts, ParseOptions options) throws YWSyntaxError {
-        if (ts.expectToken(YWCSSToken.Type.DIMENSION) != null) {
-            return parseLength(ts, options);
+        @YWCSSParserEntry
+        public static YWCSSLength parseLengthOrPercentage(YWCSSTokenStream ts) throws YWSyntaxError {
+            return parseLengthOrPercentage(ts, new ParseOptions());
         }
-        if (ts.expectToken(YWCSSToken.Type.PERCENTAGE) != null) {
-            return parsePercentage(ts);
-        }
-        throw new YWSyntaxError();
-    }
-
-    public static YWCSSLength parseLengthOrPercentage(YWCSSTokenStream ts) throws YWSyntaxError {
-        return parseLengthOrPercentage(ts, new ParseOptions());
     }
 }
