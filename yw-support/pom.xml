@@ -3,6 +3,10 @@
     <groupId>io.github.inseooh</groupId>
     <artifactId>yw-support</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>25</maven.compiler.release>
+    </properties>
     <build>
     </build>
 </project>

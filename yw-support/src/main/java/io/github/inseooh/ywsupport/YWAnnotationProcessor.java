@@ -25,7 +25,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
+@SupportedSourceVersion(SourceVersion.RELEASE_25)
 @SupportedAnnotationTypes({
 		"io.github.inseooh.ywsupport.YWCSSShorthandAnyProperty",
 		"io.github.inseooh.ywsupport.YWCSSShorthandSidesProperty",
