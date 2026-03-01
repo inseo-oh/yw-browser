@@ -1,6 +1,6 @@
 package io.github.inseooh.yw.css.display;
 
-import io.github.inseooh.ywapt.YWCSSSimpleProperty;
+import io.github.inseooh.ywsupport.YWCSSSimpleProperty;
 
 public class YWCSSProperties {
     @YWCSSSimpleProperty(name = "display", type = YWCSSDisplay.class)

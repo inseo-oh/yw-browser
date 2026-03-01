@@ -1,4 +1,4 @@
-package io.github.inseooh.ywapt;
+package io.github.inseooh.ywsupport;
 
 class YWAPTUtility {
     static String camelCaseName(String name, boolean leadingCharUpper) {

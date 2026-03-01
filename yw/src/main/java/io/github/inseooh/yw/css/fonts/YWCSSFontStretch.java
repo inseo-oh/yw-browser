@@ -7,8 +7,8 @@ package io.github.inseooh.yw.css.fonts;
 
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
-import io.github.inseooh.ywapt.YWCSSParserEntry;
-import io.github.inseooh.ywapt.YWCSSType;
+import io.github.inseooh.ywsupport.YWCSSParserEntry;
+import io.github.inseooh.ywsupport.YWCSSType;
 
 @YWCSSType
 public enum YWCSSFontStretch {

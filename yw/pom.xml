@@ -5,8 +5,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <dependencies>
         <dependency>
-            <groupId>yw-apr</groupId>
-            <artifactId>yw-apr</artifactId>
+            <groupId>yw-support</groupId>
+            <artifactId>yw-support</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <type>jar</type>
             <scope>compile</scope>
@@ -20,7 +20,7 @@
                 <version>3.15.0</version>
                 <configuration>
                     <annotationProcessors>
-                        <annotationProcessor>io.github.inseooh.ywapt.YWAnnotationProcessor</annotationProcessor>
+                        <annotationProcessor>io.github.inseooh.ywsupport.YWAnnotationProcessor</annotationProcessor>
                     </annotationProcessors>
                 </configuration>
             </plugin>    

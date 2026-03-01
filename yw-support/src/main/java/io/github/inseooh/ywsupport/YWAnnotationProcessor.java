@@ -1,4 +1,4 @@
-package io.github.inseooh.ywapt;
+package io.github.inseooh.ywsupport;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -27,10 +27,10 @@ import javax.tools.Diagnostic;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedAnnotationTypes({
-		"io.github.inseooh.ywapt.YWCSSShorthandAnyProperty",
-		"io.github.inseooh.ywapt.YWCSSShorthandSidesProperty",
-		"io.github.inseooh.ywapt.YWCSSSimpleProperty",
-		"io.github.inseooh.ywapt.YWCSSType",
+		"io.github.inseooh.ywsupport.YWCSSShorthandAnyProperty",
+		"io.github.inseooh.ywsupport.YWCSSShorthandSidesProperty",
+		"io.github.inseooh.ywsupport.YWCSSSimpleProperty",
+		"io.github.inseooh.ywsupport.YWCSSType",
 })
 public class YWAnnotationProcessor extends AbstractProcessor {
 	@Override

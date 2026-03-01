@@ -1,7 +1,7 @@
 package io.github.inseooh.yw.css.fonts;
 
-import io.github.inseooh.ywapt.YWCSSShorthandProperty;
-import io.github.inseooh.ywapt.YWCSSSimpleProperty;
+import io.github.inseooh.ywsupport.YWCSSShorthandProperty;
+import io.github.inseooh.ywsupport.YWCSSSimpleProperty;
 
 public class YWCSSProperties {
     @YWCSSSimpleProperty(name = "font-family", type = YWCSSFontFamily.FamilyList.class)

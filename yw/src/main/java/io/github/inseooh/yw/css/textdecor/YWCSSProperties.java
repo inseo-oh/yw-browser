@@ -1,8 +1,8 @@
 package io.github.inseooh.yw.css.textdecor;
 
 import io.github.inseooh.yw.css.color.YWCSSColor;
-import io.github.inseooh.ywapt.YWCSSShorthandProperty;
-import io.github.inseooh.ywapt.YWCSSSimpleProperty;
+import io.github.inseooh.ywsupport.YWCSSShorthandProperty;
+import io.github.inseooh.ywsupport.YWCSSSimpleProperty;
 
 public class YWCSSProperties {
     @YWCSSSimpleProperty(name = "text-decoration-line", type = YWCSSTextDecorationLine.class)

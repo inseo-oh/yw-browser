@@ -2,8 +2,8 @@ package io.github.inseooh.yw.css.backgrounds;
 
 import io.github.inseooh.yw.css.color.YWCSSColor;
 import io.github.inseooh.yw.css.values.YWCSSLength;
-import io.github.inseooh.ywapt.YWCSSShorthandProperty;
-import io.github.inseooh.ywapt.YWCSSSimpleProperty;
+import io.github.inseooh.ywsupport.YWCSSShorthandProperty;
+import io.github.inseooh.ywsupport.YWCSSSimpleProperty;
 
 public class YWCSSProperties {
     // background-color ========================================================

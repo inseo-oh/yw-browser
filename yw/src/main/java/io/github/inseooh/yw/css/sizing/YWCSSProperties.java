@@ -1,6 +1,6 @@
 package io.github.inseooh.yw.css.sizing;
 
-import io.github.inseooh.ywapt.YWCSSSimpleProperty;
+import io.github.inseooh.ywsupport.YWCSSSimpleProperty;
 
 public class YWCSSProperties {
     @YWCSSSimpleProperty(name = "width", type = YWCSSSize.SizeOrAuto.class)

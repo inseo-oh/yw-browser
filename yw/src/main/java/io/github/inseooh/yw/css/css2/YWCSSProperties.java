@@ -1,6 +1,6 @@
 package io.github.inseooh.yw.css.css2;
 
-import io.github.inseooh.ywapt.YWCSSSimpleProperty;
+import io.github.inseooh.ywsupport.YWCSSSimpleProperty;
 
 public class YWCSSProperties {
     @YWCSSSimpleProperty(name = "float", type = YWCSSFloat.class)
