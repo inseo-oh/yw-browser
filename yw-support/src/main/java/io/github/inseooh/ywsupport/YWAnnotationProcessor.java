@@ -290,9 +290,9 @@ public class YWAnnotationProcessor extends AbstractProcessor {
 		public String javaIdentNameOfProp() {
 			if (isShorthand()) {
 				// We explicitly name shorthand properties ~Shorthand to avoid confusion.
-				return YWAPTUtility.camelCaseName(name, true) + "Shorthand";
+				return camelCaseName(name, true) + "Shorthand";
 			} else {
-				return YWAPTUtility.camelCaseName(name, true);
+				return camelCaseName(name, true);
 			}
 		}
 
@@ -337,11 +337,11 @@ public class YWAnnotationProcessor extends AbstractProcessor {
 		}
 
 		private String getTypeName() {
-			return String.format("%sShorthand", YWAPTUtility.camelCaseName(getName(), true));
+			return String.format("%sShorthand", camelCaseName(getName(), true));
 		}
 
 		private String getParseMethodName() {
-			return String.format("parse%s", YWAPTUtility.camelCaseName(getTypeName(), true));
+			return String.format("parse%s", camelCaseName(getTypeName(), true));
 		}
 
 		@Override
@@ -376,11 +376,11 @@ public class YWAnnotationProcessor extends AbstractProcessor {
 		}
 
 		private String getTypeName() {
-			return String.format("%sShorthand", YWAPTUtility.camelCaseName(getName(), true));
+			return String.format("%sShorthand", camelCaseName(getName(), true));
 		}
 
 		private String getParseMethodName() {
-			return String.format("parse%s", YWAPTUtility.camelCaseName(getTypeName(), true));
+			return String.format("parse%s", camelCaseName(getTypeName(), true));
 		}
 
 		@Override
@@ -411,4 +411,20 @@ public class YWAnnotationProcessor extends AbstractProcessor {
 
 	}
 
+	private static String camelCaseName(String name, boolean leadingCharUpper) {
+		StringBuilder sb = new StringBuilder();
+		boolean nextUpper = leadingCharUpper;
+		for (int i = 0; i < name.length(); i++) {
+			char c = name.charAt(i);
+			if (c == '_' || c == '-') {
+				nextUpper = true;
+			} else if (nextUpper) {
+				sb.append(Character.toUpperCase(c));
+				nextUpper = false;
+			} else {
+				sb.append(c);
+			}
+		}
+		return sb.toString();
+	}
 }
