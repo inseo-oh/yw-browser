@@ -1,3 +1,4 @@
+package io.github.inseooh.yw.css.css2;
 
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.css.syntax.YWCSSTokenStream;
