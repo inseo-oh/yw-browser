@@ -6,7 +6,7 @@ import io.github.inseooh.yw.css.values.YWCSSLength;
 import io.github.inseooh.ywsupport.YWCSSParserEntry;
 import io.github.inseooh.ywsupport.YWCSSType;
 
-@YWCSSType
+@YWCSSType(resultType = YWCSSLength.class)
 public class YWCSSPadding {
     @YWCSSParserEntry
     public static YWCSSLength parsePadding(YWCSSTokenStream ts) throws YWSyntaxError {

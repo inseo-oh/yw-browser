@@ -11,7 +11,7 @@ import io.github.inseooh.yw.css.values.YWCSSNumber;
 import io.github.inseooh.ywsupport.YWCSSParserEntry;
 import io.github.inseooh.ywsupport.YWCSSType;
 
-@YWCSSType
+@YWCSSType(resultType = Integer.class)
 public class YWCSSFontWeight {
 	public static final int NORMAL = 400;
 	public static final int BOLD = 800;

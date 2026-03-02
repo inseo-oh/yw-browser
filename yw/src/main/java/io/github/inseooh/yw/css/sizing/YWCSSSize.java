@@ -72,7 +72,7 @@ public class YWCSSSize {
 		return parseSize(ts, new ParseOptions());
 	}
 
-	@YWCSSType
+	@YWCSSType(resultType = YWCSSSize.class)
 	public static class SizeOrAuto {
 		@YWCSSParserEntry
 		public static YWCSSSize parseSizeOrAuto(YWCSSTokenStream ts) throws YWSyntaxError {

@@ -15,21 +15,21 @@ public class YWCSSProperties {
         }
     }
 
-    @YWCSSSimpleProperty(name = "margin-right", type = YWCSSColor.class)
+    @YWCSSSimpleProperty(name = "margin-right", type = YWCSSMargin.class)
     public static class MarginRight {
         public static YWCSSMargin getInitialValue() {
             return new YWCSSMargin(new YWCSSLength(0, YWCSSLength.Unit.PX));
         }
     }
 
-    @YWCSSSimpleProperty(name = "margin-bottom", type = YWCSSColor.class)
+    @YWCSSSimpleProperty(name = "margin-bottom", type = YWCSSMargin.class)
     public static class MarginBottom {
         public static YWCSSMargin getInitialValue() {
             return new YWCSSMargin(new YWCSSLength(0, YWCSSLength.Unit.PX));
         }
     }
 
-    @YWCSSSimpleProperty(name = "margin-left", type = YWCSSColor.class)
+    @YWCSSSimpleProperty(name = "margin-left", type = YWCSSMargin.class)
     public static class MarginLeft {
         public static YWCSSMargin getInitialValue() {
             return new YWCSSMargin(new YWCSSLength(0, YWCSSLength.Unit.PX));
@@ -51,21 +51,21 @@ public class YWCSSProperties {
         }
     }
 
-    @YWCSSSimpleProperty(name = "padding-right", type = YWCSSColor.class)
+    @YWCSSSimpleProperty(name = "padding-right", type = YWCSSPadding.class)
     public static class PaddingRight {
         public static YWCSSLength getInitialValue() {
             return new YWCSSLength(0, YWCSSLength.Unit.PX);
         }
     }
 
-    @YWCSSSimpleProperty(name = "padding-bottom", type = YWCSSColor.class)
+    @YWCSSSimpleProperty(name = "padding-bottom", type = YWCSSPadding.class)
     public static class PaddingBottom {
         public static YWCSSLength getInitialValue() {
             return new YWCSSLength(0, YWCSSLength.Unit.PX);
         }
     }
 
-    @YWCSSSimpleProperty(name = "padding-left", type = YWCSSColor.class)
+    @YWCSSSimpleProperty(name = "padding-left", type = YWCSSPadding.class)
     public static class PaddingLeft {
         public static YWCSSLength getInitialValue() {
             return new YWCSSLength(0, YWCSSLength.Unit.PX);

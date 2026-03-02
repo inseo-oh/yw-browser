@@ -13,8 +13,8 @@ public class YWCSSProperties {
 
     @YWCSSSimpleProperty(name = "font-weight", type = YWCSSFontWeight.class)
     public static class FontWeight {
-        public static YWCSSFontFamily.FamilyList getInitialValue() {
-            return new YWCSSFontFamily.FamilyList(new YWCSSFontFamily[] { YWCSSFontFamily.SANS_SERIF });
+        public static int getInitialValue() {
+            return YWCSSFontWeight.NORMAL;
         }
     }
 

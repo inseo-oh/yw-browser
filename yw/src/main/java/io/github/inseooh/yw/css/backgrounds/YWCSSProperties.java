@@ -117,7 +117,7 @@ public class YWCSSProperties {
     }
 
     @YWCSSShorthandProperty(name = "border-width", type = YWCSSShorthandProperty.Type.SIDES, properties = {
-            BorderTopColor.class, BorderRightWidth.class, BorderBottomWidth.class, BorderLeftWidth.class
+            BorderTopWidth.class, BorderRightWidth.class, BorderBottomWidth.class, BorderLeftWidth.class
     })
     public static class BorderWidth {
     }
@@ -148,8 +148,8 @@ public class YWCSSProperties {
     public static class BorderLeft {
     }
 
-    @YWCSSShorthandProperty(name = "border", type = YWCSSShorthandProperty.Type.SIDES, properties = {
-            BorderTop.class, BorderRight.class, BorderBottom.class, BorderLeft.class
+    @YWCSSShorthandProperty(name = "border", type = YWCSSShorthandProperty.Type.ANY, properties = {
+            BorderWidth.class, BorderStyle.class, BorderColor.class
     })
     public static class Border {
     }
