@@ -15,7 +15,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#digit">Relevant section in
-     * CSS specification</a>
+     *      CSS specification</a>
      */
     private static boolean isDigit(int codePoint) {
         return '0' <= codePoint && codePoint <= '9';
@@ -23,7 +23,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#hex-digit">Relevant section
-     * in CSS specification</a>
+     *      in CSS specification</a>
      */
     private static boolean isHexDigit(int codePoint) {
         return isDigit(codePoint) || ('a' <= codePoint && codePoint <= 'f') || ('A' <= codePoint && codePoint <= 'F');
@@ -31,7 +31,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#uppercase-letter">Relevant
-     * section in CSS specification</a>
+     *      section in CSS specification</a>
      */
     private static boolean isUppercaseLetter(int codePoint) {
         return 'A' <= codePoint && codePoint <= 'Z';
@@ -39,7 +39,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#lowercase-letter">Relevant
-     * section in CSS specification</a>
+     *      section in CSS specification</a>
      */
     private static boolean isLowercaseLetter(int codePoint) {
         return 'a' <= codePoint && codePoint <= 'z';
@@ -47,7 +47,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#letter">Relevant section in
-     * CSS specification</a>
+     *      CSS specification</a>
      */
     private static boolean isLetter(int codePoint) {
         return isUppercaseLetter(codePoint) || isLowercaseLetter(codePoint);
@@ -55,8 +55,8 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href=
-     * "https://www.w3.org/TR/css-syntax-3/#non-ascii-code-point">Relevant
-     * section in CSS specification</a>
+     *      "https://www.w3.org/TR/css-syntax-3/#non-ascii-code-point">Relevant
+     *      section in CSS specification</a>
      */
     private static boolean isNonAsciiCodePoint(int codePoint) {
         return 0x80 <= codePoint;
@@ -64,8 +64,8 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href=
-     * "https://www.w3.org/TR/css-syntax-3/#ident-start-code-point">Relevant
-     * section in CSS specification</a>
+     *      "https://www.w3.org/TR/css-syntax-3/#ident-start-code-point">Relevant
+     *      section in CSS specification</a>
      */
     private static boolean isIdentStartCodePoint(int c) {
         return isLetter(c) || isNonAsciiCodePoint(c) || c == '_';
@@ -73,7 +73,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#ident-code-point">Relevant
-     * section in CSS specification</a>
+     *      section in CSS specification</a>
      */
     private static boolean isIdentCodePoint(int c) {
         return isIdentStartCodePoint(c) || isDigit(c) || c == '-';
@@ -81,7 +81,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#whitespace">Relevant
-     * section in CSS specification</a>
+     *      section in CSS specification</a>
      */
     private static boolean isNewline(int codePoint) {
         return codePoint == '\n';
@@ -89,7 +89,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#whitespace">Relevant
-     * section in CSS specification</a>
+     *      section in CSS specification</a>
      */
     private static boolean isWhitespace(int codePoint) {
         return isNewline(codePoint) || codePoint == ' ' || codePoint == '\t';
@@ -97,8 +97,8 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href=
-     * "https://www.w3.org/TR/css-syntax-3/#non-printable-code-point">Relevant
-     * section in CSS specification</a>
+     *      "https://www.w3.org/TR/css-syntax-3/#non-printable-code-point">Relevant
+     *      section in CSS specification</a>
      */
     private static boolean isNonPrintableCodePoint(int codePoint) {
         return (0x0000 <= codePoint && codePoint <= 0x0008) || codePoint == 0x000b
@@ -107,7 +107,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#consume-token">Relevant
-     * section in CSS specification</a>
+     *      section in CSS specification</a>
      */
     public YWCSSToken consumeToken() {
         this.consumeComments();
@@ -133,7 +133,8 @@ public class YWCSSTokenizer {
                     value = this.consumeIdentSequence();
 
                     /* S4 *************************************************************************/
-                    YWCSSToken.Hash token = new YWCSSToken.Hash("", YWCSSToken.Hash.HashType.UNRESTRICTED);
+                    YWCSSToken.Hash token = new YWCSSToken.Hash(value, type);
+                    return token;
                 } else {
                     return new YWCSSToken.Delim(this.tr.getCurrentChar());
                 }
@@ -229,7 +230,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#consume-comments">Relevant
-     * section in CSS specification</a>
+     *      section in CSS specification</a>
      */
     private void consumeComments() {
         boolean endFound = false;
@@ -254,7 +255,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#consume-a-numeric-token">
-     * Relevant section in CSS specification</a>
+     *      Relevant section in CSS specification</a>
      */
     private YWCSSToken consumeNumericToken() {
         ConsumedNumber num = this.consumeNumber();
@@ -279,8 +280,8 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href=
-     * "https://www.w3.org/TR/css-syntax-3/#consume-an-ident-like-token">
-     * Relevant section in CSS specification</a>
+     *      "https://www.w3.org/TR/css-syntax-3/#consume-an-ident-like-token">
+     *      Relevant section in CSS specification</a>
      */
     private YWCSSToken consumeIdentLikeToken() {
         String string = this.consumeIdentSequence();
@@ -304,7 +305,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#consume-a-string-token">
-     * Relevant section in CSS specification</a>
+     *      Relevant section in CSS specification</a>
      */
     private YWCSSToken consumeStringToken(int endingCodePoint) {
         StringBuilder result = new StringBuilder();
@@ -335,7 +336,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#consume-url-token">
-     * Relevant section in CSS specification</a>
+     *      Relevant section in CSS specification</a>
      */
     private YWCSSToken consumeUrlToken() {
         /* S1 *************************************************************************/
@@ -379,8 +380,8 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href=
-     * "https://www.w3.org/TR/css-syntax-3/#consume-an-escaped-code-point">
-     * Relevant section in CSS specification</a>
+     *      "https://www.w3.org/TR/css-syntax-3/#consume-an-escaped-code-point">
+     *      Relevant section in CSS specification</a>
      */
     private int consumeEscapedCodePoint() {
         this.tr.consumeChar();
@@ -418,8 +419,8 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href=
-     * "https://www.w3.org/TR/css-syntax-3/#check-if-two-code-points-are-a-valid-escape">
-     * Relevant section in CSS specification</a>
+     *      "https://www.w3.org/TR/css-syntax-3/#check-if-two-code-points-are-a-valid-escape">
+     *      Relevant section in CSS specification</a>
      */
     private static boolean twoCodePointsAreValidEscape(String s) {
         if (s.isEmpty() || s.charAt(0) != '\\') {
@@ -437,8 +438,8 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href=
-     * "https://www.w3.org/TR/css-syntax-3/#check-if-three-code-points-would-start-an-ident-sequence">
-     * Relevant section in CSS specification</a>
+     *      "https://www.w3.org/TR/css-syntax-3/#check-if-three-code-points-would-start-an-ident-sequence">
+     *      Relevant section in CSS specification</a>
      */
     private static boolean threeCodePointsWouldStartIdentSequence(String s) {
         if (!s.isEmpty() && s.codePointAt(0) == '-') {
@@ -461,8 +462,8 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href=
-     * "https://www.w3.org/TR/css-syntax-3/#check-if-three-code-points-would-start-a-number">
-     * Relevant section in CSS specification</a>
+     *      "https://www.w3.org/TR/css-syntax-3/#check-if-three-code-points-would-start-a-number">
+     *      Relevant section in CSS specification</a>
      */
     private static boolean threeCodePointsWouldStartNumber(String s) {
         if (!s.isEmpty() && (s.codePointAt(0) == '+' || s.codePointAt(0) == '-')) {
@@ -484,8 +485,8 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href=
-     * "https://www.w3.org/TR/css-syntax-3/#consume-an-ident-sequence">
-     * Relevant section in CSS specification</a>
+     *      "https://www.w3.org/TR/css-syntax-3/#consume-an-ident-sequence">
+     *      Relevant section in CSS specification</a>
      */
     private String consumeIdentSequence() {
         StringBuilder result = new StringBuilder();
@@ -509,7 +510,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href="https://www.w3.org/TR/css-syntax-3/#consume-a-number">Relevant
-     * section in CSS specification</a>
+     *      section in CSS specification</a>
      */
     private ConsumedNumber consumeNumber() {
         /* S1 *************************************************************************/
@@ -546,7 +547,7 @@ public class YWCSSTokenizer {
         /* S5 *************************************************************************/
         if ((this.tr.getNextChar() == 'e' || this.tr.getNextChar() == 'E')
                 && (((this.tr.getNextChar(1) == '+' || this.tr.getNextChar() == '-') && isDigit(this.tr.getNextChar(2)))
-                || isDigit(this.tr.getNextChar(1)))) {
+                        || isDigit(this.tr.getNextChar(1)))) {
             boolean areTwoChars = isDigit(this.tr.getNextChar(1));
             String chars;
 
@@ -581,8 +582,8 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href=
-     * "https://www.w3.org/TR/css-syntax-3/#consume-the-remnants-of-a-bad-url">
-     * Relevant section in CSS specification</a>
+     *      "https://www.w3.org/TR/css-syntax-3/#consume-the-remnants-of-a-bad-url">
+     *      Relevant section in CSS specification</a>
      */
     private void consumeRemnantsOfBadUrl() {
         while (true) {
@@ -597,7 +598,7 @@ public class YWCSSTokenizer {
 
     /**
      * @see <a href= "https://www.w3.org/TR/css-syntax-3/#css-tokenize">Relevant
-     * section in CSS specification</a>
+     *      section in CSS specification</a>
      */
     static YWCSSToken[] tokenize(String input) {
         List<YWCSSToken> result = new ArrayList<>();
