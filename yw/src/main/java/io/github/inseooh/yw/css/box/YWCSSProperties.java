@@ -1,6 +1,5 @@
 package io.github.inseooh.yw.css.box;
 
-import io.github.inseooh.yw.css.color.YWCSSColor;
 import io.github.inseooh.yw.css.values.YWCSSLength;
 import io.github.inseooh.ywsupport.YWCSSShorthandProperty;
 import io.github.inseooh.ywsupport.YWCSSSimpleProperty;
