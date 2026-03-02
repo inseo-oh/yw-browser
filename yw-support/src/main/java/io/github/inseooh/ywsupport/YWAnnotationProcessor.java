@@ -327,57 +327,15 @@ public class YWAnnotationProcessor extends AbstractProcessor {
 		return typeInfoMap.get(qualifiedName);
 	}
 
-	private TypeInfo[] getTypeInfoFrom(TypeElement elem, YWCSSShorthandProperty anno) {
-		Messager messager = processingEnv.getMessager();
-		TypeInfo[] resInfos;
-		try {
-			resInfos = new TypeInfo[anno.properties().length];
-			for (int i = 0; i < anno.properties().length; i++) {
-				String qualifiedName = anno.properties()[i].getCanonicalName();
-				Property prop = propertyMap.get(qualifiedName);
-				if (prop == null) {
-					messager.printMessage(Diagnostic.Kind.ERROR,
-							elem.getQualifiedName() + " points to unknown type " + qualifiedName
-									+ ". Did you forgot to add @" + YWCSSType.class.getSimpleName()
-									+ " annotation to it?");
-					continue;
-				}
-				resInfos[i] = prop.getTypeInfo();
-			}
-		} catch (MirroredTypesException mte) {
-			List<? extends TypeMirror> typeMirrors = mte.getTypeMirrors();
-			resInfos = new TypeInfo[typeMirrors.size()];
-			for (int i = 0; i < typeMirrors.size(); i++) {
-				String qualifiedName = typeMirrors.get(i).toString();
-				Property prop = propertyMap.get(qualifiedName);
-				if (prop == null) {
-					messager.printMessage(Diagnostic.Kind.ERROR,
-							elem.getQualifiedName() + " points to unknown type " + qualifiedName
-									+ ". Did you forgot to add @" + YWCSSType.class.getSimpleName()
-									+ " annotation to it?");
-					continue;
-				}
-				resInfos[i] = prop.getTypeInfo();
-			}
-		}
-		return resInfos;
-	}
-
 	private class MethodInfo {
 		private final String qualifiedName;
-		private final String returnTypeName;
 
-		public MethodInfo(String qualifiedName, String returnTypeName) {
+		public MethodInfo(String qualifiedName) {
 			this.qualifiedName = qualifiedName;
-			this.returnTypeName = returnTypeName;
 		}
 
 		public String getQualifiedName() {
 			return qualifiedName;
-		}
-
-		public String getReturnTypeName() {
-			return returnTypeName;
 		}
 	};
 
@@ -476,8 +434,7 @@ public class YWAnnotationProcessor extends AbstractProcessor {
 			}
 		}
 		// Get return type ---------------------------------------------
-		String returnTypeName = methodElem.getReturnType().toString();
-		return new MethodInfo(enclosingElem.getQualifiedName() + "." + methodName, returnTypeName);
+		return new MethodInfo(enclosingElem.getQualifiedName() + "." + methodName);
 	}
 
 	private static class TypeInfo {
