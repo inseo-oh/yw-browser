@@ -143,6 +143,7 @@ public class YWElement extends YWNode {
 
     public void appendAttr(YWAttr.Data data) {
         YWAttr attr = new YWAttr(this.getNodeDocument(), data, this);
+        attrs.add(attr);
     }
 
     /**
