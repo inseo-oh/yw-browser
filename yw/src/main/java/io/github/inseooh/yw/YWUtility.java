@@ -13,7 +13,7 @@ public class YWUtility {
 		return isLeadingSurrogateChar(codePoint) || isTrailingSurrogateChar(codePoint);
 	}
 
-	public static boolean isWhitespace(int codePoint) {
+	public static boolean isAsciiWhitespace(int codePoint) {
 		switch (codePoint) {
 		case 0x0009:
 		case 0x000a:
@@ -26,7 +26,7 @@ public class YWUtility {
 
 	public static String removeLeadingWhitespace(String s) {
 		for (int i = 0; i < s.length(); i++) {
-			if (!isWhitespace(s.charAt(i))) {
+			if (!isAsciiWhitespace(s.charAt(i))) {
 				return s.substring(i);
 			}
 		}
@@ -35,7 +35,7 @@ public class YWUtility {
 
 	public static String removeTrailingWhitespace(String s) {
 		for (int i = s.length() - 1; 0 <= i; i--) {
-			if (!isWhitespace(s.charAt(i))) {
+			if (!isAsciiWhitespace(s.charAt(i))) {
 				return s.substring(0, i + 1);
 			}
 		}
