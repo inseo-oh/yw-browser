@@ -44,6 +44,20 @@ public abstract class YWNode {
         this.nodeDocument = nodeDocument;
     }
 
+    /**
+     * @see <a href="https://dom.spec.whatwg.org/#concept-child-text-content">
+     *      Relevant section in DOM specifiation</a>
+     */
+    public String getChildTextContent() {
+        StringBuilder sb = new StringBuilder();
+        for (YWNode node : this.children) {
+            if (node instanceof YWText tNode) {
+                sb.append(tNode.getText());
+            }
+        }
+        return sb.toString();
+    }
+
     YWNode getFirstChild() {
         if (children.isEmpty()) {
             return null;
