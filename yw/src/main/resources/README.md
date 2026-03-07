@@ -1,0 +1,1 @@
+- `entities.json` is from: https://html.spec.whatwg.org/entities.json
