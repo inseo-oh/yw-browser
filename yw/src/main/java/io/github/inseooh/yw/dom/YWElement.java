@@ -196,6 +196,9 @@ public class YWElement extends YWNode {
     public void runAdoptingSteps(YWDocument oldDocument) {
     }
 
+    public void poppedFromStackOfOpenElements() {
+    }
+
     /**
      * Represents custom element state of the element.
      *
