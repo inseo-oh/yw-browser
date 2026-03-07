@@ -36,7 +36,7 @@ public class YWCSSTokenStream {
 		return tk;
 	}
 
-	public  boolean expectDelim(int d) {
+	public boolean expectDelim(int d) {
 		int oldCursor = this.cursor;
 		YWCSSToken.Delim token = (YWCSSToken.Delim) this.expectToken(YWCSSToken.Type.DELIM);
 		if (token == null || token.getValue() != d) {
@@ -106,17 +106,17 @@ public class YWCSSTokenStream {
 		List<YWCSSToken> res = new ArrayList<>();
 
 		switch (openTokenType) {
-		case LEFT_CURLY_BRACKET:
-			closeTokenType = YWCSSToken.Type.RIGHT_CURLY_BRACKET;
-			break;
-		case LEFT_SQUARE_BRACKET:
-			closeTokenType = YWCSSToken.Type.RIGHT_SQUARE_BRACKET;
-			break;
-		case LEFT_PAREN:
-			closeTokenType = YWCSSToken.Type.RIGHT_PAREN;
-			break;
-		default:
-			throw new RuntimeException("illegal open token type");
+			case LEFT_CURLY_BRACKET:
+				closeTokenType = YWCSSToken.Type.RIGHT_CURLY_BRACKET;
+				break;
+			case LEFT_SQUARE_BRACKET:
+				closeTokenType = YWCSSToken.Type.RIGHT_SQUARE_BRACKET;
+				break;
+			case LEFT_PAREN:
+				closeTokenType = YWCSSToken.Type.RIGHT_PAREN;
+				break;
+			default:
+				throw new RuntimeException("illegal open token type");
 		}
 
 		YWCSSToken openToken = this.expectToken(openTokenType);
@@ -202,8 +202,8 @@ public class YWCSSTokenStream {
 			return token;
 		}
 		token = this.consumePreservedToken();
-        return token;
-    }
+		return token;
+	}
 
 	private YWCSSToken.ASTQualifiedRule consumeQualifiedRule() {
 		int oldCursor = this.cursor;
@@ -299,7 +299,7 @@ public class YWCSSTokenStream {
 				break;
 			}
 			if (token.getType() == YWCSSToken.Type.WHITESPACE) {
-            } else if (token.getType() == YWCSSToken.Type.AT_KEYWORD) {
+			} else if (token.getType() == YWCSSToken.Type.AT_KEYWORD) {
 				this.cursor = cursorBeforeToken;
 				YWCSSToken res = this.consumeAtRule();
 				decls.add(res);
@@ -349,7 +349,7 @@ public class YWCSSTokenStream {
 		return decls.toArray(new YWCSSToken[0]);
 	}
 
-	private YWCSSToken[] consumeStyleBlockContents() {
+	public YWCSSToken[] consumeStyleBlockContents() {
 		int oldCursor = this.cursor;
 		List<YWCSSToken> decls = new ArrayList<>();
 		List<YWCSSToken> rules = new ArrayList<>();
@@ -361,7 +361,7 @@ public class YWCSSTokenStream {
 				break;
 			}
 			if (token.getType() == YWCSSToken.Type.WHITESPACE) {
-            } else if (token.getType() == YWCSSToken.Type.AT_KEYWORD) {
+			} else if (token.getType() == YWCSSToken.Type.AT_KEYWORD) {
 				this.cursor = cursorBeforeToken;
 				YWCSSToken res = this.consumeAtRule();
 				decls.add(res);
@@ -410,7 +410,7 @@ public class YWCSSTokenStream {
 				}
 			}
 		}
-        decls.addAll(rules);
+		decls.addAll(rules);
 		if (decls.isEmpty()) {
 			this.cursor = oldCursor;
 			return null;
@@ -428,7 +428,7 @@ public class YWCSSTokenStream {
 				break;
 			}
 			if (token.getType() == YWCSSToken.Type.WHITESPACE) {
-            } else if (token.getType() == YWCSSToken.Type.CDO || token.getType() == YWCSSToken.Type.CDC) {
+			} else if (token.getType() == YWCSSToken.Type.CDO || token.getType() == YWCSSToken.Type.CDC) {
 				if (topLevel) {
 					continue;
 				}
@@ -523,7 +523,8 @@ public class YWCSSTokenStream {
 	 * @see <a href="https://www.w3.org/TR/css-values-4/#mult-comma">Relevant
 	 *      section in CSS specification</a>
 	 */
-	public <T> T[] parseCommaSeparatedRepeation(T[] destArray, int maxRepeats, YWCSSParse<T> parser) throws YWSyntaxError {
+	public <T> T[] parseCommaSeparatedRepeation(T[] destArray, int maxRepeats, YWCSSParse<T> parser)
+			throws YWSyntaxError {
 		List<T> res = new ArrayList<>();
 		int lastCursorAfterValue = 0;
 		while (true) {
@@ -549,7 +550,7 @@ public class YWCSSTokenStream {
 	}
 
 	/**
-	 * @throws YWSyntaxError 
+	 * @throws YWSyntaxError
 	 * @see <a href="https://www.w3.org/TR/css-values-4/#mult-comma">Relevant
 	 *      section in CSS specification</a>
 	 */
@@ -558,7 +559,7 @@ public class YWCSSTokenStream {
 	}
 
 	/**
-	 * @throws YWSyntaxError 
+	 * @throws YWSyntaxError
 	 * @apiNote Pass {@link YWCSSTokenStream#NO_MAX_REPEATS} if you don't want
 	 *          arbitrary limit.
 	 * @see <a href="https://www.w3.org/TR/-values-4/#mult-num-range">Relevant
@@ -581,7 +582,7 @@ public class YWCSSTokenStream {
 	}
 
 	/**
-	 * @throws YWSyntaxError 
+	 * @throws YWSyntaxError
 	 * @see <a href="https://www.w3.org/TR/-values-4/#mult-num-range">Relevant
 	 *      section in CSS specification</a>
 	 */
@@ -592,6 +593,7 @@ public class YWCSSTokenStream {
 	public int getCursor() {
 		return this.cursor;
 	}
+
 	public void setCursor(int cursor) {
 		this.cursor = cursor;
 	}
