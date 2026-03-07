@@ -51,7 +51,7 @@ public final class YWCSSStyleSheetSetManager {
      *      "https://www.w3.org/TR/2021/WD-cssom-1-20210826/#remove-a-css-style-sheet">
      *      Relevant section in CSS specification</a>
      */
-    public void removeCSSStyleSheet(YWCSSStyleSheet sheet) {
+    public static void removeCSSStyleSheet(YWCSSStyleSheet sheet) {
         // S1.
         ((YWDocumentOrShadowRoot) sheet.getOwnerNode()).getStyleSheets().remove(sheet);
 
