@@ -16,6 +16,16 @@ public class YWCSSCompoundSelector {
 		this.subclassSelectors = subclassSelectors;
 	}
 
+	public YWCSSCompoundSelector(YWCSSSimpleSelector selector) {
+		if (selector instanceof YWCSSSimpleSelector.TagType) {
+			this.typeSelector = selector;
+			this.subclassSelectors = new YWCSSSimpleSelector[0];
+		} else {
+			this.typeSelector = null;
+			this.subclassSelectors = new YWCSSSimpleSelector[] { selector };
+		}
+	}
+
 	public YWCSSSimpleSelector getTypeSelector() {
 		return typeSelector;
 	}
@@ -35,29 +45,29 @@ public class YWCSSCompoundSelector {
 		}
 		return true;
 	}
-	
+
 	public static YWCSSCompoundSelector parseCompoundSelector(YWCSSTokenStream ts) throws YWSyntaxError {
-	    int oldCursor = ts.getCursor();
-	    YWCSSSimpleSelector typeSel = null;
-	    try {
-	    	typeSel = YWCSSSimpleSelector.parseTypeSelector(ts);
-	    } catch (YWSyntaxError e) {
-	    	ts.setCursor(oldCursor);
-	    }
-	    
-	    List<YWCSSSimpleSelector> subclassSels = new ArrayList<>();
-	    while (true) {
-	    	oldCursor = ts.getCursor();
-	        try {
-	         	YWCSSSimpleSelector sel = YWCSSSimpleSelector.parseSubclassSelector(ts);
-		    	subclassSels.add(sel);
-		    } catch (YWSyntaxError e) {
-		    	ts.setCursor(oldCursor);
-		    	break;
-		    }
-	    }
-	    // TODO: pseudo elements
-	    return new YWCSSCompoundSelector(typeSel, subclassSels.toArray(new YWCSSSimpleSelector[0]));
+		int oldCursor = ts.getCursor();
+		YWCSSSimpleSelector typeSel = null;
+		try {
+			typeSel = YWCSSSimpleSelector.parseTypeSelector(ts);
+		} catch (YWSyntaxError e) {
+			ts.setCursor(oldCursor);
+		}
+
+		List<YWCSSSimpleSelector> subclassSels = new ArrayList<>();
+		while (true) {
+			oldCursor = ts.getCursor();
+			try {
+				YWCSSSimpleSelector sel = YWCSSSimpleSelector.parseSubclassSelector(ts);
+				subclassSels.add(sel);
+			} catch (YWSyntaxError e) {
+				ts.setCursor(oldCursor);
+				break;
+			}
+		}
+		// TODO: pseudo elements
+		return new YWCSSCompoundSelector(typeSel, subclassSels.toArray(new YWCSSSimpleSelector[0]));
 	}
 
 }

@@ -41,6 +41,10 @@ public class YWCSSComplexSelector {
 		this.rests = rests;
 	}
 
+	public YWCSSComplexSelector(YWCSSSimpleSelector base) {
+		this(new YWCSSCompoundSelector(base), new Rest[0]);
+	}
+
 	public YWCSSCompoundSelector getBase() {
 		return base;
 	}
@@ -59,30 +63,30 @@ public class YWCSSComplexSelector {
 			}
 
 			switch (rests[i].combinator) {
-			case CHILD_COMBINATOR: {
-				// A B
-				YWNode currElem = element;
-				boolean found = false;
-				while (currElem != null) {
-					if (!(currElem instanceof YWElement)) {
-						break;
+				case CHILD_COMBINATOR: {
+					// A B
+					YWNode currElem = element;
+					boolean found = false;
+					while (currElem != null) {
+						if (!(currElem instanceof YWElement)) {
+							break;
+						}
+						if (prevSel.matchAgainst((YWElement) currElem)) {
+							found = true;
+							break;
+						}
+						currElem = currElem.getParent();
 					}
-					if (prevSel.matchAgainst((YWElement) currElem)) {
-						found = true;
-						break;
+					return found;
+				}
+				case DIRECT_CHILD_COMBINATOR: {
+					// A > B
+					if (element.getParent() == null || !(element.getParent() instanceof YWElement)
+							|| !prevSel.matchAgainst((YWElement) element.getParent())) {
+						return false;
 					}
-					currElem = currElem.getParent();
+					return true;
 				}
-				return found;
-			}
-			case DIRECT_CHILD_COMBINATOR: {
-				// A > B
-				if (element.getParent() == null || !(element.getParent() instanceof YWElement)
-						|| !prevSel.matchAgainst((YWElement) element.getParent())) {
-					return false;
-				}
-				return true;
-			}
 			}
 		}
 		throw new RuntimeException("unreachable");
