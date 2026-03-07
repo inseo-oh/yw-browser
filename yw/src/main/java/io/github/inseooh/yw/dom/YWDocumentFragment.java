@@ -9,19 +9,19 @@ public class YWDocumentFragment extends YWNode {
     }
 
     @Override
-    void runInsertionSteps() {
+    public void runInsertionSteps() {
     }
 
     @Override
-    void runChildrenChangedSteps() {
+    public void runChildrenChangedSteps() {
     }
 
     @Override
-    void runPostConnectionSteps() {
+    public void runPostConnectionSteps() {
     }
 
     @Override
-    void runAdoptingSteps(YWDocument oldDocument) {
+    public void runAdoptingSteps(YWDocument oldDocument) {
     }
 
     public YWNode getHost() {

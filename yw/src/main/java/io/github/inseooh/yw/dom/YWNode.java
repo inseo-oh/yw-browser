@@ -12,13 +12,13 @@ public abstract class YWNode {
     private YWNode parent = null;
     private YWDocument nodeDocument;
 
-    abstract void runInsertionSteps();
+    public abstract void runInsertionSteps();
 
-    abstract void runChildrenChangedSteps();
+    public abstract void runChildrenChangedSteps();
 
-    abstract void runPostConnectionSteps();
+    public abstract void runPostConnectionSteps();
 
-    abstract void runAdoptingSteps(YWDocument oldDocument);
+    public abstract void runAdoptingSteps(YWDocument oldDocument);
 
     YWNode(YWDocument nodeDocument) {
         this.nodeDocument = nodeDocument;
@@ -40,7 +40,7 @@ public abstract class YWNode {
         return nodeDocument;
     }
 
-    public  void setNodeDocument(YWDocument nodeDocument) {
+    public void setNodeDocument(YWDocument nodeDocument) {
         this.nodeDocument = nodeDocument;
     }
 
@@ -62,7 +62,9 @@ public abstract class YWNode {
      * Returns next sibling of the node.
      *
      * @return The next sibling, or null if it has no parent or is the last child.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-next-sibling">Relevant section in DOM specification</a>
+     * @see <a href=
+     *      "https://dom.spec.whatwg.org/#concept-tree-next-sibling">Relevant
+     *      section in DOM specification</a>
      */
     YWNode getNextSibling() {
         if (parent == null) {
@@ -78,8 +80,11 @@ public abstract class YWNode {
     /**
      * Returns previous sibling of the node.
      *
-     * @return The previous sibling, or null if it has no parent or is the last child.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-previous-sibling">Relevant section in DOM specification</a>
+     * @return The previous sibling, or null if it has no parent or is the last
+     *         child.
+     * @see <a href=
+     *      "https://dom.spec.whatwg.org/#concept-tree-previous-sibling">Relevant
+     *      section in DOM specification</a>
      */
     YWNode getPrevSibling() {
         if (parent == null) {
@@ -96,7 +101,8 @@ public abstract class YWNode {
      * Returns root of the node.
      *
      * @return The root node.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-root">Relevant section in DOM specification</a>
+     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-root">Relevant
+     *      section in DOM specification</a>
      */
     YWNode getRoot() {
         YWNode res = this;
@@ -120,7 +126,8 @@ public abstract class YWNode {
      * Returns index of the node in the parent.
      *
      * @return Index of the node.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-index">Relevant section in DOM specification</a>
+     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-index">Relevant
+     *      section in DOM specification</a>
      */
     int getIndex() {
         if (parent == null) {
@@ -138,7 +145,9 @@ public abstract class YWNode {
      * Returns [inclusive descendant] nodes of this node.
      *
      * @return Array of inclusive descendant nodes, in tree order.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-inclusive-descendant">Relevant section in DOM specification</a>
+     * @see <a href=
+     *      "https://dom.spec.whatwg.org/#concept-tree-inclusive-descendant">Relevant
+     *      section in DOM specification</a>
      */
     YWNode[] getInclusiveDescendants() {
         // In a nutshell: It's just DFS search.
@@ -189,7 +198,8 @@ public abstract class YWNode {
      * Returns [descendant] nodes of this node.
      *
      * @return Array of descendant nodes, in tree order.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-descendant">Relevant section in DOM specification</a>
+     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-descendant">Relevant
+     *      section in DOM specification</a>
      */
     YWNode[] getDescendants() {
         YWNode[] nodes = getInclusiveDescendants();
@@ -201,7 +211,9 @@ public abstract class YWNode {
      * Returns [inclusive ancestor] nodes of this node.
      *
      * @return Array of inclusive ancestor nodes, in tree order.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-inclusive-ancestor">Relevant section in DOM specification</a>
+     * @see <a href=
+     *      "https://dom.spec.whatwg.org/#concept-tree-inclusive-ancestor">Relevant
+     *      section in DOM specification</a>
      */
     YWNode[] getInclusiveAncestors() {
         List<YWNode> resNodes = new ArrayList<>();
@@ -219,7 +231,8 @@ public abstract class YWNode {
      * Returns [ancestor] nodes of this node.
      *
      * @return Array of ancestor nodes, in tree order.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-ancestor">Relevant section in DOM specification</a>
+     * @see <a href="https://dom.spec.whatwg.org/#concept-tree-ancestor">Relevant
+     *      section in DOM specification</a>
      */
     YWNode[] getAncestors() {
         YWNode[] nodes = getInclusiveAncestors();
@@ -228,10 +241,13 @@ public abstract class YWNode {
     }
 
     /**
-     * Same as {@link #getRoot()}, except it also follows host of {@link YWShadowRoot} objects.
+     * Same as {@link #getRoot()}, except it also follows host of
+     * {@link YWShadowRoot} objects.
      *
      * @return Shadow-including root of the node.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-shadow-including-root">Relevant section in DOM specification</a>
+     * @see <a href=
+     *      "https://dom.spec.whatwg.org/#concept-shadow-including-root">Relevant
+     *      section in DOM specification</a>
      */
     YWNode getShadowIncludingRoot() {
         YWNode root = this.getRoot();
@@ -242,10 +258,13 @@ public abstract class YWNode {
     }
 
     /**
-     * Same as {@link #getInclusiveDescendants()}, except it also follows host of {@link YWShadowRoot} objects.
+     * Same as {@link #getInclusiveDescendants()}, except it also follows host of
+     * {@link YWShadowRoot} objects.
      *
      * @return Shadow-including root of the node.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-shadow-including-inclusive-descendant">Relevant section in DOM specification</a>
+     * @see <a href=
+     *      "https://dom.spec.whatwg.org/#concept-shadow-including-inclusive-descendant">Relevant
+     *      section in DOM specification</a>
      */
     YWNode[] getShadowIncludingInclusiveDescendants() {
         YWNode[] descendants = getInclusiveDescendants();
@@ -261,10 +280,13 @@ public abstract class YWNode {
     }
 
     /**
-     * Same as {@link #getDescendants()}, except it also follows host of {@link YWShadowRoot} objects.
+     * Same as {@link #getDescendants()}, except it also follows host of
+     * {@link YWShadowRoot} objects.
      *
      * @return Shadow-including root of the node.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-shadow-including-descendant">Relevant section in DOM specification</a>
+     * @see <a href=
+     *      "https://dom.spec.whatwg.org/#concept-shadow-including-descendant">Relevant
+     *      section in DOM specification</a>
      */
     YWNode[] getShadowIncludingDescendants() {
         YWNode[] nodes = getInclusiveDescendants();
@@ -273,10 +295,12 @@ public abstract class YWNode {
     }
 
     /**
-     * Reports whether node is connected, meaning its shadow-including root is the node document.
+     * Reports whether node is connected, meaning its shadow-including root is the
+     * node document.
      *
      * @return true if node is connected.
-     * @see <a href="https://dom.spec.whatwg.org/#connected">Relevant section in DOM specification</a>
+     * @see <a href="https://dom.spec.whatwg.org/#connected">Relevant section in DOM
+     *      specification</a>
      */
     boolean isConnected() {
         return getShadowIncludingRoot() == getNodeDocument();
@@ -286,7 +310,8 @@ public abstract class YWNode {
      * Reports whether node is in a document tree.
      *
      * @return true if node is in a document tree.
-     * @see <a href="https://dom.spec.whatwg.org/#in-a-document-tree">Relevant section in DOM specification</a>
+     * @see <a href="https://dom.spec.whatwg.org/#in-a-document-tree">Relevant
+     *      section in DOM specification</a>
      */
     boolean isInDocumentTree() {
         return getRoot() instanceof YWDocument;
@@ -296,18 +321,21 @@ public abstract class YWNode {
      * Inserts this node to given parent.
      *
      * @param parent      Parent to insert this node into.
-     * @param beforeChild If non-null, the node will be inserted before it. Otherwise, it's inserted after other children.
-     * @see <a href="https://dom.spec.whatwg.org/#concept-node-insert">Relevant section in DOM specification</a>
+     * @param beforeChild If non-null, the node will be inserted before it.
+     *                    Otherwise, it's inserted after other children.
+     * @see <a href="https://dom.spec.whatwg.org/#concept-node-insert">Relevant
+     *      section in DOM specification</a>
      */
     void insert(YWNode parent, YWNode beforeChild, boolean suppressObservers) {
-        // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2025.11.13)
+        // NOTE: All the step numbers(S#.) are based on spec from when this was
+        // initially written(2025.11.13)
 
         // S1.
         YWNode[] nodes;
         if (this instanceof YWDocumentFragment) {
             nodes = children.toArray(new YWNode[0]);
         } else {
-            nodes = new YWNode[]{this};
+            nodes = new YWNode[] { this };
         }
         // S2.
         int count = nodes.length;
@@ -322,8 +350,10 @@ public abstract class YWNode {
         // S5.
         if (beforeChild != null) {
             // TODO[https://dom.spec.whatwg.org/#concept-node-insert]
-            // 1. For each live range whose start node is parent and start offset is greater than child’s index, increase its start offset by count.
-            // 2. For each live range whose end node is parent and end offset is greater than child’s index, increase its end offset by count.
+            // 1. For each live range whose start node is parent and start offset is greater
+            // than child’s index, increase its start offset by count.
+            // 2. For each live range whose end node is parent and end offset is greater
+            // than child’s index, increase its end offset by count.
         }
         // S6.
         YWNode prevSibling = parent.getLastChild();
@@ -369,22 +399,30 @@ public abstract class YWNode {
                     } else if (reg.isScoped()) {
                         reg.getScopedDocumentSet().add(inclusiveDescendant.getNodeDocument());
                     } else if (inclusiveDescendantElem.isCustom()) {
-                        // TODO: enqueue a custom element callback reaction with inclusiveDescendant, callback name "connectedCallback", and « ».
+                        // TODO: enqueue a custom element callback reaction with inclusiveDescendant,
+                        // callback name "connectedCallback", and « ».
                         throw new RuntimeException("TODO[https://dom.spec.whatwg.org/#concept-node-insert]");
                     } else {
-                       YWHTMLCustomElements.tryUpgradeElement(inclusiveDescendantElem);
+                        YWHTMLCustomElements.tryUpgradeElement(inclusiveDescendantElem);
                     }
                 } else if (inclusiveDescendant instanceof YWShadowRoot) {
                     // S7-7-3.
-                    // TODO: If inclusiveDescendant’s custom element registry is null and inclusiveDescendant’s keep custom element registry null is false, then set inclusiveDescendant’s custom element registry to the result of looking up a custom element registry given inclusiveDescendant’s host.
-                    // TODO: Otherwise, if inclusiveDescendant’s custom element registry is non-null and inclusiveDescendant’s custom element registry’s is scoped is true, append inclusiveDescendant’s node document to inclusiveDescendant’s custom element registry’s scoped document set.
+                    // TODO: If inclusiveDescendant’s custom element registry is null and
+                    // inclusiveDescendant’s keep custom element registry null is false, then set
+                    // inclusiveDescendant’s custom element registry to the result of looking up a
+                    // custom element registry given inclusiveDescendant’s host.
+                    // TODO: Otherwise, if inclusiveDescendant’s custom element registry is non-null
+                    // and inclusiveDescendant’s custom element registry’s is scoped is true, append
+                    // inclusiveDescendant’s node document to inclusiveDescendant’s custom element
+                    // registry’s scoped document set.
                     throw new RuntimeException("TODO[https://dom.spec.whatwg.org/#concept-node-insert]");
                 }
             }
         }
         // S8.
         if (!suppressObservers) {
-            // TODO: queue a tree mutation record for parent with nodes, « », previousSibling, and child.
+            // TODO: queue a tree mutation record for parent with nodes, « »,
+            // previousSibling, and child.
         }
         // S9.
         parent.runChildrenChangedSteps();
@@ -415,10 +453,12 @@ public abstract class YWNode {
      * Adopts given node into a document.
      *
      * @param document Document to adopt the node into
-     * @see <a href="https://dom.spec.whatwg.org/#concept-node-adopt">Relevant section in DOM specification</a>
+     * @see <a href="https://dom.spec.whatwg.org/#concept-node-adopt">Relevant
+     *      section in DOM specification</a>
      */
     void adoptNodeInto(YWDocument document) {
-        // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2025.11.13)
+        // NOTE: All the step numbers(S#.) are based on spec from when this was
+        // initially written(2025.11.13)
 
         // S1.
         YWDocument oldDocument = this.getNodeDocument();
@@ -433,10 +473,12 @@ public abstract class YWNode {
             for (YWNode inclusiveDescendant : getShadowIncludingDescendants()) {
                 // S3-1-1.
                 inclusiveDescendant.nodeDocument = document;
-                if (inclusiveDescendant instanceof YWShadowRoot && YWDOMCustomElements.isGlobalCustomElementRegistry(inclusiveDescendant.lookupCustomElementRegistry())) {
+                if (inclusiveDescendant instanceof YWShadowRoot && YWDOMCustomElements
+                        .isGlobalCustomElementRegistry(inclusiveDescendant.lookupCustomElementRegistry())) {
                     // S3-1-2.
                     YWShadowRoot inclusiveDescendantSr = (YWShadowRoot) inclusiveDescendant;
-                    // TODO: set inclusiveDescendant’s custom element registry to document’s effective global custom element registry.
+                    // TODO: set inclusiveDescendant’s custom element registry to document’s
+                    // effective global custom element registry.
                     inclusiveDescendantSr.setCustomElementRegistry(document.getEffectiveGlobalCustomElementRegistry());
                     throw new RuntimeException("TODO[https://dom.spec.whatwg.org/#concept-node-adopt]");
                 } else if (inclusiveDescendant instanceof YWElement) {
@@ -447,8 +489,10 @@ public abstract class YWNode {
                         inclusiveDescendantElem.getAttrs().get(i).setNodeDocument(document);
                     }
                     // S3-1-3-2.
-                    if (YWDOMCustomElements.isGlobalCustomElementRegistry(inclusiveDescendant.lookupCustomElementRegistry())) {
-                        // TODO: set inclusiveDescendant’s custom element registry to document’s effective global custom element registry.
+                    if (YWDOMCustomElements
+                            .isGlobalCustomElementRegistry(inclusiveDescendant.lookupCustomElementRegistry())) {
+                        // TODO: set inclusiveDescendant’s custom element registry to document’s
+                        // effective global custom element registry.
                         throw new RuntimeException("TODO[https://dom.spec.whatwg.org/#concept-node-adopt]");
                     }
                 }
@@ -458,7 +502,8 @@ public abstract class YWNode {
                 if (((YWElement) inclusiveDescendant).isCustom()) {
                     continue;
                 }
-                // TODO: enqueue a custom element callback reaction with inclusiveDescendant, callback name "adoptedCallback", and « oldDocument, document ».
+                // TODO: enqueue a custom element callback reaction with inclusiveDescendant,
+                // callback name "adoptedCallback", and « oldDocument, document ».
                 throw new RuntimeException("TODO[https://dom.spec.whatwg.org/#concept-node-adopt]");
             }
             // S3-3.

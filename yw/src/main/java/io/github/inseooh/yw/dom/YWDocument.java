@@ -6,7 +6,8 @@ public class YWDocument extends YWNode {
     /**
      * Represents document's mode.
      *
-     * @see <a href="https://dom.spec.whatwg.org/#concept-document-mode">Relevant section in DOM specification</a>
+     * @see <a href="https://dom.spec.whatwg.org/#concept-document-mode">Relevant
+     *      section in DOM specification</a>
      */
     public enum Mode {
         NO_QUIRKS, QUIRKS, LIMITED_QUIRKS
@@ -33,19 +34,19 @@ public class YWDocument extends YWNode {
     }
 
     @Override
-    void runInsertionSteps() {
+    public void runInsertionSteps() {
     }
 
     @Override
-    void runChildrenChangedSteps() {
+    public void runChildrenChangedSteps() {
     }
 
     @Override
-    void runPostConnectionSteps() {
+    public void runPostConnectionSteps() {
     }
 
     @Override
-    void runAdoptingSteps(YWDocument oldDocument) {
+    public void runAdoptingSteps(YWDocument oldDocument) {
     }
 
     public Origin getOrigin() {
@@ -106,6 +107,7 @@ public class YWDocument extends YWNode {
 
     /**
      * Returns effective global custom element registry.
+     * 
      * @return Effective global custom element registry, or null if not applicable.
      */
     public YWCustomElementRegistry getEffectiveGlobalCustomElementRegistry() {
