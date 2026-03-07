@@ -58,7 +58,7 @@ public final class YWCSSStyleSheetSetManager {
         // S2.
         sheet.setParentStyleSheet(null);
         sheet.setOwnerNode(null);
-        sheet.setOwnerRule(null);
+        sheet.setOwnerCSSRule(null);
     }
 
     /**

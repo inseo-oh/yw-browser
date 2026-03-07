@@ -11,7 +11,7 @@ public class YWCSSStyleSheet {
     private String location = null;
     private YWCSSStyleSheet parentStyleSheet = null;
     private YWNode ownerNode = null;
-    private YWCSSRule ownerRule = null;
+    private YWCSSRule ownerCSSRule = null;
     private YWCSSMediaList media = new YWCSSMediaList();
     private String title = "";
     private boolean alternateFlag = false;
@@ -58,12 +58,12 @@ public class YWCSSStyleSheet {
         this.ownerNode = ownerNode;
     }
 
-    public YWCSSRule getOwnerRule() {
-        return ownerRule;
+    public YWCSSRule getOwnerCSSRule() {
+        return ownerCSSRule;
     }
 
-    public void setOwnerRule(YWCSSRule ownerRule) {
-        this.ownerRule = ownerRule;
+    public void setOwnerCSSRule(YWCSSRule ownerCSSRule) {
+        this.ownerCSSRule = ownerCSSRule;
     }
 
     public YWCSSMediaList getMedia() {
