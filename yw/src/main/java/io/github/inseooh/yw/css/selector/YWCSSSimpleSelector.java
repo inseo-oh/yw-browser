@@ -55,11 +55,11 @@ public interface YWCSSSimpleSelector {
 
 		public boolean isCaseSensitive() {
 			switch (caseSensitivity) {
-			case SENSITIVE:
-			case DEFAULT_FOR_DOCUMENT_LANGUAGE: // STUB
-				return true;
-			case INSENSITIVE:
-				return false;
+				case SENSITIVE:
+				case DEFAULT_FOR_DOCUMENT_LANGUAGE: // STUB
+					return true;
+				case INSENSITIVE:
+					return false;
 			}
 			throw new RuntimeException("bad caseSensitivity");
 		}
@@ -72,14 +72,14 @@ public interface YWCSSSimpleSelector {
 				return false;
 			}
 			switch (matchMethod) {
-			case NAME_ONLY:
-				break;
-			case VALUE_EQUALS: {
-				if (!isCaseSensitive()) {
-					return attrValue.toLowerCase().equals(value.toLowerCase());
+				case NAME_ONLY:
+					break;
+				case VALUE_EQUALS: {
+					if (!isCaseSensitive()) {
+						return attrValue.toLowerCase().equals(value.toLowerCase());
+					}
+					return attrValue.equals(value);
 				}
-				return attrValue.equals(value);
-			}
 			}
 			throw new RuntimeException("bad matchMethod");
 		}
@@ -191,7 +191,7 @@ public interface YWCSSSimpleSelector {
 	/**
 	 * @apiNote This is for internal use only, and not part of CSS specification.
 	 */
-	static class Reference implements YWCSSSimpleSelector {
+	public static class Reference implements YWCSSSimpleSelector {
 		private final YWElement element;
 
 		public Reference(YWElement element) {
