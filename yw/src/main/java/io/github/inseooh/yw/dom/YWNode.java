@@ -302,7 +302,7 @@ public abstract class YWNode {
      * @see <a href="https://dom.spec.whatwg.org/#connected">Relevant section in DOM
      *      specification</a>
      */
-    boolean isConnected() {
+    public boolean isConnected() {
         return getShadowIncludingRoot() == getNodeDocument();
     }
 
