@@ -354,11 +354,11 @@ public enum YWEncoding {
 		/* S3 *************************************************************************/
 		YWEncodingDecoder decoder;
 		switch (encoding) {
-		case UTF8:
-			decoder = new YWUTF8Decoder();
-			break;
-		default:
-			throw new RuntimeException("TODO: Add support for " + encoding + " encoding");
+			case UTF8:
+				decoder = new YWUTF8Decoder();
+				break;
+			default:
+				throw new RuntimeException("TODO: Add support for " + encoding + " encoding");
 		}
 		decoder.processQueue(inputQueue, output, YWEncodingErrorMode.REPLACEMENT);
 
@@ -373,4 +373,20 @@ public enum YWEncoding {
 	public static YWIOQueue decode(YWIOQueue input, YWEncoding fallbackEncoding) {
 		return decode(input, fallbackEncoding, null);
 	}
+
+	/**
+	 * @see <a href= "https://encoding.spec.whatwg.org/#get-an-output-encoding">
+	 *      Relevant section in Encoding specification</a>
+	 */
+	public YWEncoding getOutputEncoding() {
+		switch (this) {
+			case REPLACEMENT:
+			case UTF16_BE:
+			case UTF16_LE:
+				return UTF8;
+			default:
+				return this;
+		}
+	}
+
 }
