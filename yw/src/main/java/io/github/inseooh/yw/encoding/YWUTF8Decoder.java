@@ -12,7 +12,7 @@ public class YWUTF8Decoder extends YWEncodingDecoder {
 	private int upperBoundary = 0xbf;
 
 	@Override
-	protected YWEncodingResult handler(YWIOQueue queue, int byteItem) {
+	public YWEncodingResult handler(YWIOQueue queue, int byteItem) {
 		if (byteItem == YWIOQueue.END_OF_IO_QUEUE) {
 			if (this.bytesNeeded != 0) {
 				this.bytesNeeded = 0;
