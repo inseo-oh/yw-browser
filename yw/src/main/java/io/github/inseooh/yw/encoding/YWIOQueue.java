@@ -16,6 +16,12 @@ public class YWIOQueue {
 		return queue;
 	}
 
+	public static YWIOQueue fromString(String s) {
+		YWIOQueue queue = new YWIOQueue();
+		s.codePoints().forEach(cp -> queue.items.add(cp));
+		return queue;
+	}
+
 	private static int[] itemsToArray(List<Integer> items) {
 		int[] result = new int[items.size()];
 		for (int i = 0; i < result.length; i++) {
