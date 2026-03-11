@@ -15,11 +15,11 @@ public class YWUtility {
 
 	public static boolean isAsciiWhitespace(int codePoint) {
 		switch (codePoint) {
-		case 0x0009:
-		case 0x000a:
-		case 0x000c:
-		case 0x000d:
-			return true;
+			case 0x0009:
+			case 0x000a:
+			case 0x000c:
+			case 0x000d:
+				return true;
 		}
 		return false;
 	}
@@ -41,54 +41,58 @@ public class YWUtility {
 		}
 		return "";
 	}
-	
+
 	public static String removeLeadingAndTrailingWhitespace(String s) {
 		return removeTrailingWhitespace(removeLeadingWhitespace(s));
 	}
 
 	public static boolean isNoncharacter(int codePoint) {
 		switch (codePoint) {
-		case 0xfffe:
-		case 0xffff:
-		case 0x1fffe:
-		case 0x1ffff:
-		case 0x2fffe:
-		case 0x2ffff:
-		case 0x3fffe:
-		case 0x3ffff:
-		case 0x4fffe:
-		case 0x4ffff:
-		case 0x5fffe:
-		case 0x5ffff:
-		case 0x6fffe:
-		case 0x6ffff:
-		case 0x7fffe:
-		case 0x7ffff:
-		case 0x8fffe:
-		case 0x8ffff:
-		case 0x9fffe:
-		case 0x9ffff:
-		case 0xafffe:
-		case 0xaffff:
-		case 0xbfffe:
-		case 0xbffff:
-		case 0xcfffe:
-		case 0xcffff:
-		case 0xdfffe:
-		case 0xdffff:
-		case 0xefffe:
-		case 0xeffff:
-		case 0xffffe:
-		case 0xfffff:
-		case 0x10fffe:
-		case 0x10ffff:
-			return true;
+			case 0xfffe:
+			case 0xffff:
+			case 0x1fffe:
+			case 0x1ffff:
+			case 0x2fffe:
+			case 0x2ffff:
+			case 0x3fffe:
+			case 0x3ffff:
+			case 0x4fffe:
+			case 0x4ffff:
+			case 0x5fffe:
+			case 0x5ffff:
+			case 0x6fffe:
+			case 0x6ffff:
+			case 0x7fffe:
+			case 0x7ffff:
+			case 0x8fffe:
+			case 0x8ffff:
+			case 0x9fffe:
+			case 0x9ffff:
+			case 0xafffe:
+			case 0xaffff:
+			case 0xbfffe:
+			case 0xbffff:
+			case 0xcfffe:
+			case 0xcffff:
+			case 0xdfffe:
+			case 0xdffff:
+			case 0xefffe:
+			case 0xeffff:
+			case 0xffffe:
+			case 0xfffff:
+			case 0x10fffe:
+			case 0x10ffff:
+				return true;
 		}
 		return false;
 	}
 
 	public static boolean isC0ControlCharacter(int codePoint) {
 		return 0x0000 <= codePoint && codePoint <= 0x001f;
+	}
+
+	public static boolean isC0ControlCharacterOrSpace(int codePoint) {
+		return isC0ControlCharacter(codePoint) || codePoint == ' ';
 	}
 
 	public static boolean isControlCharacter(int codePoint) {
@@ -127,6 +131,10 @@ public class YWUtility {
 		return isAsciiUppercaseHexDigit(codePoint) || isAsciiLowercaseHexDigit(codePoint) || isAsciiDigit(codePoint);
 	}
 
+	public static boolean isAsciiCodePoint(int codePoint) {
+		return 0 <= codePoint && codePoint <= 0x7f;
+	}
+
 	static int toAsciiUppercase(int codePoint) {
 		return !isAsciiUppercase(codePoint) ? codePoint : (codePoint - 'A' + 'a');
 	}
@@ -162,9 +170,8 @@ public class YWUtility {
 		}
 		return true;
 	}
-	
-	public static float clamp(float val, float min, float max) {
-	    return Math.max(min, Math.min(max, val));
-	}
 
+	public static float clamp(float val, float min, float max) {
+		return Math.max(min, Math.min(max, val));
+	}
 }
