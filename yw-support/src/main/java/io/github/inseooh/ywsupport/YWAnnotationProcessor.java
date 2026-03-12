@@ -203,7 +203,7 @@ public class YWAnnotationProcessor extends AbstractProcessor {
 						out.println("    }");
 					}
 					// The finalizing method =======================================================
-					out.println("    private YWCSSPropertySet finalizeProperties(YWCSSPropertySet parentSet) {");
+					out.println("    public YWCSSPropertySet finalizeProperties(YWCSSPropertySet parentSet) {");
 					for (Property prop : propertyMap.values()) {
 						prop.generateFinalizeCode(out, 2, "parentSet");
 					}
