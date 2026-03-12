@@ -1,5 +1,7 @@
 package io.github.inseooh.yw.url;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1611,4 +1613,115 @@ public final class YWURL {
         this.blobURLEntry = blobURLEntry;
     }
 
+    /**
+     * @see <a href=
+     *      "https://url.spec.whatwg.org/#concept-url-serializer">
+     *      Relevant section in URL specification</a>
+     */
+    private String serializer(boolean excludeFragment) {
+        // NOTE: All the step numbers(S#.) are based on spec from when this was
+        // initially written(2026.03.12.)
+
+        // S1.
+        StringBuilder output = new StringBuilder();
+        output.append(scheme + ":");
+
+        // S2.
+        if (host != null) {
+            // S2-1.
+            output.append("//");
+
+            // S2-2.
+            if (includesCredentials()) {
+                // S2-2-1.
+                output.append(username);
+
+                // S2-2-2.
+                if (!password.isEmpty()) {
+                    output.append(":" + password);
+                }
+
+                // S2-2-3.
+                output.append("@");
+            }
+
+            // S2-3.
+            output.append(host.serializer());
+
+            // S2-4.
+            if (port != null) {
+                output.append(":" + port);
+            }
+        }
+
+        // S3.
+        if (host == null && !hasOpaquePath() && 1 < path.size() && path.get(0).isEmpty()) {
+            output.append("/.");
+        }
+
+        // S4.
+        output.append(pathSerializer());
+
+        // S5.
+        if (query != null) {
+            output.append("?" + query);
+        }
+
+        // S6.
+        if (!excludeFragment && fragment != null) {
+            output.append("#" + fragment);
+        }
+
+        // S7.
+        return output.toString();
+    }
+
+    /**
+     * @see <a href=
+     *      "https://url.spec.whatwg.org/#concept-url-serializer">
+     *      Relevant section in URL specification</a>
+     */
+    private String serializer() {
+        return serializer(false);
+    }
+
+    /**
+     * @see <a href=
+     *      "https://url.spec.whatwg.org/#url-path-serializer">
+     *      Relevant section in URL specification</a>
+     */
+    private String pathSerializer() {
+        // NOTE: All the step numbers(S#.) are based on spec from when this was
+        // initially written(2026.03.12.)
+
+        // S1.
+        if (hasOpaquePath()) {
+            return path.get(0);
+        }
+
+        // S2.
+        StringBuilder output = new StringBuilder();
+
+        // S3.
+        for (String segment : path) {
+            output.append("/" + segment);
+        }
+
+        // S4.
+        return output.toString();
+    }
+
+    @Override
+    public String toString() {
+        return serializer();
+    }
+
+    public URI toURI() {
+        try {
+            URI uri = new URI(this.toString());
+            return uri;
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
