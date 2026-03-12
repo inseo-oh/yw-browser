@@ -21,12 +21,35 @@ public final class YWURL {
     private String scheme = "";
     private String username = "";
     private String password = "";
-    private String host = null;
+    private Host host = null;
     private Integer port = null;
     private List<String> path = new ArrayList<>();
     private String query = null;
     private String fragment = null;
     private Object blobURLEntry = null; // STUB
+
+    /**
+     * @see <a href=
+     *      "https://url.spec.whatwg.org/#concept-host">
+     *      Relevant section in URL specification</a>
+     */
+    private sealed interface Host {
+        public record Domain(String domain) implements Host {
+            @Override
+            public String serializer() {
+                return domain;
+            }
+        };
+
+        public record Empty() implements Host {
+            @Override
+            public String serializer() {
+                return "";
+            }
+        }
+
+        public String serializer();
+    };
 
     /**
      * @see <a href=
@@ -456,7 +479,7 @@ public final class YWURL {
      *      "https://url.spec.whatwg.org/#host-parsing">
      *      Relevant section in URL specification</a>
      */
-    private static String hostParser(String input, boolean isOpaque) throws YWSyntaxError {
+    private static Host hostParser(String input, boolean isOpaque) throws YWSyntaxError {
         // NOTE: All the step numbers(S#.) are based on spec from when this was
         // initially written(2026.03.09.)
 
@@ -500,7 +523,7 @@ public final class YWURL {
         }
 
         // S8.
-        return asciiDomain;
+        return new Host.Domain(asciiDomain);
     }
 
     /**
@@ -508,7 +531,7 @@ public final class YWURL {
      *      "https://url.spec.whatwg.org/#concept-opaque-host-parser">
      *      Relevant section in URL specification</a>
      */
-    private static String opaqueHostParser(String input) throws YWSyntaxError {
+    private static Host opaqueHostParser(String input) throws YWSyntaxError {
         // S1.
         if (input.codePoints().anyMatch(i -> isForbiddenHostCodePoint(i))) {
             throw new YWSyntaxError();
@@ -521,7 +544,7 @@ public final class YWURL {
         // NOTE: S3 only does validation.
 
         // S4.
-        return utf8PercentEncode(input, C0_CONTROL_PERCENT_ENCODE_SET);
+        return new Host.Domain(utf8PercentEncode(input, C0_CONTROL_PERCENT_ENCODE_SET));
     }
 
     private enum ParserState {
@@ -886,7 +909,7 @@ public final class YWURL {
                         atSignSeen = true;
 
                         // S1-4.
-                         for (int codePoint : buffer.codePoints().toArray()) {
+                        for (int codePoint : buffer.codePoints().toArray()) {
                             // S1-4-1.
                             if (codePoint == ':' && !passwordTokenSeen) {
                                 passwordTokenSeen = true;
@@ -947,7 +970,7 @@ public final class YWURL {
                             throw new YWSyntaxError();
                         }
 
-                        String host;
+                        Host host;
                         try {
                             // S2-3.
                             host = hostParser(buffer.toString(), !url.isSpecial());
@@ -978,7 +1001,7 @@ public final class YWURL {
                             throw new YWSyntaxError();
                         }
 
-                        String host;
+                        Host host;
                         try {
                             // S3-3.
                             host = hostParser(buffer.toString(), !url.isSpecial());
@@ -1066,7 +1089,7 @@ public final class YWURL {
                     url.scheme = "file";
 
                     // S2.
-                    url.host = "";
+                    url.host = new Host.Empty();
 
                     // S3.
                     if (c == '/' || c == '\\') {
@@ -1169,7 +1192,7 @@ public final class YWURL {
                         // S1-2.
                         else if (!buffer.isEmpty()) {
                             // S1-2-1.
-                            url.host = "";
+                            url.host = new Host.Empty();
 
                             // S1-2-2.
                             if (stateOverride != null) {
@@ -1182,7 +1205,7 @@ public final class YWURL {
 
                         // S1-3.
                         else {
-                            String host;
+                            Host host;
                             try {
                                 // S1-3-1.
                                 host = hostParser(buffer.toString(), !url.isSpecial());
@@ -1192,8 +1215,8 @@ public final class YWURL {
                             }
 
                             // S1-3-3.
-                            if (host.equals("localhost")) {
-                                host = "";
+                            if (host instanceof Host.Domain domainHost && domainHost.domain.equals("localhost")) {
+                                host = new Host.Empty();
                             }
 
                             // S1-3-4.
@@ -1540,11 +1563,11 @@ public final class YWURL {
         this.password = password;
     }
 
-    public String getHost() {
+    public Host getHost() {
         return host;
     }
 
-    public void setHost(String host) {
+    public void setHost(Host host) {
         this.host = host;
     }
 
