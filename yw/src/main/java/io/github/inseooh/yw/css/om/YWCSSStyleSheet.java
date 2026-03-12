@@ -74,6 +74,10 @@ public class YWCSSStyleSheet {
         this.media = media;
     }
 
+    public void setMedia(String media) {
+        // TODO
+    }
+
     public String getTitle() {
         return title;
     }

@@ -9,6 +9,7 @@ import java.util.List;
 
 import io.github.inseooh.yw.dom.YWElement;
 import io.github.inseooh.yw.html.YWEnumeratedAttributes;
+import io.github.inseooh.yw.html.fetch.YWCORSSettings;
 import io.github.inseooh.yw.url.YWURL;
 
 public final class YWFetchRequest {
@@ -512,7 +513,7 @@ public final class YWFetchRequest {
          *      "https://fetch.spec.whatwg.org/#process-response-end-of-body">
          *      Relevant section in Fetch specification</a>
          */
-        default void processResponseConsumeBody(YWFetchResponse response, boolean isFailure, byte[] result) {
+        default void processResponseConsumeBody(YWFetchResponse response, boolean isFailure, byte[] bodyBytes) {
         }
     }
 
@@ -530,8 +531,63 @@ public final class YWFetchRequest {
             callbacks.processResponseConsumeBody(new YWFetchResponse(), false, httpResponse.body());
         } catch (IOException e) {
             callbacks.processResponseConsumeBody(null, true, null);
-        }  catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             callbacks.processResponseConsumeBody(null, true, null);
         }
     }
+
+    /**
+     * @see <a href=
+     *      "https://fetch.spec.whatwg.org/#concept-fetch">
+     *      Relevant section in Fetch specification</a>
+     */
+    public void fetch(FetchCallbacks callbacks) {
+        fetch(false, callbacks);
+    }
+
+    /**
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/urls-and-fetching.html#create-a-potential-cors-request">
+     *      Relevant section in Fetch specification</a>
+     */
+    public static YWFetchRequest createPotentialCORSRequest(YWURL url, String destination,
+            YWCORSSettings corsAttributeState, boolean sameOriginFallback) {
+        // NOTE: All the step numbers(S#.) are based on spec from when this was
+        // initially written(2026.03.12.)
+
+        // S1.
+        Mode mode = corsAttributeState == YWCORSSettings.NO_CORS ? Mode.NO_CORS : Mode.CORS;
+
+        // S2.
+        if (sameOriginFallback && mode == Mode.NO_CORS) {
+            mode = Mode.SAME_ORGIN;
+        }
+
+        // S3.
+        CredentialsMode credentialsMode = CredentialsMode.INCLUDE;
+
+        // S4.
+        if (corsAttributeState == YWCORSSettings.ANONYMOUS) {
+            credentialsMode = CredentialsMode.SAME_ORGIN;
+        }
+
+        // S5.
+        YWFetchRequest request = new YWFetchRequest(url, null, null); // XXX: Should those two be null at creation?
+        request.setDestination(destination);
+        request.setMode(mode);
+        request.setCredentialsMode(credentialsMode);
+        request.setUseURLCredentials(true);
+        return request;
+    }
+
+    /**
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/urls-and-fetching.html#create-a-potential-cors-request">
+     *      Relevant section in Fetch specification</a>
+     */
+    public static YWFetchRequest createPotentialCORSRequest(YWURL url, String destination,
+            YWCORSSettings corsAttributeState) {
+        return createPotentialCORSRequest(url, destination, corsAttributeState, false);
+    }
+
 }
