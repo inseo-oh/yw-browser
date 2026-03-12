@@ -163,7 +163,7 @@ public abstract class YWNode {
      *      "https://dom.spec.whatwg.org/#concept-tree-inclusive-descendant">Relevant
      *      section in DOM specification</a>
      */
-    YWNode[] getInclusiveDescendants() {
+    public YWNode[] getInclusiveDescendants() {
         // In a nutshell: It's just DFS search.
         List<YWNode> resNodes = new ArrayList<>();
         YWNode lastNode = null;
@@ -215,7 +215,7 @@ public abstract class YWNode {
      * @see <a href="https://dom.spec.whatwg.org/#concept-tree-descendant">Relevant
      *      section in DOM specification</a>
      */
-    YWNode[] getDescendants() {
+    public YWNode[] getDescendants() {
         YWNode[] nodes = getInclusiveDescendants();
         List<YWNode> resNodes = new ArrayList<>(Arrays.asList(nodes).subList(1, nodes.length));
         return resNodes.toArray(new YWNode[0]);
@@ -229,7 +229,7 @@ public abstract class YWNode {
      *      "https://dom.spec.whatwg.org/#concept-tree-inclusive-ancestor">Relevant
      *      section in DOM specification</a>
      */
-    YWNode[] getInclusiveAncestors() {
+    public YWNode[] getInclusiveAncestors() {
         List<YWNode> resNodes = new ArrayList<>();
         resNodes.add(this);
 
@@ -248,7 +248,7 @@ public abstract class YWNode {
      * @see <a href="https://dom.spec.whatwg.org/#concept-tree-ancestor">Relevant
      *      section in DOM specification</a>
      */
-    YWNode[] getAncestors() {
+    public YWNode[] getAncestors() {
         YWNode[] nodes = getInclusiveAncestors();
         List<YWNode> resNodes = new ArrayList<>(Arrays.asList(nodes).subList(1, nodes.length));
         return resNodes.toArray(new YWNode[0]);
