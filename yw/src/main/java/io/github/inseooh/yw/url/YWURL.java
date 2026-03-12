@@ -10,6 +10,7 @@ import java.util.function.Function;
 
 import io.github.inseooh.yw.YWSyntaxError;
 import io.github.inseooh.yw.YWUtility;
+import io.github.inseooh.yw.dom.YWDocument;
 import io.github.inseooh.yw.encoding.YWEncoding;
 import io.github.inseooh.yw.encoding.YWEncodingDecoder;
 import io.github.inseooh.yw.encoding.YWEncodingEncoder;
@@ -606,6 +607,52 @@ public final class YWURL {
                         s.codePointAt(2) == '\\' ||
                         s.codePointAt(2) == '?' ||
                         s.codePointAt(2) == '#');
+    }
+
+    /**
+     * @see <a href=
+     *      "https://url.spec.whatwg.org/#concept-url-parser">
+     *      Relevant section in URL specification</a>
+     */
+    public static YWURL urlParser(String input, YWURL base, YWEncoding encoding) throws YWSyntaxError {
+        // NOTE: All the step numbers(S#.) are based on spec from when this was
+        // initially written(2026.03.12.)
+
+        YWURL url;
+        try {
+            // S1.
+            url = basicURLParser(input, base);
+        } catch (YWSyntaxError e) {
+            // S2.
+            throw e;
+        }
+
+        // S3.
+        if (!url.scheme.equals("blob")) {
+            return url;
+        }
+
+        // S4.
+        // TODO: Implement S4. and S5.
+        throw new RuntimeException("TODO");
+    }
+
+    /**
+     * @see <a href=
+     *      "https://url.spec.whatwg.org/#concept-url-parser">
+     *      Relevant section in URL specification</a>
+     */
+    public static YWURL urlParser(String input, YWURL base) throws YWSyntaxError {
+        return urlParser(input, base, YWEncoding.UTF8);
+    }
+
+    /**
+     * @see <a href=
+     *      "https://url.spec.whatwg.org/#concept-url-parser">
+     *      Relevant section in URL specification</a>
+     */
+    public static YWURL urlParser(String input) throws YWSyntaxError {
+        return urlParser(input, null);
     }
 
     /**
@@ -1539,6 +1586,41 @@ public final class YWURL {
     public boolean matchesAboutBlank() {
         return scheme.equals("about") && path.size() == 1 && path.get(0).equals("blank") &&
                 username.isEmpty() && password.isEmpty() && host == null;
+    }
+
+    /**
+     * @see <a href=
+     *      "https://html.spec.whatwg.org/multipage/urls-and-fetching.html#encoding-parsing-a-url">
+     *      Relevant section in HTML specification</a>
+     */
+    public static YWURL encodingParseURL(String url, Object environment) throws YWSyntaxError {
+        // NOTE: All the step numbers(S#.) are based on spec from when this was
+        // initially written(2026.03.08.)
+
+        // S1.
+        YWEncoding encoding = YWEncoding.UTF8;
+
+        // S2.
+        if (environment instanceof YWDocument documentEnv) {
+            encoding = documentEnv.getEncoding();
+        }
+
+        // S3.
+        else {
+            // TODO: Implement S3.
+            throw new RuntimeException("TODO");
+        }
+
+        // S4.
+        YWURL baseURL;
+        if (environment instanceof YWDocument) {
+            baseURL = documentEnv.getDocumentBaseURL();
+        } else {
+            throw new RuntimeException("TODO");
+        }
+
+        // S5.
+        return urlParser(url, baseURL, encoding);
     }
 
     public String getScheme() {
