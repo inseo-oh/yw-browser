@@ -121,4 +121,33 @@ public class YWCSSComplexSelector {
 	public static YWCSSComplexSelector[] parseComplexSelectorList(YWCSSTokenStream ts) throws YWSyntaxError {
 		return ts.parseCommaSeparatedRepeation(new YWCSSComplexSelector[0], () -> parseComplexSelector(ts));
 	}
+
+	public YWElement[] matchAgainstTree(YWNode root) {
+		List<YWElement> matchList = new ArrayList<>();
+		List<YWElement> candidates = new ArrayList<>();
+		for (YWNode node : root.getInclusiveDescendants()) {
+			if (node instanceof YWElement elem) {
+				candidates.add(elem);
+			}
+		}
+		for (YWElement elem : candidates) {
+			if (matchAgainst(elem)) {
+				matchList.add(elem);
+			}
+			// TODO: Pseudo elements
+		}
+		return matchList.toArray(new YWElement[0]);
+	}
+
+	public static YWElement[] matchAgainstTree(YWCSSComplexSelector selectors[], YWNode root) {
+		List<YWElement> matchList = new ArrayList<>();
+		for (YWCSSComplexSelector sel : selectors) {
+			for (YWElement match : sel.matchAgainstTree(root)) {
+				if (matchList.indexOf(match) < 0) {
+					matchList.add(match);
+				}
+			}
+		}
+		return matchList.toArray(new YWElement[0]);
+	}
 }
