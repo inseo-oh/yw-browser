@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import io.github.inseooh.yw.css.om.YWCSSStyleSheet;
 import io.github.inseooh.yw.html.customelements.YWCustomElementRegistry;
 import io.github.inseooh.yw.html.customelements.YWHTMLCustomElements;
 
 public abstract class YWNode {
     private final List<YWNode> children = new ArrayList<>();
+    private final List<YWCSSStyleSheet> styleSheets = new ArrayList<>();
+
     private YWNode parent = null;
     private YWDocument nodeDocument;
 
@@ -538,5 +541,9 @@ public abstract class YWNode {
             return ((YWShadowRoot) this).getCustomElementRegistry();
         }
         return null;
+    }
+
+    public List<YWCSSStyleSheet> getStyleSheets() {
+        return styleSheets;
     }
 }

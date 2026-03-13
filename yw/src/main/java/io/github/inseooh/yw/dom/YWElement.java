@@ -3,6 +3,7 @@ package io.github.inseooh.yw.dom;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.inseooh.yw.css.YWCSSPropertySet;
 import io.github.inseooh.yw.html.customelements.YWCustomElementRegistry;
 
 public class YWElement extends YWNode {
@@ -15,6 +16,7 @@ public class YWElement extends YWNode {
     private final List<YWAttr> attrs = new ArrayList<>();
     private Object tagToken;
     private CustomElementState customElementState;
+    private YWCSSPropertySet cssPropertySet;
 
     public YWElement(YWDocument nodeDocument, String namespace, String namespacePrefix, String is, String localName,
             Object tagToken, CustomElementState customElementState) {
@@ -178,6 +180,14 @@ public class YWElement extends YWNode {
      */
     public String getAttr(String localName) {
         return getAttr(null, localName);
+    }
+
+    public YWCSSPropertySet getCSSPropertySet() {
+        return cssPropertySet;
+    }
+
+    public void setCSSPropertySet(YWCSSPropertySet cssPropertySet) {
+        this.cssPropertySet = cssPropertySet;
     }
 
     @Override
