@@ -8,6 +8,8 @@ import io.github.inseooh.ywsupport.YWCSSType;
 
 @YWCSSType
 public class YWCSSTextTransform {
+	public static final YWCSSTextTransform NONE = new YWCSSTextTransform(null);
+
 	public enum CaseTransform {
 		CAPITALIZE, UPPERCASE, LOWERCASE
 	};
