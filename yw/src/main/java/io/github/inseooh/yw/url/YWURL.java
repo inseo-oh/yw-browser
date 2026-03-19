@@ -657,6 +657,19 @@ public final class YWURL {
 
     /**
      * @see <a href=
+     *      "https://url.spec.whatwg.org/#concept-url-parser">
+     *      Relevant section in URL specification</a>
+     */
+    public static YWURL urlParserFromLiteral(String input) {
+        try {
+            return urlParser(input, null);
+        } catch (YWSyntaxError e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    /**
+     * @see <a href=
      *      "https://url.spec.whatwg.org/#concept-basic-url-parser">
      *      Relevant section in URL specification</a>
      */
