@@ -34,7 +34,7 @@ public class YWDocument extends YWNode {
 
     private YWEncoding encoding = YWEncoding.UTF8;
     private String contentType = "application/xml";
-    private YWURL url = YWURL.urlParser("about:blank");
+    private YWURL url = YWURL.urlParserFromLiteral("about:blank");
     private Origin origin = new Origin(); /* STUB */
     private Type type = Type.XML;
     private Mode mode = Mode.NO_QUIRKS;
