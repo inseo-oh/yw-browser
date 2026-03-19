@@ -41,4 +41,11 @@ class YWLogicalRect {
     public void setHeight(float height) {
         this.height = height;
     }
+
+    public YWPhysicalRect toPhysical(YWWritingMode writingMode) {
+        return switch (writingMode) {
+            case HORIZONTAL -> new YWPhysicalRect(x, y, width, height);
+            case VERTICAL -> new YWPhysicalRect(y, x, height, width);
+        };
+    }
 }

@@ -43,6 +43,10 @@ public class YWCSSSize {
 		return size;
 	}
 
+	public boolean isAuto() {
+		return type == Type.AUTO;
+	}
+
 	public float computeUsedValue(float fontSize, float containerSize) {
 		switch (type) {
 			case AUTO:

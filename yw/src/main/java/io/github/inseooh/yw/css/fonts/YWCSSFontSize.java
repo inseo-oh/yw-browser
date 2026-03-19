@@ -13,6 +13,13 @@ import io.github.inseooh.ywsupport.YWCSSType;
 public interface YWCSSFontSize {
 	float toComputedValue(float parentFontSize);
 
+	static float getComputedValue(YWCSSFontSize size) {
+		if (!(size instanceof Length lSize) || lSize.length.getUnit() != YWCSSLength.Unit.PX) {
+			throw new IllegalArgumentException("size must be computed Length value");
+		}
+		return lSize.length.getValue();
+	}
+
 	public static enum Absolute implements YWCSSFontSize {
 		XX_SMALL, X_SMALL, SMALL, MEDIUM, LARGE, X_LARGE, XX_LARGE;
 

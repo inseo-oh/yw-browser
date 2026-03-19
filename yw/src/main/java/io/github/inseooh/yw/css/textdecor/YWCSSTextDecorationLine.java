@@ -13,6 +13,10 @@ public class YWCSSTextDecorationLine {
 	private boolean lineThrough = false;
 	private boolean blink = false;
 
+	public boolean isAny() {
+		return underline || overline || lineThrough || blink;
+	}
+
 	public boolean isUnderline() {
 		return underline;
 	}

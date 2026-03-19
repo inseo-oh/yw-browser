@@ -27,7 +27,7 @@ public abstract class YWNode {
         this.nodeDocument = nodeDocument;
     }
 
-    List<YWNode> getChildren() {
+    public List<YWNode> getChildren() {
         return children;
     }
 

@@ -1,6 +1,6 @@
 package io.github.inseooh.yw.layout;
 
-public class YWPhysicalRect {
+class YWPhysicalRect {
     private float x, y, width, height;
 
     public YWPhysicalRect(float x, float y, float width, float height) {
@@ -40,5 +40,20 @@ public class YWPhysicalRect {
 
     public void setHeight(float height) {
         this.height = height;
+    }
+
+    public YWPhysicalRect addPadding(YWPhysicalEdges edges) {
+        return new YWPhysicalRect(
+                y + edges.getTop(),
+                x + edges.getLeft(),
+                width - edges.getHorizontalSum(),
+                height - edges.getVerticalSum());
+    }
+
+    public YWLogicalRect toLogical(YWWritingMode writingMode) {
+        return switch (writingMode) {
+            case HORIZONTAL -> new YWLogicalRect(x, y, width, height);
+            case VERTICAL -> new YWLogicalRect(y, x, height, width);
+        };
     }
 }
