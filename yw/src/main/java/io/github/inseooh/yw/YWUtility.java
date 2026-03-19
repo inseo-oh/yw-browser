@@ -171,6 +171,20 @@ public class YWUtility {
 		return true;
 	}
 
+	public static String removePrefix(String str, String prefix) {
+		if (str.startsWith(prefix)) {
+			return str.substring(prefix.length());
+		}
+		return str;
+	}
+
+	public static String removeSuffix(String str, String suffix) {
+		if (str.endsWith(suffix)) {
+			return str.substring(0, str.lastIndexOf(suffix));
+		}
+		return str;
+	}
+
 	public static float clamp(float val, float min, float max) {
 		return Math.max(min, Math.min(max, val));
 	}
