@@ -1,0 +1,23 @@
+{
+    "name": "yw",
+    "version": "0.0.1",
+    "description": "",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc --watch",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "Oh Inseo",
+    "license": "BSD-3-Clause",
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/node": "^25.5.0",
+        "eslint": "^10.1.0",
+        "globals": "^17.4.0",
+        "typescript": "^5.9.3",
+        "typescript-eslint": "^8.57.2"
+    }
+}
