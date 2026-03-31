@@ -38,6 +38,13 @@ export function toASCIIUppercaseCodePoint(codePoint: number) {
 export function toASCIILowercaseCodePoint(codePoint: number) {
     return !isASCIILowerAlpha(codePoint) ? codePoint : codePoint - 0x41 + 0x61;
 }
+export function toCodePoint(v: string | number): number | undefined {
+    if (typeof v == "string") {
+        return v.codePointAt(0);
+    } else {
+        return v;
+    }
+}
 
 export class TextReader {
     str: string;
@@ -47,16 +54,16 @@ export class TextReader {
         this.str = str;
     }
 
-     isEnd() {
+    isEnd() {
         return this.str.length <= this.cursor;
     }
 
     getNextChar(offset: number = 0) {
         const c = this.str.codePointAt(this.cursor + offset);
         if (c === undefined) {
-            return undefined;
+            return "";
         }
-        return c;
+        return String.fromCodePoint(c)!;
     }
 
     getCurrentChar() {
@@ -65,9 +72,9 @@ export class TextReader {
         }
         const c = this.str.codePointAt(this.cursor - 1);
         if (c === undefined) {
-            return undefined;
+            return "";
         }
-        return c;
+        return String.fromCodePoint(c);
     }
 
     reconsumeChar() {
@@ -93,11 +100,11 @@ export class TextReader {
         const startIdx = this.cursor;
         let len = 0;
         while (len < maxCount) {
-            const cp = this.getNextChar();
-            if (cp === undefined) {
+            const chr = this.getNextChar();
+            if (chr === undefined) {
                 break;
             } else {
-                this.cursor += String.fromCodePoint(cp).length;
+                this.cursor += chr.length;
                 len++;
             }
         }
@@ -106,11 +113,7 @@ export class TextReader {
     }
 
     consumeChar() {
-        const s = this.consumeChars(1);
-        if (s.length === 0) {
-            return undefined;
-        }
-        return s.codePointAt(0);
+        return this.consumeChars(1);
     }
 
     static NO_MATCH_FLAGS = 0;

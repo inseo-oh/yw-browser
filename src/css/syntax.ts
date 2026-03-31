@@ -9,7 +9,7 @@ import IOQueue, {
     decode as encodingDecode,
 } from "../encoding.js";
 import { isSurrogate, isASCIICaseInsensitiveMatch } from "../infra.js";
-import { TextReader } from "../utility.js";
+import { TextReader, toCodePoint } from "../utility.js";
 
 //==============================================================================
 // CSS Syntax Module Level 3 - 3.2.
@@ -319,7 +319,7 @@ class Tokenizer {
 
     consumeWhitespaces() {
         while (!this.tr.isEnd()) {
-            if (!isWhitespace(this.tr.getNextChar())) {
+            if (!isWhitespace(toCodePoint(this.tr.getNextChar()))) {
                 break;
             }
             this.tr.consumeChar();
@@ -334,15 +334,15 @@ class Tokenizer {
     public consumeToken(): Token | undefined {
         this.consumeComments();
         while (true) {
-            const cp = this.tr.consumeChar();
-            if (cp !== undefined && isWhitespace(cp)) {
+            const chr = this.tr.consumeChar();
+            if (chr !== undefined && isWhitespace(toCodePoint(chr))) {
                 this.consumeWhitespaces();
                 return { kind: "whitespace" };
-            } else if (cp === 0x0022) {
-                return this.consumeStringToken(cp);
-            } else if (cp === 0x0023) {
+            } else if (chr === '"') {
+                return this.consumeStringToken(chr);
+            } else if (chr === "#") {
                 if (
-                    isIdentCodePoint(this.tr.getNextChar()) ||
+                    isIdentCodePoint(toCodePoint(this.tr.getNextChar())) ||
                     this.startsWithValidEscape()
                 ) {
                     // S1.
@@ -361,28 +361,28 @@ class Tokenizer {
                 } else {
                     return {
                         kind: "delim",
-                        value: String.fromCodePoint(this.tr.getCurrentChar()!),
+                        value: this.tr.getCurrentChar(),
                     };
                 }
-            } else if (cp === 0x0027) {
-                return this.consumeStringToken(cp);
-            } else if (cp === 0x0028) {
+            } else if (chr === "'") {
+                return this.consumeStringToken(chr);
+            } else if (chr === "(") {
                 return { kind: "(" };
-            } else if (cp === 0x0029) {
+            } else if (chr === ")") {
                 return { kind: ")" };
-            } else if (cp === 0x002b) {
+            } else if (chr === "+") {
                 if (this.startsWithNumber()) {
                     this.tr.reconsumeChar();
                     return this.consumeNumericToken();
                 } else {
                     return {
                         kind: "delim",
-                        value: String.fromCodePoint(this.tr.getCurrentChar()!),
+                        value: this.tr.getCurrentChar(),
                     };
                 }
-            } else if (cp === 0x002c) {
+            } else if (chr === ",") {
                 return { kind: "comma" };
-            } else if (cp === 0x002d) {
+            } else if (chr === "-") {
                 if (this.startsWithNumber()) {
                     this.tr.reconsumeChar();
                     return this.consumeNumericToken();
@@ -394,45 +394,45 @@ class Tokenizer {
                 } else {
                     return {
                         kind: "delim",
-                        value: String.fromCodePoint(this.tr.getCurrentChar()!),
+                        value: this.tr.getCurrentChar(),
                     };
                 }
-            } else if (cp === 0x002e) {
+            } else if (chr === ".") {
                 if (this.startsWithNumber()) {
                     this.tr.reconsumeChar();
                     return this.consumeNumericToken();
                 } else {
                     return {
                         kind: "delim",
-                        value: String.fromCodePoint(this.tr.getCurrentChar()!),
+                        value: this.tr.getCurrentChar(),
                     };
                 }
-            } else if (cp === 0x003a) {
+            } else if (chr === ":") {
                 return { kind: "colon" };
-            } else if (cp === 0x003b) {
+            } else if (chr === ";") {
                 return { kind: "semicolon" };
-            } else if (cp === 0x003c) {
+            } else if (chr === "<") {
                 if (this.tr.startsWith("!--")) {
                     return { kind: "CDO" };
                 } else {
                     return {
                         kind: "delim",
-                        value: String.fromCodePoint(this.tr.getCurrentChar()!),
+                        value: this.tr.getCurrentChar(),
                     };
                 }
-            } else if (cp === 0x0040) {
+            } else if (chr === "@") {
                 if (this.startsWithIdentSequence()) {
                     const value = this.consumeIdentSequence();
                     return { kind: "at-keyword", value };
                 } else {
                     return {
                         kind: "delim",
-                        value: String.fromCodePoint(this.tr.getCurrentChar()!),
+                        value: this.tr.getCurrentChar(),
                     };
                 }
-            } else if (cp === 0x005b) {
+            } else if (chr === "[") {
                 return { kind: "[" };
-            } else if (cp === 0x005c) {
+            } else if (chr === "\\") {
                 if (this.startsWithValidEscape()) {
                     this.tr.reconsumeChar();
                     return this.consumeIdentLikeToken();
@@ -440,27 +440,27 @@ class Tokenizer {
                     // PARSE ERROR
                     return {
                         kind: "delim",
-                        value: String.fromCodePoint(this.tr.getCurrentChar()!),
+                        value: this.tr.getCurrentChar(),
                     };
                 }
-            } else if (cp === 0x005d) {
+            } else if (chr === "]") {
                 return { kind: "]" };
-            } else if (cp === 0x007b) {
+            } else if (chr === "{") {
                 return { kind: "{" };
-            } else if (cp === 0x007d) {
+            } else if (chr === "}") {
                 return { kind: "}" };
-            } else if (isDigit(cp)) {
+            } else if (isDigit(toCodePoint(chr))) {
                 this.tr.reconsumeChar();
                 return this.consumeNumericToken();
-            } else if (isIdentStartCodePoint(cp)) {
+            } else if (isIdentStartCodePoint(toCodePoint(chr))) {
                 this.tr.reconsumeChar();
                 return this.consumeIdentLikeToken();
-            } else if (cp === undefined) {
+            } else if (chr === undefined) {
                 return undefined;
             } else {
                 return {
                     kind: "delim",
-                    value: String.fromCodePoint(this.tr.getCurrentChar()!),
+                    value: this.tr.getCurrentChar(),
                 };
             }
         }
@@ -510,7 +510,7 @@ class Tokenizer {
                 type: type,
                 unit,
             };
-        } else if (this.tr.getNextChar() === 0x0025) {
+        } else if (this.tr.getNextChar() === "%") {
             this.tr.consumeChar();
             return { kind: "percentage", value };
         } else {
@@ -528,26 +528,26 @@ class Tokenizer {
 
         if (
             isASCIICaseInsensitiveMatch(string, "url") &&
-            this.tr.getNextChar() === 0x0028
+            this.tr.getNextChar() === "("
         ) {
             do {
                 this.tr.consumeChar();
             } while (
-                isWhitespace(this.tr.getNextChar()) &&
-                isWhitespace(this.tr.getNextChar(1))
+                isWhitespace(toCodePoint(this.tr.getNextChar())) &&
+                isWhitespace(toCodePoint(this.tr.getNextChar(1)))
             );
             if (
-                this.tr.getNextChar() === 0x0022 ||
-                this.tr.getNextChar() === 0x0027 ||
-                (isWhitespace(this.tr.getNextChar()) &&
-                    (this.tr.getNextChar(1) === 0x0022 ||
-                        this.tr.getNextChar(1) === 0x0027))
+                this.tr.getNextChar() === '"' ||
+                this.tr.getNextChar() === "'" ||
+                (isWhitespace(toCodePoint(this.tr.getNextChar())) &&
+                    (this.tr.getNextChar(1) === '"' ||
+                        this.tr.getNextChar(1) === "'"))
             ) {
                 return { kind: "function", value: string };
             } else {
                 return this.consumeURLToken();
             }
-        } else if (this.tr.getNextChar() === 0x0028) {
+        } else if (this.tr.getNextChar() === "(") {
             this.tr.consumeChar();
             return { kind: "function", value: string };
         }
@@ -559,22 +559,22 @@ class Tokenizer {
     //==========================================================================
 
     // https://www.w3.org/TR/css-syntax-3/#consume-a-string-token
-    consumeStringToken(endingCodePoint: number): Token {
+    consumeStringToken(endingChar: string): Token {
         let value = "";
         while (!this.tr.isEnd()) {
-            const cp = this.tr.consumeChar();
-            if (cp === endingCodePoint) {
+            const chr = this.tr.consumeChar();
+            if (chr === endingChar) {
                 break;
-            } else if (cp === undefined) {
+            } else if (chr === undefined) {
                 // PARSE ERROR: Unexpected EOF
                 break;
-            } else if (isNewline(cp)) {
+            } else if (isNewline(toCodePoint(chr))) {
                 // PARSE ERROR: Unexpected newline
                 this.tr.reconsumeChar();
                 return { kind: "bad-string" };
-            } else if (cp === 0x005c) {
+            } else if (toCodePoint(chr) === 0x005c) {
                 if (this.tr.getNextChar() !== undefined) {
-                    if (isNewline(this.tr.getNextChar())) {
+                    if (isNewline(toCodePoint(this.tr.getNextChar()))) {
                         this.tr.consumeChar();
                     } else {
                         value += String.fromCodePoint(
@@ -583,7 +583,7 @@ class Tokenizer {
                     }
                 }
             } else {
-                value += String.fromCodePoint(cp);
+                value += chr;
             }
         }
         return { kind: "string", value };
@@ -603,16 +603,16 @@ class Tokenizer {
 
         // S3.
         while (true) {
-            const cp = this.tr.consumeChar();
-            if (cp === 0x0029) {
+            const chr = this.tr.consumeChar();
+            if (chr === ")") {
                 return { kind: "url", value };
-            } else if (cp === undefined) {
+            } else if (chr === undefined) {
                 // PARSE ERROR: Unexpected EOF
                 return { kind: "url", value };
-            } else if (isWhitespace(cp)) {
+            } else if (isWhitespace(toCodePoint(chr))) {
                 this.consumeWhitespaces();
                 if (
-                    this.tr.getNextChar() === 0x0029 ||
+                    this.tr.getNextChar() === ")" ||
                     this.tr.getNextChar() === undefined
                 ) {
                     // NOTE: If it was EOF(undefined), this is a PARSE ERROR
@@ -624,14 +624,14 @@ class Tokenizer {
                 }
             }
             if (
-                cp === 0x0022 ||
-                cp === 0x0027 ||
-                cp === 0x0028 ||
-                isNonPrintableCodePoint(cp)
+                chr === '"' ||
+                chr === "'" ||
+                chr === "(" ||
+                isNonPrintableCodePoint(toCodePoint(chr))
             ) {
                 this.consumeRemnantsOfBadUrl();
                 return { kind: "bad-url" };
-            } else if (cp === 0x005c) {
+            } else if (chr === "\\") {
                 if (this.startsWithValidEscape()) {
                     value += String.fromCodePoint(
                         this.consumeEscapedCodePoint()!,
@@ -641,7 +641,7 @@ class Tokenizer {
                     return { kind: "bad-url" };
                 }
             } else {
-                value += String.fromCodePoint(cp);
+                value += chr;
             }
         }
     }
@@ -651,7 +651,7 @@ class Tokenizer {
     //==========================================================================
 
     // https://www.w3.org/TR/css-syntax-3/#consume-an-escaped-code-point
-    consumeEscapedCodePoint() {
+    consumeEscapedCodePoint(): number {
         this.tr.consumeChar();
         let foundHexDigit = false;
         let hexDigitVal = 0;
@@ -662,26 +662,26 @@ class Tokenizer {
             return 0xfffd;
         }
         while (!this.tr.isEnd() && hexDigitCount < 6) {
-            const tempChar = this.tr.getNextChar();
+            const tempCodePoint = toCodePoint(this.tr.getNextChar());
             let digit;
             if (
-                tempChar !== undefined &&
-                isHexDigit(tempChar) &&
-                isDigit(tempChar)
+                tempCodePoint !== undefined &&
+                isHexDigit(tempCodePoint) &&
+                isDigit(tempCodePoint)
             ) {
-                digit = tempChar - 0x0030;
+                digit = tempCodePoint - 0x0030;
             } else if (
-                tempChar !== undefined &&
-                isHexDigit(tempChar) &&
-                isLowercaseLetter(tempChar)
+                tempCodePoint !== undefined &&
+                isHexDigit(tempCodePoint) &&
+                isLowercaseLetter(tempCodePoint)
             ) {
-                digit = tempChar - 0x0061 + 10;
+                digit = tempCodePoint - 0x0061 + 10;
             } else if (
-                tempChar !== undefined &&
-                isHexDigit(tempChar) &&
-                isUppercaseLetter(tempChar)
+                tempCodePoint !== undefined &&
+                isHexDigit(tempCodePoint) &&
+                isUppercaseLetter(tempCodePoint)
             ) {
-                digit = tempChar - 0x0041 + 10;
+                digit = tempCodePoint - 0x0041 + 10;
             } else {
                 break;
             }
@@ -693,7 +693,7 @@ class Tokenizer {
         if (foundHexDigit) {
             return hexDigitVal;
         } else {
-            return this.tr.consumeChar();
+            return this.tr.consumeChar()!.codePointAt(0)!;
         }
     }
 
@@ -741,9 +741,9 @@ class Tokenizer {
     consumeIdentSequence() {
         let result = "";
         while (true) {
-            const cp = this.tr.consumeChar();
-            if (cp !== undefined && isIdentCodePoint(cp)) {
-                result += String.fromCodePoint(cp);
+            const chr = this.tr.consumeChar();
+            if (chr !== undefined && isIdentCodePoint(toCodePoint(chr))) {
+                result += chr;
             } else if (this.startsWithValidEscape()) {
                 result += String.fromCodePoint(this.consumeEscapedCodePoint()!);
             } else {
@@ -764,22 +764,19 @@ class Tokenizer {
         let repr = "";
 
         // S2.
-        if (
-            this.tr.getNextChar() === 0x002b ||
-            this.tr.getNextChar() === 0x002d
-        ) {
-            repr += String.fromCodePoint(this.tr.consumeChar()!);
+        if (this.tr.getNextChar() === "+" || this.tr.getNextChar() === "-") {
+            repr += this.tr.consumeChar();
         }
 
         // S3.
-        while (isDigit(this.tr.getNextChar())) {
-            repr += String.fromCodePoint(this.tr.consumeChar()!);
+        while (isDigit(toCodePoint(this.tr.getNextChar()))) {
+            repr += this.tr.consumeChar();
         }
 
         // S4.
         if (
-            this.tr.getNextChar() === 0x002e &&
-            isDigit(this.tr.getNextChar(1))
+            this.tr.getNextChar() === "." &&
+            isDigit(toCodePoint(this.tr.getNextChar(1)))
         ) {
             // S4-1.
             const chars = this.tr.consumeChars(2);
@@ -791,21 +788,20 @@ class Tokenizer {
             type = "number";
 
             // S4-4.
-            while (isDigit(this.tr.getNextChar())) {
-                repr += String.fromCodePoint(this.tr.consumeChar()!);
+            while (isDigit(toCodePoint(this.tr.getNextChar()))) {
+                repr += this.tr.consumeChar();
             }
         }
 
         // S5.
         if (
-            (this.tr.getNextChar() === 0x0065 ||
-                this.tr.getNextChar() === 0x0045) &&
-            (((this.tr.getNextChar(1) === 0x002b ||
-                this.tr.getNextChar() === 0x002d) &&
-                isDigit(this.tr.getNextChar(2))) ||
-                isDigit(this.tr.getNextChar(1)))
+            (this.tr.getNextChar() === "e" || this.tr.getNextChar() === "E") &&
+            (((this.tr.getNextChar(1) === "+" ||
+                this.tr.getNextChar() === "-") &&
+                isDigit(toCodePoint(this.tr.getNextChar(2)))) ||
+                isDigit(toCodePoint(this.tr.getNextChar(1))))
         ) {
-            const areTwoChars = isDigit(this.tr.getNextChar(1));
+            const areTwoChars = isDigit(toCodePoint(this.tr.getNextChar(1)));
             let chars;
 
             // S5-1.
@@ -822,8 +818,8 @@ class Tokenizer {
             type = "number";
 
             // S5-4.
-            while (isDigit(this.tr.getNextChar())) {
-                repr += String.fromCodePoint(this.tr.consumeChar()!);
+            while (isDigit(toCodePoint(this.tr.getNextChar()))) {
+                repr += this.tr.consumeChar();
             }
         }
 
@@ -841,8 +837,8 @@ class Tokenizer {
     // https://www.w3.org/TR/css-syntax-3/#consume-the-remnants-of-a-bad-url
     consumeRemnantsOfBadUrl() {
         while (true) {
-            const cp = this.tr.consumeChar();
-            if (cp === 0x0029 || cp === undefined) {
+            const chr = this.tr.consumeChar();
+            if (chr === ")" || chr === undefined) {
                 return;
             } else if (this.startsWithValidEscape()) {
                 this.consumeEscapedCodePoint();
@@ -869,15 +865,15 @@ function twoCodePointsAreValidEscape(s: string) {
 
 // https://www.w3.org/TR/css-syntax-3/#check-if-three-code-points-would-start-an-ident-sequence
 function threeCodePointsWouldStartIdentSequence(s: string) {
-    if (s.length !== 0 && s.codePointAt(0) === 0x002d) {
+    if (s.length !== 0 && s.charAt(0) === "-") {
         return (
             (2 <= s.length && isIdentCodePoint(s.codePointAt(1))) ||
-            s.codePointAt(1) === 0x002d ||
+            s.charAt(1) === "-" ||
             (3 <= s.length && twoCodePointsAreValidEscape(s.substring(1)))
         );
     } else if (s.length !== 0 && isIdentStartCodePoint(s.codePointAt(0))) {
         return true;
-    } else if (s.length !== 0 && s.codePointAt(0) === 0x005c) {
+    } else if (s.length !== 0 && s === "\\") {
         return twoCodePointsAreValidEscape(s);
     }
     return false;
@@ -889,17 +885,12 @@ function threeCodePointsWouldStartIdentSequence(s: string) {
 
 // https://www.w3.org/TR/css-syntax-3/#check-if-three-code-points-would-start-a-number
 function threeCodePointsWouldStartNumber(s: string) {
-    if (
-        s.length !== 0 &&
-        (s.codePointAt(0) === 0x002b || s.codePointAt(0) === 0x002d)
-    ) {
+    if (s.length !== 0 && (s.charAt(0) === "+" || s.charAt(0) === "-")) {
         return (
             (2 <= s.length && isDigit(s.codePointAt(1))) ||
-            (3 <= s.length &&
-                s.codePointAt(1) === 0x002e &&
-                isDigit(s.codePointAt(2)))
+            (3 <= s.length && s.charAt(1) === "." && isDigit(s.codePointAt(2)))
         );
-    } else if (s.length !== 0 && s.codePointAt(0) === 0x002e) {
+    } else if (s.length !== 0 && s.charAt(0) === ".") {
         return 2 <= s.length && isDigit(s.codePointAt(1));
     } else {
         return s.length !== 0 && isDigit(s.codePointAt(0));

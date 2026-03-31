@@ -102,54 +102,67 @@ export function isASCIIWhitespace(codePoint: number) {
 }
 
 // https://infra.spec.whatwg.org/#c0-control
-export function isC0Control(codePoint: number) {
-    return 0x0000 <= codePoint && codePoint <= 0x001f;
+export function isC0Control(codePoint: number | undefined) {
+    return (
+        codePoint !== undefined && 0x0000 <= codePoint && codePoint <= 0x001f
+    );
 }
 
 // https://infra.spec.whatwg.org/#c0-control-or-space
-export function isC0ControlOrSpace(codePoint: number) {
+export function isC0ControlOrSpace(codePoint: number | undefined) {
     return isC0Control(codePoint) || codePoint === 0x0020;
 }
 
 // https://infra.spec.whatwg.org/#control
-export function is_control(codePoint: number) {
+export function is_control(codePoint: number | undefined) {
     return (
-        isC0Control(codePoint) || (0x007f <= codePoint && codePoint <= 0x009f)
+        codePoint !== undefined &&
+        (isC0Control(codePoint) || (0x007f <= codePoint && codePoint <= 0x009f))
     );
 }
 
 // https://infra.spec.whatwg.org/#ascii-digit
-export function isASCIIDigit(codePoint: number) {
-    return 0x0030 <= codePoint && codePoint <= 0x0039;
+export function isASCIIDigit(codePoint: number | undefined) {
+    return (
+        codePoint !== undefined && 0x0030 <= codePoint && codePoint <= 0x0039
+    );
 }
 
 // https://infra.spec.whatwg.org/#ascii-upper-hex-digit
-export function isASCIIUpperHexDigit(codePoint: number) {
-    return 0x0041 <= codePoint && codePoint <= 0x0046;
+export function isASCIIUpperHexDigit(codePoint: number | undefined) {
+    return (
+        codePoint !== undefined && 0x0041 <= codePoint && codePoint <= 0x0046
+    );
 }
 
 // https://infra.spec.whatwg.org/#ascii-lower-hex-digit
-export function isASCIILowerHexDigit(codePoint: number) {
-    return 0x0061 <= codePoint && codePoint <= 0x0066;
+export function isASCIILowerHexDigit(codePoint: number | undefined) {
+    return (
+        codePoint !== undefined && 0x0061 <= codePoint && codePoint <= 0x0066
+    );
 }
 
 // https://infra.spec.whatwg.org/#ascii-hex-digit
-export function is_ascii_hex_digit(codePoint: number) {
+export function is_ascii_hex_digit(codePoint: number | undefined) {
     return isASCIIUpperHexDigit(codePoint) || isASCIILowerHexDigit(codePoint);
 }
 
 // https://infra.spec.whatwg.org/#ascii-upper-alpha
-export function isASCIIUpperAlpha(codePoint: number) {
-    return 0x0041 <= codePoint && codePoint <= 0x005a;
+export function isASCIIUpperAlpha(codePoint: number | undefined) {
+    return (
+        codePoint !== undefined && 0x0041 <= codePoint && codePoint <= 0x005a
+    );
 }
 
 // https://infra.spec.whatwg.org/#ascii-lower-alpha
-export function isASCIILowerAlpha(codePoint: number) {
-    return 0x0061 <= codePoint && codePoint <= 0x007a;
+export function isASCIILowerAlpha(codePoint: number | undefined) {
+    return (
+        codePoint !== undefined && 0x0061 <= codePoint && codePoint <= 0x007a
+    );
 }
 
 // https://infra.spec.whatwg.org/#ascii-alpha
-export function isASCIIAlpha(codePoint: number) {
+export function isASCIIAlpha(codePoint: number | undefined) {
     return isASCIIUpperAlpha(codePoint) || isASCIILowerAlpha(codePoint);
 }
 
