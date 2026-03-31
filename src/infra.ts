@@ -183,3 +183,25 @@ export function toASCIIUppercase(s: string) {
 export function isASCIICaseInsensitiveMatch(a: string, b: string) {
     return toASCIILowercase(a) === toASCIILowercase(b);
 }
+
+//==========================================================================
+// Infra Standard - 8.
+//==========================================================================
+
+// https://infra.spec.whatwg.org/#html-namespace
+export const HTML_NAMESPACE = "http://www.w3.org/1999/xhtml";
+
+// https://infra.spec.whatwg.org/#mathml-namespace
+export const MATHML_NAMESPACE = "http://www.w3.org/1998/Math/MathML";
+
+// https://infra.spec.whatwg.org/#svg-namespace
+export const SVG_NAMESPACE = "http://www.w3.org/2000/svg";
+
+// https://infra.spec.whatwg.org/#xlink-namespace
+export const XLINK_NAMESPACE = "http://www.w3.org/1999/xlink";
+
+// https://infra.spec.whatwg.org/#xml-namespace
+export const XML_NAMESPACE = "http://www.w3.org/XML/1998/namespace";
+
+// https://infra.spec.whatwg.org/#xmlns-namespace
+export const XMLNS_NAMESPACE = "http://www.w3.org/2000/xmlns/";
