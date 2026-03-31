@@ -455,7 +455,7 @@ class Tokenizer {
             } else if (isIdentStartCodePoint(toCodePoint(chr))) {
                 this.tr.reconsumeChar();
                 return this.consumeIdentLikeToken();
-            } else if (chr === undefined) {
+            } else if (chr === "") {
                 return undefined;
             } else {
                 return {
@@ -565,7 +565,7 @@ class Tokenizer {
             const chr = this.tr.consumeChar();
             if (chr === endingChar) {
                 break;
-            } else if (chr === undefined) {
+            } else if (chr === "") {
                 // PARSE ERROR: Unexpected EOF
                 break;
             } else if (isNewline(toCodePoint(chr))) {
@@ -606,14 +606,14 @@ class Tokenizer {
             const chr = this.tr.consumeChar();
             if (chr === ")") {
                 return { kind: "url", value };
-            } else if (chr === undefined) {
+            } else if (chr === "") {
                 // PARSE ERROR: Unexpected EOF
                 return { kind: "url", value };
             } else if (isWhitespace(toCodePoint(chr))) {
                 this.consumeWhitespaces();
                 if (
                     this.tr.getNextChar() === ")" ||
-                    this.tr.getNextChar() === undefined
+                    this.tr.getNextChar() === ""
                 ) {
                     // NOTE: If it was EOF(undefined), this is a PARSE ERROR
                     this.tr.consumeChar();
@@ -838,7 +838,7 @@ class Tokenizer {
     consumeRemnantsOfBadUrl() {
         while (true) {
             const chr = this.tr.consumeChar();
-            if (chr === ")" || chr === undefined) {
+            if (chr === ")" || chr === "") {
                 return;
             } else if (this.startsWithValidEscape()) {
                 this.consumeEscapedCodePoint();
