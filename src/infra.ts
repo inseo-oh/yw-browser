@@ -166,6 +166,11 @@ export function isASCIIAlpha(codePoint: number | undefined) {
     return isASCIIUpperAlpha(codePoint) || isASCIILowerAlpha(codePoint);
 }
 
+// https://infra.spec.whatwg.org/#ascii-alphanumeric
+export function isASCIIAlphanumeric(codePoint: number | undefined) {
+    return isASCIIDigit(codePoint) || isASCIIAlpha(codePoint);
+}
+
 //==========================================================================
 // Infra Standard - 4.7.
 //==========================================================================
