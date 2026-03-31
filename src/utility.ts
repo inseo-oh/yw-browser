@@ -33,10 +33,10 @@ export function removeLeadingAndTrailingWhitespace(s: string) {
     return removeTrailingWhitespace(removeLeadingWhitespace(s));
 }
 export function toASCIIUppercaseCodePoint(codePoint: number) {
-    return !isASCIIUpperAlpha(codePoint) ? codePoint : codePoint - 0x61 + 0x41;
+    return !isASCIILowerAlpha(codePoint) ? codePoint : codePoint - 0x61 + 0x41;
 }
 export function toASCIILowercaseCodePoint(codePoint: number) {
-    return !isASCIILowerAlpha(codePoint) ? codePoint : codePoint - 0x41 + 0x61;
+    return !isASCIIUpperAlpha(codePoint) ? codePoint : codePoint - 0x41 + 0x61;
 }
 export function toCodePoint(v: string | number): number | undefined {
     if (typeof v == "string") {
