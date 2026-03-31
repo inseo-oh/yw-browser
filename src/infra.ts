@@ -114,7 +114,7 @@ export function isC0ControlOrSpace(codePoint: number | undefined) {
 }
 
 // https://infra.spec.whatwg.org/#control
-export function is_control(codePoint: number | undefined) {
+export function isControl(codePoint: number | undefined) {
     return (
         codePoint !== undefined &&
         (isC0Control(codePoint) || (0x007f <= codePoint && codePoint <= 0x009f))
@@ -143,7 +143,7 @@ export function isASCIILowerHexDigit(codePoint: number | undefined) {
 }
 
 // https://infra.spec.whatwg.org/#ascii-hex-digit
-export function is_ascii_hex_digit(codePoint: number | undefined) {
+export function isASCIIHexDigit(codePoint: number | undefined) {
     return isASCIIUpperHexDigit(codePoint) || isASCIILowerHexDigit(codePoint);
 }
 
