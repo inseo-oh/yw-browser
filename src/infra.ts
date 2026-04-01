@@ -11,27 +11,31 @@ import {
 //==========================================================================
 
 // https://infra.spec.whatwg.org/#leading-surrogate
-export function isLeadingSurrogate(codePoint: number) {
-    return 0xd800 <= codePoint && codePoint <= 0xdbff;
+export function isLeadingSurrogate(codePoint: number | undefined) {
+    return (
+        codePoint !== undefined && 0xd800 <= codePoint && codePoint <= 0xdbff
+    );
 }
 
 // https://infra.spec.whatwg.org/#trailing-surrogate
-export function isTrailingSurrogate(codePoint: number) {
-    return 0xdc00 <= codePoint && codePoint <= 0xdfff;
+export function isTrailingSurrogate(codePoint: number | undefined) {
+    return (
+        codePoint !== undefined && 0xdc00 <= codePoint && codePoint <= 0xdfff
+    );
 }
 
 // https://infra.spec.whatwg.org/#surrogate
-export function isSurrogate(codePoint: number) {
+export function isSurrogate(codePoint: number | undefined) {
     return isLeadingSurrogate(codePoint) || isTrailingSurrogate(codePoint);
 }
 
 // https://infra.spec.whatwg.org/#scalar-value
-export function is_scalar(codePoint: number) {
+export function is_scalar(codePoint: number | undefined) {
     return !isSurrogate(codePoint);
 }
 
 // https://infra.spec.whatwg.org/#noncharacter
-export function isNoncharacter(codePoint: number) {
+export function isNoncharacter(codePoint: number | undefined) {
     switch (codePoint) {
         case 0xfffe:
         case 0xffff:
@@ -73,12 +77,14 @@ export function isNoncharacter(codePoint: number) {
 }
 
 // https://infra.spec.whatwg.org/#ascii-code-point
-export function isASCIICodePoint(codePoint: number) {
-    return 0x0000 <= codePoint && codePoint <= 0x007f;
+export function isASCIICodePoint(codePoint: number | undefined) {
+    return (
+        codePoint !== undefined && 0x0000 <= codePoint && codePoint <= 0x007f
+    );
 }
 
 // https://infra.spec.whatwg.org/#ascii-tab-or-newline
-export function isASCIITabOrNewline(codePoint: number) {
+export function isASCIITabOrNewline(codePoint: number | undefined) {
     switch (codePoint) {
         case 0x0009:
         case 0x000a:
@@ -89,7 +95,7 @@ export function isASCIITabOrNewline(codePoint: number) {
 }
 
 // https://infra.spec.whatwg.org/#ascii-whitespace
-export function isASCIIWhitespace(codePoint: number) {
+export function isASCIIWhitespace(codePoint: number | undefined) {
     switch (codePoint) {
         case 0x0009:
         case 0x000a:
