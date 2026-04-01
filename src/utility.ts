@@ -5,6 +5,7 @@ import {
     isASCIIWhitespace,
     isASCIIUpperAlpha,
     isASCIILowerAlpha,
+    toASCIILowercase,
 } from "./infra.js";
 
 export function removeLeadingWhitespace(s: string) {
@@ -37,6 +38,9 @@ export function toASCIIUppercaseCodePoint(codePoint: number) {
 }
 export function toASCIILowercaseCodePoint(codePoint: number) {
     return !isASCIIUpperAlpha(codePoint) ? codePoint : codePoint - 0x41 + 0x61;
+}
+export function hasPrefixASCIICaseInsensitive(s: string, prefix: string) {
+    return toASCIILowercase(s).startsWith(toASCIILowercase(prefix));
 }
 export function toCodePoint(v: string | number): number | undefined {
     if (typeof v == "string") {
