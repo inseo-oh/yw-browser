@@ -673,9 +673,9 @@ export class Element extends Node {
      *                  namespace will not be matched, and if it's non-null,
      *                  attributes without namespace will not be matched.
      * @param localName Local name of the attribute.
-     * @return Value of the attribute, or null if not found.
+     * @return Value of the attribute, or undefined if not found.
      */
-    attribute(namespace: string | null, localName: string): string | null {
+    attribute(namespace: string | null, localName: string): string | undefined {
         for (const attr of this.attributeList) {
             if (
                 ((namespace == null && attr.namespace == null) ||
@@ -685,7 +685,7 @@ export class Element extends Node {
                 return attr.value;
             }
         }
-        return null;
+        return undefined;
     }
 
     //==========================================================================
