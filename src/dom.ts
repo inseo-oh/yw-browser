@@ -7,6 +7,7 @@ import {
     CustomElementRegistry,
     tryUpgradeElement,
 } from "./html/custom_elements.js";
+import { type TokenFor } from "./html/parsing/token.js";
 
 //==============================================================================
 // DOM Standard - 4.2. and 4.4.
@@ -596,7 +597,7 @@ export class ShadowRoot extends DocumentFragment {
 
 // https://dom.spec.whatwg.org/#concept-element
 export class Element extends Node {
-    tagToken: null = null; // STUB
+    tagToken: TokenFor<"tag">; // STUB
     cssPropertySet: null = null; // STUB
 
     constructor(
@@ -614,6 +615,7 @@ export class Element extends Node {
                 | "custom";
             customElementDefinition: null;
             isValue: string | null;
+            tagToken: TokenFor<"tag">;
         },
     ) {
         super(nodeDocument);
@@ -624,6 +626,7 @@ export class Element extends Node {
         this.customElementState = args.customElementState;
         this.customElementDefinition = args.customElementDefinition;
         this.isValue = args.isValue;
+        this.tagToken = args.tagToken
     }
 
     isInside(namespace: string, localName: string) {
