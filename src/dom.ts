@@ -526,6 +526,12 @@ export class Document extends Node {
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parser-cannot-change-the-mode-flag
     parserCannotChangeMode: boolean = false;
+
+    constructor() {
+        // Document is special: the node document of Document is itself.
+        super(undefined!);
+        this.nodeDocument = this;
+    }
 }
 
 // https://dom.spec.whatwg.org/#is-a-global-custom-element-registry
