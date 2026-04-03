@@ -1828,8 +1828,6 @@ export class TokenStream {
         return this.consumeDeclarationValueImpl(true);
     }
 
-    static undefined = 0;
-
     // https://www.w3.org/TR/css-values-4/#mult-comma
     parseCommaSeparatedRepeation<T>(
         maxRepeats: number | undefined,
