@@ -173,10 +173,10 @@ export class Node {
     //==========================================================================
 
     // https://dom.spec.whatwg.org/#concept-node-post-connection-ext
-    runPostConnectionSteps() {}
+    onRunPostConnectionSteps() {}
 
     // https://dom.spec.whatwg.org/#concept-node-children-changed-ext
-    runChildrenChangedSteps() {}
+    onRunChildrenChangedSteps() {}
 
     // https://dom.spec.whatwg.org/#concept-node-insert
     insert(parent: Node, beforeChild: Node | null, suppressObservers: boolean) {
@@ -257,7 +257,7 @@ export class Node {
             // S7-7.
             for (const inclusiveDescendant of node.shadowIncludingDescendants()) {
                 // S7-7-1.
-                inclusiveDescendant.runInsertionSteps(this);
+                inclusiveDescendant.onRunInsertionSteps(this);
                 if (inclusiveDescendant instanceof Element) {
                     const inclusiveDescendantElem = inclusiveDescendant;
                     // S7-7-2.
@@ -296,7 +296,7 @@ export class Node {
         }
 
         // S9.
-        parent.runChildrenChangedSteps();
+        parent.onRunChildrenChangedSteps();
 
         // S10.
         const staticNodeList = [];
@@ -309,7 +309,7 @@ export class Node {
         // S12.
         for (const node of staticNodeList) {
             if (node.isConnected()) {
-                node.runPostConnectionSteps();
+                node.onRunPostConnectionSteps();
             }
         }
     }
@@ -320,7 +320,7 @@ export class Node {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    runInsertionSteps(_insertedNode: Node) {}
+    onRunInsertionSteps(_insertedNode: Node) {}
 
     //==========================================================================
     // DOM Standard - 4.4.
@@ -334,7 +334,7 @@ export class Node {
     //==========================================================================
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    runAdoptingSteps(_oldDocument: Document) {}
+    onRunAdoptingSteps(_oldDocument: Document) {}
 
     // https://dom.spec.whatwg.org/#concept-node-adopt
     adoptNodeInto(document: Document) {
@@ -401,7 +401,7 @@ export class Node {
             }
             // S3-3.
             for (const inclusiveDescendant of this.shadowIncludingDescendants()) {
-                inclusiveDescendant.runAdoptingSteps(oldDocument);
+                inclusiveDescendant.onRunAdoptingSteps(oldDocument);
             }
         }
     }
@@ -606,7 +606,7 @@ export class Element extends Node {
     tagToken: TokenFor<"tag">; // STUB
     cssPropertySet: null = null; // STUB
 
-    poppedFromStackOfOpenElements() {}
+    onPoppedFromStackOfOpenElements() {}
     onRunResetAlgorithm() {}
 
     constructor(
