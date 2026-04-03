@@ -606,6 +606,9 @@ export class Element extends Node {
     tagToken: TokenFor<"tag">; // STUB
     cssPropertySet: null = null; // STUB
 
+    poppedFromStackOfOpenElements() {}
+    onRunResetAlgorithm() {}
+
     constructor(
         nodeDocument: Document,
         args: {
@@ -632,7 +635,7 @@ export class Element extends Node {
         this.customElementState = args.customElementState;
         this.customElementDefinition = args.customElementDefinition;
         this.isValue = args.isValue;
-        this.tagToken = args.tagToken
+        this.tagToken = args.tagToken;
     }
 
     isInside(namespace: string, localName: string) {
