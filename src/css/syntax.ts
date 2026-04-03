@@ -331,7 +331,7 @@ class Tokenizer {
     //==========================================================================
 
     // https://www.w3.org/TR/css-syntax-3/#consume-token
-    public consumeToken(): Token | undefined {
+    consumeToken(): Token | undefined {
         this.consumeComments();
         while (true) {
             const chr = this.tr.consumeChar();
