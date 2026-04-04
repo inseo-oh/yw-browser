@@ -5,9 +5,81 @@
 import { UTF8_ENCODING, type Encoding } from "./encoding.js";
 import {
     CustomElementRegistry,
+    isValidCustomElementName,
+    lookupCustomElementDefinition,
     tryUpgradeElement,
 } from "./html/custom_elements.js";
+import { HTMLElement } from "./html/elements.js";
 import { type TokenFor } from "./html/parsing/token.js";
+import {
+    HTML_NAMESPACE,
+    isASCIIAlpha,
+    isASCIIDigit,
+    isASCIIWhitespace,
+    toASCIILowercase,
+} from "./infra.js";
+
+//==============================================================================
+// DOM Standard - 1.4.
+//==============================================================================
+
+// https://dom.spec.whatwg.org/#valid-element-local-name
+export function isValidElementLocalName(name: string) {
+    // S1.
+    if (name.length === 0) {
+        return false;
+    }
+
+    // S2.
+    const firstCodePoint = name.codePointAt(0);
+    if (isASCIIAlpha(firstCodePoint)) {
+        // S2-1.
+        for (let i = 0; i < name.length; i++) {
+            const cp = name.codePointAt(i);
+            if (
+                isASCIIWhitespace(cp) ||
+                cp === 0x000 ||
+                cp === 0x002f ||
+                cp === 0x003e
+            ) {
+                return false;
+            }
+        }
+
+        // S2-2.
+        return true;
+    }
+
+    // S3.
+    if (
+        firstCodePoint !== 0x003a &&
+        firstCodePoint !== 0x005f &&
+        (firstCodePoint === undefined ||
+            firstCodePoint < 0x0080 ||
+            0x10ffff < firstCodePoint)
+    ) {
+        return false;
+    }
+
+    // S4.
+    for (let i = 1; i < name.length; i++) {
+        const cp = name.codePointAt(i);
+        if (
+            !isASCIIAlpha(cp) &&
+            !isASCIIDigit(cp) &&
+            cp !== 0x002d &&
+            cp !== 0x002e &&
+            cp !== 0x003a &&
+            cp !== 0x005f &&
+            (cp === undefined || cp < 0x0080 || 0x10ffff < cp)
+        ) {
+            return false;
+        }
+    }
+
+    // S5.
+    return true;
+}
 
 //==============================================================================
 // DOM Standard - 4.2. and 4.4.
@@ -534,6 +606,27 @@ export class Document extends Node {
     }
 }
 
+type ElementInterface = (
+    nodeDocument: Document,
+    args: ElementConstructionArgs,
+) => Element;
+function elementInterfaceFor(
+    namespace: string | null,
+    localName: string,
+): ElementInterface {
+    switch (namespace) {
+        case HTML_NAMESPACE:
+            switch (toASCIILowercase(localName)) {
+                case "html":
+                    return (n, a) => new HTMLElement(n, a);
+                default:
+                    return (n, a) => new Element(n, a);
+            }
+        default:
+            return (n, a) => new Element(n, a);
+    }
+}
+
 // https://dom.spec.whatwg.org/#is-a-global-custom-element-registry
 export function isGlobalCustomElementRegistry(
     registry: CustomElementRegistry | null,
@@ -601,6 +694,22 @@ export class ShadowRoot extends DocumentFragment {
 // DOM Standard - 4.9.
 //==============================================================================
 
+export type ElementConstructionArgs = {
+    namespace: string | null;
+    namespacePrefix: string | null;
+    localName: string;
+    customElementRegistry: CustomElementRegistry | null;
+    customElementState:
+        | "undefined"
+        | "failed"
+        | "uncustomized"
+        | "precustomized"
+        | "custom";
+    customElementDefinition: null;
+    isValue: string | null;
+    tagToken: TokenFor<"tag">;
+};
+
 // https://dom.spec.whatwg.org/#concept-element
 export class Element extends Node {
     tagToken: TokenFor<"tag">; // STUB
@@ -609,24 +718,10 @@ export class Element extends Node {
     onPoppedFromStackOfOpenElements() {}
     onRunResetAlgorithm() {}
 
-    constructor(
-        nodeDocument: Document,
-        args: {
-            namespace: string | null;
-            namespacePrefix: string | null;
-            localName: string;
-            customElementRegistry: CustomElementRegistry | null;
-            customElementState:
-                | "undefined"
-                | "failed"
-                | "uncustomized"
-                | "precustomized"
-                | "custom";
-            customElementDefinition: null;
-            isValue: string | null;
-            tagToken: TokenFor<"tag">;
-        },
-    ) {
+    /**
+     * Do NOT use this constructor unless you need to.
+     */
+    constructor(nodeDocument: Document, args: ElementConstructionArgs) {
         super(nodeDocument);
         this.namespace = args.namespace;
         this.namespacePrefix = args.namespacePrefix;
@@ -749,6 +844,112 @@ export class Element extends Node {
     // https://dom.spec.whatwg.org/#element-shadow-host
     isShadowHost() {
         return this.shadowRoot !== null;
+    }
+
+    // https://dom.spec.whatwg.org/#concept-create-element
+    static create(
+        document: Document,
+        localName: string,
+        namespace: string | null,
+        tagToken: TokenFor<"tag">,
+        prefix: string | null = null,
+        is: string | null = null,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        _synchronousCustomElements: boolean = false,
+        registry: "default" | null | CustomElementRegistry = "default",
+    ) {
+        // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.04.)
+
+        // S1.
+        let result;
+
+        // S2.
+        if (registry === "default") {
+            registry = document.lookupCustomElementRegistry();
+        }
+
+        // S3.
+        const definition = lookupCustomElementDefinition(
+            registry,
+            namespace,
+            localName,
+            is,
+        );
+
+        // S4.
+        if (definition !== null && definition.name !== definition.localName) {
+            // TODO: S4-1. ~ S4-4.
+            throw new Error("TODO");
+        }
+
+        // S5.
+        else if (definition !== null) {
+            // TODO: S5-1. ~ S5-2.
+            throw new Error("TODO");
+        }
+
+        // S6.
+        else {
+            // S6-1.
+            const interfce = elementInterfaceFor(namespace, localName);
+
+            // S6-2.
+            result = Element.createInternal(
+                document,
+                interfce,
+                localName,
+                namespace,
+                prefix,
+                "uncustomized",
+                is,
+                registry,
+                tagToken,
+            );
+
+            // S6-3.
+            if (
+                namespace === HTML_NAMESPACE &&
+                (isValidCustomElementName(localName) || is !== null)
+            ) {
+                result.customElementState = "undefined";
+            }
+
+            // S7.
+            return result;
+        }
+    }
+
+    // https://dom.spec.whatwg.org/#create-an-element-internal
+    static createInternal(
+        document: Document,
+        interfce: ElementInterface,
+        localName: string,
+        namespace: string | null,
+        prefix: string | null,
+        state: Element["customElementState"],
+        is: string | null,
+        registry: null | CustomElementRegistry,
+        tagToken: TokenFor<"tag">,
+    ) {
+        // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.04.)
+
+        // S1.
+        const element = interfce(document, {
+            namespace,
+            namespacePrefix: prefix,
+            localName,
+            customElementRegistry: registry,
+            customElementState: state,
+            customElementDefinition: null,
+            isValue: is,
+            tagToken,
+        });
+
+        // S2.
+        console.assert(element.attributeList.length === 0);
+
+        // S3.
+        return element;
     }
 
     // https://dom.spec.whatwg.org/#concept-element-attribute
