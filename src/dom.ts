@@ -847,7 +847,14 @@ export class Element extends Node {
         document: Document,
         localName: string,
         namespace: string | null,
-        tagToken: TokenFor<"tag">,
+        tagToken: TokenFor<"tag"> = {
+            kind: "tag",
+            name: localName,
+            attributes: [],
+            type: "start",
+            isSelfClosing: false,
+            selfClosingAcknowledged: false,
+        },
         prefix: string | null = null,
         is: string | null = null,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
