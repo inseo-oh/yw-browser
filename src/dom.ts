@@ -9,14 +9,13 @@ import {
     lookupCustomElementDefinition,
     tryUpgradeElement,
 } from "./html/custom_elements.js";
-import { HTMLElement } from "./html/elements.js";
+import { elementInterfaceForHTML } from "./html/elements.js";
 import { type TokenFor } from "./html/parsing/token.js";
 import {
     HTML_NAMESPACE,
     isASCIIAlpha,
     isASCIIDigit,
     isASCIIWhitespace,
-    toASCIILowercase,
 } from "./infra.js";
 
 //==============================================================================
@@ -606,22 +605,19 @@ export class Document extends Node {
     }
 }
 
-type ElementInterface = (
+export type ElementInterface = (
     nodeDocument: Document,
     args: ElementConstructionArgs,
 ) => Element;
+
+// https://dom.spec.whatwg.org/#concept-element-interface
 function elementInterfaceFor(
     namespace: string | null,
     localName: string,
 ): ElementInterface {
     switch (namespace) {
         case HTML_NAMESPACE:
-            switch (toASCIILowercase(localName)) {
-                case "html":
-                    return (n, a) => new HTMLElement(n, a);
-                default:
-                    return (n, a) => new Element(n, a);
-            }
+            return elementInterfaceForHTML(localName);
         default:
             return (n, a) => new Element(n, a);
     }
