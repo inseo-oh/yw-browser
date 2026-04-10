@@ -72,6 +72,89 @@ type State =
     | "Decimal character reference"
     | "Numeric character reference end";
 
+interface TokenBuilder {
+    build(): Token;
+}
+
+class DOCTYPETokenBuilder implements TokenBuilder {
+    name: string | null = null;
+    publicID: string | null = null;
+    systemID: string | null = null;
+    forceQuirks = false;
+
+    build(): Token {
+        return {
+            kind: "doctype",
+            name: this.name,
+            publicID: this.publicID,
+            systemID: this.systemID,
+            forceQuirks: this.forceQuirks,
+        };
+    }
+}
+class TagTokenBuilder implements TokenBuilder {
+    name: string;
+    type: "start" | "end";
+    // https://html.spec.whatwg.org/multipage/parsing.html#self-closing-flag
+    isSelfClosing: boolean = false;
+    attributes: {
+        localName: string;
+        value: string;
+    }[] = [];
+    attributeIndicesToRemove: number[] = [];
+
+    constructor(name: string, type: "start" | "end") {
+        this.name = name;
+        this.type = type;
+    }
+    build(): Token {
+        return {
+            kind: "tag",
+            name: this.name,
+            type: this.type,
+            isSelfClosing: this.isSelfClosing,
+            attributes: this.attributes
+                .filter((attr, idx) =>
+                    this.attributeIndicesToRemove.includes(idx),
+                )
+                .map(({ localName, value }) => ({
+                    localName,
+                    value,
+                    namespace: null,
+                    namespacePrefix: null,
+                })),
+            selfClosingAcknowledged: false,
+        };
+    }
+}
+class CommentTokenBuilder implements TokenBuilder {
+    data: string;
+
+    constructor(data: string) {
+        this.data = data;
+    }
+
+    build(): Token {
+        return { kind: "comment", data: this.data };
+    }
+}
+class CharacterTokenBuilder implements TokenBuilder {
+    data: string;
+
+    constructor(data: string) {
+        this.data = data;
+    }
+
+    build(): Token {
+        return { kind: "character", data: this.data };
+    }
+}
+class EOFTokenBuilder implements TokenBuilder {
+    build(): Token {
+        return { kind: "eof" };
+    }
+}
+
 export type Token =
     | { kind: "eof" }
     | { kind: "character"; data: string }
@@ -93,55 +176,13 @@ export type Token =
               namespace: string | null;
               namespacePrefix: string | null;
           }[];
-          isEnd: boolean;
+          type: "start" | "end";
           // https://html.spec.whatwg.org/multipage/parsing.html#self-closing-flag
           isSelfClosing: boolean;
-          attributeIndicesToRemove: number[];
+          selfClosingAcknowledged: boolean;
       };
 
-export function makeToken<K extends Token["kind"]>(
-    kind: K,
-): Extract<Token, { kind: K }> {
-    let res: Token;
-    switch (kind) {
-        case "eof":
-            res = { kind: "eof" };
-            break;
-        case "character":
-            res = makeCharToken("");
-            break;
-        case "comment":
-            res = { kind: "comment", data: "" };
-            break;
-        case "doctype":
-            res = {
-                kind: "doctype",
-                name: null,
-                publicID: null,
-                systemID: null,
-                forceQuirks: false,
-            };
-            break;
-        case "tag":
-            res = {
-                kind: "tag",
-                name: "",
-                attributes: [],
-                isEnd: false,
-                isSelfClosing: false,
-                attributeIndicesToRemove: [],
-            };
-            break;
-    }
-    return res as Extract<Token, { kind: K }>;
-}
-export function makeCharToken(
-    char: string,
-): Extract<Token, { kind: "character" }> {
-    const token = makeToken("character");
-    token.data = char;
-    return token;
-}
+export type TokenFor<K extends Token["kind"]> = Extract<Token, { kind: K }>;
 
 export function serializeTokens(tokens: Token[]): string {
     return tokens.map((x) => serializeToken(x)).join("");
@@ -171,7 +212,7 @@ export function serializeToken(token: Token): string {
         }
         case "tag": {
             let res = "<";
-            if (token.isEnd) {
+            if (token.type === "end") {
                 res += "/";
             }
             res += token.name;
@@ -200,7 +241,7 @@ export function tokenize(
 export class Tokenizer {
     lastStartTagName: string = "";
     state: State = "Data";
-    currentToken: Token = makeToken("eof"); // DUMMY
+    currentToken: TokenBuilder = new EOFTokenBuilder(); // DUMMY
     eofEmitted = false;
     tr: TextReader;
     emitCallback: (tokenizer: Tokenizer, token: Token) => void;
@@ -213,41 +254,20 @@ export class Tokenizer {
         this.emitCallback = emitCallback;
     }
 
-    emitToken(tk: Token) {
-        if (tk.kind === "tag") {
-            if (tk.attributeIndicesToRemove.length !== 0) {
-                const newAttrs = [];
-                for (let i = 0; i < tk.attributes.length; i++) {
-                    let isBadAttr = false;
-                    for (
-                        let j = 0;
-                        j < tk.attributeIndicesToRemove.length;
-                        j++
-                    ) {
-                        if (tk.attributeIndicesToRemove[j] === i) {
-                            isBadAttr = true;
-                            break;
-                        }
-                    }
-                    if (!isBadAttr) {
-                        newAttrs.push(tk.attributes[i]!);
-                    }
-                }
-                tk.attributes = [];
-                tk.attributes.push(...newAttrs);
+    emitToken(tkb: TokenBuilder) {
+        if (tkb instanceof TagTokenBuilder) {
+            if (tkb.type === "start") {
+                this.lastStartTagName = tkb.name;
             }
-            if (!tk.isEnd) {
-                this.lastStartTagName = tk.name;
-            }
-        } else if (tk.kind === "eof") {
+        } else if (tkb instanceof EOFTokenBuilder) {
             this.eofEmitted = true;
         }
-        this.emitCallback(this, tk);
+        this.emitCallback(this, tkb.build());
     }
 
     currentAttribute() {
         const tag = this.currentToken;
-        if (tag.kind !== "tag") {
+        if (!(tag instanceof TagTokenBuilder)) {
             throw new Error("current token is not tag token");
         }
         const attr = tag.attributes[tag.attributes.length - 1];
@@ -259,7 +279,7 @@ export class Tokenizer {
 
     addAttrToCurrentTag(name: string, value: string) {
         const tag = this.currentToken;
-        if (tag.kind !== "tag") {
+        if (!(tag instanceof TagTokenBuilder)) {
             throw new Error("current token is not tag token");
         }
         const attr: {
@@ -294,14 +314,12 @@ export class Tokenizer {
     returnState: State = "Data"; // DUMMY
 
     // https://html.spec.whatwg.org/multipage/parsing.html#appropriate-end-tag-token
-    isAppropriateEndTagToken(tk: Token): boolean {
-        if (tk.kind !== "tag") {
-            return false;
-        }
-        if (!tk.isEnd) {
-            return false;
-        }
-        return this.lastStartTagName === tk.name;
+    isAppropriateEndTagToken(tk: TokenBuilder): boolean {
+        return (
+            tk instanceof TagTokenBuilder &&
+            tk.type === "end" &&
+            this.lastStartTagName === tk.name
+        );
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#charref-in-attribute
@@ -321,10 +339,9 @@ export class Tokenizer {
             const length = this.tempBuf.length;
             for (let offset = 0; offset < length; ) {
                 const codePoint = this.tempBuf.codePointAt(offset)!;
-                this.emitToken({
-                    kind: "character",
-                    data: String.fromCodePoint(codePoint),
-                });
+                this.emitToken(
+                    new CharacterTokenBuilder(String.fromCodePoint(codePoint)),
+                );
                 offset += String.fromCodePoint(codePoint).length;
             }
         }
@@ -350,19 +367,13 @@ export class Tokenizer {
                         break;
                     case "\0":
                         // PARSE ERROR
-                        this.emitToken({
-                            kind: "character",
-                            data: nextChar,
-                        });
+                        this.emitToken(new CharacterTokenBuilder(nextChar));
                         break;
                     case "":
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
-                        this.emitToken({
-                            kind: "character",
-                            data: nextChar,
-                        });
+                        this.emitToken(new CharacterTokenBuilder(nextChar));
                         break;
                 }
                 break;
@@ -379,19 +390,13 @@ export class Tokenizer {
                         break;
                     case "\0":
                         // PARSE ERROR
-                        this.emitToken({
-                            kind: "character",
-                            data: "\ufffd",
-                        });
+                        this.emitToken(new CharacterTokenBuilder("\ufffd"));
                         break;
                     case "":
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
-                        this.emitToken({
-                            kind: "character",
-                            data: nextChar,
-                        });
+                        this.emitToken(new CharacterTokenBuilder(nextChar));
                         break;
                 }
                 break;
@@ -404,19 +409,13 @@ export class Tokenizer {
                         break;
                     case "\0":
                         // PARSE ERROR
-                        this.emitToken({
-                            kind: "character",
-                            data: "\ufffd",
-                        });
+                        this.emitToken(new CharacterTokenBuilder("\ufffd"));
                         break;
                     case "":
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
-                        this.emitToken({
-                            kind: "character",
-                            data: nextChar,
-                        });
+                        this.emitToken(new CharacterTokenBuilder(nextChar));
                         break;
                 }
                 break;
@@ -437,25 +436,25 @@ export class Tokenizer {
                         break;
                     case "?":
                         // PARSE ERROR
-                        this.currentToken = makeToken("comment");
+                        this.currentToken = new CommentTokenBuilder("");
                         this.tr.cursor = oldCursor;
                         this.state = "Bogus comment";
                         break;
                     case "":
-                        this.emitToken(makeCharToken("<"));
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new CharacterTokenBuilder("<"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         if (isASCIIAlpha(toCodePoint(nextChar))) {
-                            this.currentToken = makeToken("tag");
+                            this.currentToken = new TagTokenBuilder(
+                                "",
+                                "start",
+                            );
                             this.tr.cursor = oldCursor;
                             this.state = "Tag name";
                         } else {
                             // PARSE ERROR
-                            this.emitToken({
-                                kind: "character",
-                                data: "<",
-                            });
+                            this.emitToken(new CharacterTokenBuilder("<"));
                             this.tr.cursor = oldCursor;
                             this.state = "Data";
                         }
@@ -471,19 +470,18 @@ export class Tokenizer {
                         this.state = "Data";
                         break;
                     case "":
-                        this.emitToken(makeCharToken("<"));
-                        this.emitToken(makeCharToken("/"));
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new CharacterTokenBuilder("<"));
+                        this.emitToken(new CharacterTokenBuilder("/"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         if (isASCIIAlpha(toCodePoint(nextChar))) {
-                            this.currentToken = makeToken("tag");
-                            this.currentToken.isEnd = true;
+                            this.currentToken = new TagTokenBuilder("", "end");
                             this.tr.cursor = oldCursor;
                             this.state = "Tag name";
                         } else {
                             // PARSE ERROR
-                            this.currentToken = makeToken("comment");
+                            this.currentToken = new CommentTokenBuilder("");
                             this.tr.cursor = oldCursor;
                             this.state = "Bogus comment";
                         }
@@ -492,7 +490,7 @@ export class Tokenizer {
             }
             case "Tag name": {
                 const nextChar = this.tr.consumeChar();
-                if (this.currentToken.kind !== "tag") {
+                if (!(this.currentToken instanceof TagTokenBuilder)) {
                     throw new Error("current token is not tag token");
                 }
                 switch (nextChar) {
@@ -515,7 +513,7 @@ export class Tokenizer {
                         break;
                     case "":
                         // PARSE ERROR
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default: {
                         const chr = toASCIILowercase(nextChar);
@@ -533,7 +531,7 @@ export class Tokenizer {
                         this.state = "RCDATA end tag open";
                         break;
                     default:
-                        this.emitToken(makeCharToken("<"));
+                        this.emitToken(new CharacterTokenBuilder("<"));
                         this.tr.cursor = oldCursor;
                         this.state = "RCDATA";
                 }
@@ -546,13 +544,12 @@ export class Tokenizer {
                     nextChar !== undefined &&
                     isASCIIAlpha(toCodePoint(nextChar))
                 ) {
-                    this.currentToken = makeToken("tag");
-                    this.currentToken.isEnd = true;
+                    this.currentToken = new TagTokenBuilder("", "end");
                     this.tr.cursor = oldCursor;
                     this.state = "RCDATA end tag name";
                 } else {
-                    this.emitToken(makeCharToken("<"));
-                    this.emitToken(makeCharToken("/"));
+                    this.emitToken(new CharacterTokenBuilder("<"));
+                    this.emitToken(new CharacterTokenBuilder("/"));
                     this.tr.cursor = oldCursor;
                     this.state = "RCDATA";
                 }
@@ -562,10 +559,10 @@ export class Tokenizer {
                 const oldCursor = this.tr.cursor;
                 const nextChar = this.tr.consumeChar();
                 const anythingElse = () => {
-                    this.emitToken(makeCharToken("<"));
-                    this.emitToken(makeCharToken("/"));
+                    this.emitToken(new CharacterTokenBuilder("<"));
+                    this.emitToken(new CharacterTokenBuilder("/"));
                     for (const c of this.tempBuf) {
-                        this.emitToken(makeCharToken(c));
+                        this.emitToken(new CharacterTokenBuilder(c));
                     }
                     this.tr.cursor = oldCursor;
                     this.state = "RCDATA";
@@ -619,7 +616,7 @@ export class Tokenizer {
                         this.state = "RAWTEXT end tag open";
                         break;
                     default:
-                        this.emitToken(makeCharToken("<"));
+                        this.emitToken(new CharacterTokenBuilder("<"));
                         this.tr.cursor = oldCursor;
                         this.state = "RAWTEXT";
                 }
@@ -632,13 +629,12 @@ export class Tokenizer {
                     nextChar !== undefined &&
                     isASCIIAlpha(toCodePoint(nextChar))
                 ) {
-                    this.currentToken = makeToken("tag");
-                    this.currentToken.isEnd = true;
+                    this.currentToken = new TagTokenBuilder("", "end");
                     this.tr.cursor = oldCursor;
                     this.state = "RAWTEXT end tag name";
                 } else {
-                    this.emitToken(makeCharToken("<"));
-                    this.emitToken(makeCharToken("/"));
+                    this.emitToken(new CharacterTokenBuilder("<"));
+                    this.emitToken(new CharacterTokenBuilder("/"));
                     this.tr.cursor = oldCursor;
                     this.state = "RAWTEXT";
                 }
@@ -649,10 +645,10 @@ export class Tokenizer {
                 const nextChar = this.tr.consumeChar();
 
                 const anythingElse = () => {
-                    this.emitToken(makeCharToken("<"));
-                    this.emitToken(makeCharToken("/"));
+                    this.emitToken(new CharacterTokenBuilder("<"));
+                    this.emitToken(new CharacterTokenBuilder("/"));
                     for (const c of this.tempBuf) {
-                        this.emitToken(makeCharToken(c));
+                        this.emitToken(new CharacterTokenBuilder(c));
                     }
                     this.tr.cursor = oldCursor;
                     this.state = "RAWTEXT";
@@ -729,7 +725,7 @@ export class Tokenizer {
                 break;
             }
             case "Attribute name": {
-                if (this.currentToken.kind !== "tag") {
+                if (!(this.currentToken instanceof TagTokenBuilder)) {
                     throw new Error("current token is not tag token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -739,7 +735,7 @@ export class Tokenizer {
                 };
                 const checkDupliateAttrName = () => {
                     const tag = this.currentToken;
-                    if (tag.kind !== "tag") {
+                    if (!(tag instanceof TagTokenBuilder)) {
                         throw new Error("current token is not tag token");
                     }
                     const currentAttr = this.currentAttribute();
@@ -807,7 +803,7 @@ export class Tokenizer {
                         break;
                     case "":
                         // PARSE ERROR
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.addAttrToCurrentTag("", "");
@@ -858,7 +854,7 @@ export class Tokenizer {
                         break;
                     case "":
                         // PARSE ERROR
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentAttribute().value += nextChar;
@@ -882,7 +878,7 @@ export class Tokenizer {
                         break;
                     case "":
                         // PARSE ERROR
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentAttribute().value += nextChar;
@@ -913,7 +909,7 @@ export class Tokenizer {
                         break;
                     case "":
                         // PARSE ERROR
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentAttribute().value += nextChar;
@@ -940,7 +936,7 @@ export class Tokenizer {
                         break;
                     case "":
                         // PARSE ERROR
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         // PARSE ERROR
@@ -951,7 +947,7 @@ export class Tokenizer {
                 break;
             }
             case "Self closing start tag": {
-                if (this.currentToken.kind !== "tag") {
+                if (!(this.currentToken instanceof TagTokenBuilder)) {
                     throw new Error("current token is not tag token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -964,7 +960,7 @@ export class Tokenizer {
                         break;
                     case "":
                         // PARSE ERROR
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         // PARSE ERROR
@@ -975,7 +971,7 @@ export class Tokenizer {
                 break;
             }
             case "Bogus comment": {
-                if (this.currentToken.kind !== "comment") {
+                if (!(this.currentToken instanceof CommentTokenBuilder)) {
                     throw new Error("current token is not comment token");
                 }
                 const nextChar = this.tr.consumeChar();
@@ -986,7 +982,7 @@ export class Tokenizer {
                         break;
                     case "":
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     case "\0":
                         // PARSE ERROR
@@ -1000,7 +996,7 @@ export class Tokenizer {
             }
             case "Markup declaration open": {
                 if (this.tr.consumeString("--", TextReader.NO_MATCH_FLAGS)) {
-                    this.currentToken = makeToken("comment");
+                    this.currentToken = new CommentTokenBuilder("");
                     this.state = "Comment start";
                 } else if (
                     this.tr.consumeString(
@@ -1015,7 +1011,7 @@ export class Tokenizer {
                     throw new Error("TODO");
                 } else {
                     // PARSE ERROR
-                    this.currentToken = makeToken("comment");
+                    this.currentToken = new CommentTokenBuilder("");
                     this.state = "Bogus comment";
                 }
                 break;
@@ -1040,7 +1036,7 @@ export class Tokenizer {
                 break;
             }
             case "Comment start dash": {
-                if (this.currentToken.kind !== "comment") {
+                if (!(this.currentToken instanceof CommentTokenBuilder)) {
                     throw new Error("current token is not comment token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1057,7 +1053,7 @@ export class Tokenizer {
                     case "":
                         // PARSE ERROR
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentToken.data += "-";
@@ -1068,7 +1064,7 @@ export class Tokenizer {
                 break;
             }
             case "Comment": {
-                if (this.currentToken.kind !== "comment") {
+                if (!(this.currentToken instanceof CommentTokenBuilder)) {
                     throw new Error("current token is not comment token");
                 }
                 const nextChar = this.tr.consumeChar();
@@ -1087,7 +1083,7 @@ export class Tokenizer {
                     case "":
                         // PARSE ERROR
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentToken.data += nextChar;
@@ -1096,7 +1092,7 @@ export class Tokenizer {
                 break;
             }
             case "Comment less than sign": {
-                if (this.currentToken.kind !== "comment") {
+                if (!(this.currentToken instanceof CommentTokenBuilder)) {
                     throw new Error("current token is not comment token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1117,7 +1113,7 @@ export class Tokenizer {
                 break;
             }
             case "Comment end dash": {
-                if (this.currentToken.kind !== "comment") {
+                if (!(this.currentToken instanceof CommentTokenBuilder)) {
                     throw new Error("current token is not comment token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1129,7 +1125,7 @@ export class Tokenizer {
                     case "":
                         // PARSE ERROR
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentToken.data += "-";
@@ -1140,7 +1136,7 @@ export class Tokenizer {
                 break;
             }
             case "Comment end": {
-                if (this.currentToken.kind !== "comment") {
+                if (!(this.currentToken instanceof CommentTokenBuilder)) {
                     throw new Error("current token is not comment token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1156,7 +1152,7 @@ export class Tokenizer {
                     case "":
                         // PARSE ERROR
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentToken.data += "--";
@@ -1182,14 +1178,8 @@ export class Tokenizer {
                         break;
                     case "":
                         // PARSE ERROR
-                        this.emitToken({
-                            kind: "doctype",
-                            name: null,
-                            publicID: null,
-                            systemID: null,
-                            forceQuirks: false,
-                        });
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new DOCTYPETokenBuilder());
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         // PARSE ERROR
@@ -1207,54 +1197,36 @@ export class Tokenizer {
                     case "\f":
                     case " ":
                         break;
-                    case "\0":
+                    case "\0": {
                         // PARSE ERROR
-                        this.currentToken = {
-                            kind: "doctype",
-                            name: null,
-                            publicID: null,
-                            systemID: null,
-                            forceQuirks: false,
-                        };
-                        this.currentToken.name += "\ufffd";
+                        const tempToken = new DOCTYPETokenBuilder();
+                        tempToken.name += "\ufffd";
+                        this.currentToken = tempToken;
                         break;
-                    case ">":
+                    }
+                    case ">": {
                         // PARSE ERROR
-                        this.currentToken = {
-                            kind: "doctype",
-                            name: null,
-                            publicID: null,
-                            systemID: null,
-                            forceQuirks: false,
-                        };
-                        this.currentToken.forceQuirks = true;
+                        const tempToken = new DOCTYPETokenBuilder();
+                        tempToken.forceQuirks = true;
+                        this.currentToken = tempToken;
                         break;
+                    }
                     case "":
                         // PARSE ERROR
-                        this.emitToken({
-                            kind: "doctype",
-                            name: null,
-                            publicID: null,
-                            systemID: null,
-                            forceQuirks: false,
-                        });
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new DOCTYPETokenBuilder());
+                        this.emitToken(new EOFTokenBuilder());
                         break;
-                    default:
-                        this.currentToken = {
-                            kind: "doctype",
-                            name: null,
-                            publicID: null,
-                            systemID: null,
-                            forceQuirks: false,
-                        };
-                        this.currentToken.name = toASCIILowercase(nextChar);
+                    default: {
+                        const tempToken = new DOCTYPETokenBuilder();
+                        tempToken.name = toASCIILowercase(nextChar);
+                        this.currentToken = tempToken;
                         this.state = "DOCTYPE name";
+                    }
                 }
                 break;
             }
             case "DOCTYPE name": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const nextChar = this.tr.consumeChar();
@@ -1277,7 +1249,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentToken.name += toASCIILowercase(nextChar);
@@ -1286,7 +1258,7 @@ export class Tokenizer {
                 break;
             }
             case "After DOCTYPE name": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1305,7 +1277,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.tr.cursor = oldCursor;
@@ -1333,7 +1305,7 @@ export class Tokenizer {
                 break;
             }
             case "After DOCTYPE public keyword": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1367,7 +1339,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         // PARSE ERROR
@@ -1379,7 +1351,7 @@ export class Tokenizer {
                 break;
             }
             case "Before DOCTYPE public identifier": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1410,7 +1382,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         // PARSE ERROR
@@ -1422,7 +1394,7 @@ export class Tokenizer {
                 break;
             }
             case "DOCTYPE public identifier (double-quoted)": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const nextChar = this.tr.consumeChar();
@@ -1440,7 +1412,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentToken.publicID += nextChar;
@@ -1449,7 +1421,7 @@ export class Tokenizer {
                 break;
             }
             case "DOCTYPE public identifier (single-quoted)": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const nextChar = this.tr.consumeChar();
@@ -1467,7 +1439,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentToken.publicID += nextChar;
@@ -1476,7 +1448,7 @@ export class Tokenizer {
                 break;
             }
             case "After DOCTYPE public identifier": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1509,7 +1481,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         // PARSE ERROR
@@ -1521,7 +1493,7 @@ export class Tokenizer {
                 break;
             }
             case "between DOCTYPE public and system identifiers": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1550,7 +1522,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         // PARSE ERROR
@@ -1562,7 +1534,7 @@ export class Tokenizer {
                 break;
             }
             case "After DOCTYPE system keyword": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1596,7 +1568,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         // PARSE ERROR
@@ -1608,7 +1580,7 @@ export class Tokenizer {
                 break;
             }
             case "Before DOCTYPE system identifier": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1639,7 +1611,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         // PARSE ERROR
@@ -1651,7 +1623,7 @@ export class Tokenizer {
                 break;
             }
             case "DOCTYPE system identifier (double-quoted)": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const nextChar = this.tr.consumeChar();
@@ -1669,7 +1641,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentToken.systemID += nextChar;
@@ -1678,7 +1650,7 @@ export class Tokenizer {
                 break;
             }
             case "DOCTYPE system identifier (single-quoted)": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const nextChar = this.tr.consumeChar();
@@ -1696,7 +1668,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         this.currentToken.systemID += nextChar;
@@ -1705,7 +1677,7 @@ export class Tokenizer {
                 break;
             }
             case "After DOCTYPE system identifier": {
-                if (this.currentToken.kind !== "doctype") {
+                if (!(this.currentToken instanceof DOCTYPETokenBuilder)) {
                     throw new Error("current token is not DOCTYPE token");
                 }
                 const oldCursor = this.tr.cursor;
@@ -1724,7 +1696,7 @@ export class Tokenizer {
                         // PARSE ERROR
                         this.currentToken.forceQuirks = true;
                         this.emitToken(this.currentToken);
-                        this.emitToken(makeToken("eof"));
+                        this.emitToken(new EOFTokenBuilder());
                         break;
                     default:
                         // PARSE ERROR
