@@ -556,6 +556,9 @@ export class Tokenizer {
                 break;
             }
             case "RCDATA end tag name": {
+                if (!(this.currentToken instanceof TagTokenBuilder)) {
+                    throw new Error("current token is not tag token");
+                }
                 const oldCursor = this.tr.cursor;
                 const nextChar = this.tr.consumeChar();
                 const anythingElse = () => {
@@ -567,7 +570,6 @@ export class Tokenizer {
                     this.tr.cursor = oldCursor;
                     this.state = "RCDATA";
                 };
-
                 switch (nextChar) {
                     case "\t":
                     case "\n":
@@ -575,24 +577,24 @@ export class Tokenizer {
                     case " ":
                         if (this.isAppropriateEndTagToken(this.currentToken)) {
                             this.state = "Before attribute name";
-                            break;
+                        } else {
+                            anythingElse();
                         }
-                        anythingElse();
                         break;
                     case "/":
                         if (this.isAppropriateEndTagToken(this.currentToken)) {
                             this.state = "Self closing start tag";
-                            break;
+                        } else {
+                            anythingElse();
                         }
-                        anythingElse();
                         break;
                     case ">":
                         if (this.isAppropriateEndTagToken(this.currentToken)) {
                             this.state = "Data";
                             this.emitToken(this.currentToken);
-                            break;
+                        } else {
+                            anythingElse();
                         }
-                        anythingElse();
                         break;
                     default:
                         if (
@@ -600,10 +602,10 @@ export class Tokenizer {
                             isASCIIAlpha(toCodePoint(nextChar))
                         ) {
                             const chr = toASCIILowercase(nextChar);
-                            this.tempBuf += chr;
-                            break;
+                            this.currentToken.name += chr;
+                        } else {
+                            anythingElse();
                         }
-                        anythingElse();
                 }
                 break;
             }
@@ -641,6 +643,9 @@ export class Tokenizer {
                 break;
             }
             case "RAWTEXT end tag name": {
+                if (!(this.currentToken instanceof TagTokenBuilder)) {
+                    throw new Error("current token is not tag token");
+                }
                 const oldCursor = this.tr.cursor;
                 const nextChar = this.tr.consumeChar();
 
@@ -662,23 +667,26 @@ export class Tokenizer {
                         if (this.isAppropriateEndTagToken(this.currentToken)) {
                             this.state = "Before attribute name";
                             break;
+                        } else {
+                            anythingElse();
                         }
-                        anythingElse();
                         break;
                     case "/":
                         if (this.isAppropriateEndTagToken(this.currentToken)) {
                             this.state = "Self closing start tag";
                             break;
+                        } else {
+                            anythingElse();
                         }
-                        anythingElse();
                         break;
                     case ">":
                         if (this.isAppropriateEndTagToken(this.currentToken)) {
                             this.state = "Data";
                             this.emitToken(this.currentToken);
                             break;
+                        } else {
+                            anythingElse();
                         }
-                        anythingElse();
                         break;
                     default:
                         if (
@@ -686,10 +694,11 @@ export class Tokenizer {
                             isASCIIAlpha(toCodePoint(nextChar))
                         ) {
                             const chr = toASCIILowercase(nextChar);
-                            this.tempBuf += chr;
+                            this.currentToken.name += chr;
                             break;
+                        } else {
+                            anythingElse();
                         }
-                        anythingElse();
                 }
                 break;
             }
