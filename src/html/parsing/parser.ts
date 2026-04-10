@@ -3791,8 +3791,7 @@ class Parser {
                 token.type === "start") ||
             (this.isHTMLIntegrationPoint(this.adjustedCurrentNode()) &&
                 token.kind === "character") ||
-            (this.isHTMLIntegrationPoint(this.adjustedCurrentNode()) &&
-                token.kind === "eof")
+            token.kind === "eof"
         ) {
             this.useRulesFor(this.insertionMode, tkr, token);
         } else {
