@@ -2124,21 +2124,13 @@ class Parser {
                 } else if (token.kind === "tag" && token.type === "end") {
                     let nodeIdx = this.stackOfOpenElements.length - 1;
                     while (true) {
-                        if (
-                            this.stackOfOpenElementsNodeAt(nodeIdx).isElement(
-                                HTML_NAMESPACE,
-                                token.name,
-                            )
-                        ) {
+                        const node = this.stackOfOpenElementsNodeAt(nodeIdx);
+                        if (node.isElement(HTML_NAMESPACE, token.name)) {
                             this.generateImpliedEndTags([token.name]);
-                            if (
-                                this.stackOfOpenElementsNodeAt(nodeIdx) !==
-                                this.currentNode()
-                            ) {
+                            if (node !== this.currentNode()) {
                                 // PARSE ERROR
                             }
-                            const targetNode =
-                                this.stackOfOpenElementsNodeAt(nodeIdx);
+                            const targetNode = node;
                             while (true) {
                                 const element =
                                     this.popFromStackOfOpenElements();
@@ -2149,11 +2141,7 @@ class Parser {
                             }
                             return;
                         }
-                        if (
-                            this.isSpecialElement(
-                                this.stackOfOpenElementsNodeAt(nodeIdx),
-                            )
-                        ) {
+                        if (this.isSpecialElement(node)) {
                             // PARSE ERROR
                             return;
                         }
