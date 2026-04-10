@@ -927,7 +927,9 @@ class Parser {
                     token.name === "html"
                 ) {
                     // PARSE ERROR
-                    if (this.stackOfOEContainsHTMLElement("template")) {
+                    if (
+                        this.stackOfOpenElementsContainsHTMLElement("template")
+                    ) {
                         return;
                     } else {
                         throw new Error("not yet implemented");
@@ -956,11 +958,11 @@ class Parser {
                     // PARSE ERROR
                     if (
                         this.stackOfOpenElements.length === 1 ||
-                        !this.stackOfOENodeAt(1).isElement(
+                        !this.stackOfOpenElementsNodeAt(1).isElement(
                             HTML_NAMESPACE,
                             "body",
                         ) ||
-                        this.stackOfOEContainsHTMLElement("template")
+                        this.stackOfOpenElementsContainsHTMLElement("template")
                     ) {
                         return;
                     } else {
@@ -975,7 +977,7 @@ class Parser {
                     // PARSE ERROR
                     if (
                         this.stackOfOpenElements.length === 1 ||
-                        !this.stackOfOENodeAt(1).isElement(
+                        !this.stackOfOpenElementsNodeAt(1).isElement(
                             HTML_NAMESPACE,
                             "body",
                         )
@@ -991,24 +993,38 @@ class Parser {
                         this.useRulesFor("in template", tkr, token);
                     } else {
                         if (
-                            this.stackOfOEContainsHTMLElement("dd") ||
-                            this.stackOfOEContainsHTMLElement("dt") ||
-                            this.stackOfOEContainsHTMLElement("li") ||
-                            this.stackOfOEContainsHTMLElement("optgroup") ||
-                            this.stackOfOEContainsHTMLElement("option") ||
-                            this.stackOfOEContainsHTMLElement("p") ||
-                            this.stackOfOEContainsHTMLElement("rb") ||
-                            this.stackOfOEContainsHTMLElement("rp") ||
-                            this.stackOfOEContainsHTMLElement("rt") ||
-                            this.stackOfOEContainsHTMLElement("rtc") ||
-                            this.stackOfOEContainsHTMLElement("tbody") ||
-                            this.stackOfOEContainsHTMLElement("td") ||
-                            this.stackOfOEContainsHTMLElement("tfoot") ||
-                            this.stackOfOEContainsHTMLElement("th") ||
-                            this.stackOfOEContainsHTMLElement("thead") ||
-                            this.stackOfOEContainsHTMLElement("tr") ||
-                            this.stackOfOEContainsHTMLElement("body") ||
-                            this.stackOfOEContainsHTMLElement("html")
+                            this.stackOfOpenElementsContainsHTMLElement("dd") ||
+                            this.stackOfOpenElementsContainsHTMLElement("dt") ||
+                            this.stackOfOpenElementsContainsHTMLElement("li") ||
+                            this.stackOfOpenElementsContainsHTMLElement(
+                                "optgroup",
+                            ) ||
+                            this.stackOfOpenElementsContainsHTMLElement(
+                                "option",
+                            ) ||
+                            this.stackOfOpenElementsContainsHTMLElement("p") ||
+                            this.stackOfOpenElementsContainsHTMLElement("rb") ||
+                            this.stackOfOpenElementsContainsHTMLElement("rp") ||
+                            this.stackOfOpenElementsContainsHTMLElement("rt") ||
+                            this.stackOfOpenElementsContainsHTMLElement(
+                                "rtc",
+                            ) ||
+                            this.stackOfOpenElementsContainsHTMLElement(
+                                "tbody",
+                            ) ||
+                            this.stackOfOpenElementsContainsHTMLElement("td") ||
+                            this.stackOfOpenElementsContainsHTMLElement(
+                                "tfoot",
+                            ) ||
+                            this.stackOfOpenElementsContainsHTMLElement("th") ||
+                            this.stackOfOpenElementsContainsHTMLElement(
+                                "thead",
+                            ) ||
+                            this.stackOfOpenElementsContainsHTMLElement("tr") ||
+                            this.stackOfOpenElementsContainsHTMLElement(
+                                "body",
+                            ) ||
+                            this.stackOfOpenElementsContainsHTMLElement("html")
                         ) {
                             // PARSE ERROR
                         }
@@ -1027,24 +1043,26 @@ class Parser {
                         // PARSE ERROR
                         return;
                     } else if (
-                        this.stackOfOEContainsHTMLElement("dd") ||
-                        this.stackOfOEContainsHTMLElement("dt") ||
-                        this.stackOfOEContainsHTMLElement("li") ||
-                        this.stackOfOEContainsHTMLElement("optgroup") ||
-                        this.stackOfOEContainsHTMLElement("option") ||
-                        this.stackOfOEContainsHTMLElement("p") ||
-                        this.stackOfOEContainsHTMLElement("rb") ||
-                        this.stackOfOEContainsHTMLElement("rp") ||
-                        this.stackOfOEContainsHTMLElement("rt") ||
-                        this.stackOfOEContainsHTMLElement("rtc") ||
-                        this.stackOfOEContainsHTMLElement("tbody") ||
-                        this.stackOfOEContainsHTMLElement("td") ||
-                        this.stackOfOEContainsHTMLElement("tfoot") ||
-                        this.stackOfOEContainsHTMLElement("th") ||
-                        this.stackOfOEContainsHTMLElement("thead") ||
-                        this.stackOfOEContainsHTMLElement("tr") ||
-                        this.stackOfOEContainsHTMLElement("body") ||
-                        this.stackOfOEContainsHTMLElement("html")
+                        this.stackOfOpenElementsContainsHTMLElement("dd") ||
+                        this.stackOfOpenElementsContainsHTMLElement("dt") ||
+                        this.stackOfOpenElementsContainsHTMLElement("li") ||
+                        this.stackOfOpenElementsContainsHTMLElement(
+                            "optgroup",
+                        ) ||
+                        this.stackOfOpenElementsContainsHTMLElement("option") ||
+                        this.stackOfOpenElementsContainsHTMLElement("p") ||
+                        this.stackOfOpenElementsContainsHTMLElement("rb") ||
+                        this.stackOfOpenElementsContainsHTMLElement("rp") ||
+                        this.stackOfOpenElementsContainsHTMLElement("rt") ||
+                        this.stackOfOpenElementsContainsHTMLElement("rtc") ||
+                        this.stackOfOpenElementsContainsHTMLElement("tbody") ||
+                        this.stackOfOpenElementsContainsHTMLElement("td") ||
+                        this.stackOfOpenElementsContainsHTMLElement("tfoot") ||
+                        this.stackOfOpenElementsContainsHTMLElement("th") ||
+                        this.stackOfOpenElementsContainsHTMLElement("thead") ||
+                        this.stackOfOpenElementsContainsHTMLElement("tr") ||
+                        this.stackOfOpenElementsContainsHTMLElement("body") ||
+                        this.stackOfOpenElementsContainsHTMLElement("html")
                     ) {
                         // PARSE ERROR
                     }
@@ -1062,24 +1080,26 @@ class Parser {
                         // PARSE ERROR
                         return;
                     } else if (
-                        this.stackOfOEContainsHTMLElement("dd") ||
-                        this.stackOfOEContainsHTMLElement("dt") ||
-                        this.stackOfOEContainsHTMLElement("li") ||
-                        this.stackOfOEContainsHTMLElement("optgroup") ||
-                        this.stackOfOEContainsHTMLElement("option") ||
-                        this.stackOfOEContainsHTMLElement("p") ||
-                        this.stackOfOEContainsHTMLElement("rb") ||
-                        this.stackOfOEContainsHTMLElement("rp") ||
-                        this.stackOfOEContainsHTMLElement("rt") ||
-                        this.stackOfOEContainsHTMLElement("rtc") ||
-                        this.stackOfOEContainsHTMLElement("tbody") ||
-                        this.stackOfOEContainsHTMLElement("td") ||
-                        this.stackOfOEContainsHTMLElement("tfoot") ||
-                        this.stackOfOEContainsHTMLElement("th") ||
-                        this.stackOfOEContainsHTMLElement("thead") ||
-                        this.stackOfOEContainsHTMLElement("tr") ||
-                        this.stackOfOEContainsHTMLElement("body") ||
-                        this.stackOfOEContainsHTMLElement("html")
+                        this.stackOfOpenElementsContainsHTMLElement("dd") ||
+                        this.stackOfOpenElementsContainsHTMLElement("dt") ||
+                        this.stackOfOpenElementsContainsHTMLElement("li") ||
+                        this.stackOfOpenElementsContainsHTMLElement(
+                            "optgroup",
+                        ) ||
+                        this.stackOfOpenElementsContainsHTMLElement("option") ||
+                        this.stackOfOpenElementsContainsHTMLElement("p") ||
+                        this.stackOfOpenElementsContainsHTMLElement("rb") ||
+                        this.stackOfOpenElementsContainsHTMLElement("rp") ||
+                        this.stackOfOpenElementsContainsHTMLElement("rt") ||
+                        this.stackOfOpenElementsContainsHTMLElement("rtc") ||
+                        this.stackOfOpenElementsContainsHTMLElement("tbody") ||
+                        this.stackOfOpenElementsContainsHTMLElement("td") ||
+                        this.stackOfOpenElementsContainsHTMLElement("tfoot") ||
+                        this.stackOfOpenElementsContainsHTMLElement("th") ||
+                        this.stackOfOpenElementsContainsHTMLElement("thead") ||
+                        this.stackOfOpenElementsContainsHTMLElement("tr") ||
+                        this.stackOfOpenElementsContainsHTMLElement("body") ||
+                        this.stackOfOpenElementsContainsHTMLElement("html")
                     ) {
                         // PARSE ERROR
                     }
@@ -1172,7 +1192,7 @@ class Parser {
                 ) {
                     if (
                         this.formElementPointer !== null &&
-                        !this.stackOfOEContainsHTMLElement("template")
+                        !this.stackOfOpenElementsContainsHTMLElement("template")
                     ) {
                         // PARSE ERROR
                         return;
@@ -1185,7 +1205,11 @@ class Parser {
                             this.closePElement();
                         }
                         const element = this.insertHTMLElement(token);
-                        if (!this.stackOfOEContainsHTMLElement("template")) {
+                        if (
+                            !this.stackOfOpenElementsContainsHTMLElement(
+                                "template",
+                            )
+                        ) {
                             this.formElementPointer = element;
                         }
                     }
@@ -1239,7 +1263,7 @@ class Parser {
                         } else {
                             const nodeIdx =
                                 this.stackOfOpenElements.indexOf(node) - 1;
-                            node = this.stackOfOENodeAt(nodeIdx);
+                            node = this.stackOfOpenElementsNodeAt(nodeIdx);
                         }
                     }
                     if (
@@ -1320,7 +1344,7 @@ class Parser {
                         } else {
                             const nodeIdx =
                                 this.stackOfOpenElements.indexOf(node) - 1;
-                            node = this.stackOfOENodeAt(nodeIdx);
+                            node = this.stackOfOpenElementsNodeAt(nodeIdx);
                         }
                     }
                     if (
@@ -1433,7 +1457,9 @@ class Parser {
                     token.type === "end" &&
                     token.name === "form"
                 ) {
-                    if (this.stackOfOEContainsHTMLElement("template")) {
+                    if (
+                        this.stackOfOpenElementsContainsHTMLElement("template")
+                    ) {
                         const node = this.formElementPointer;
                         if (
                             node === null ||
@@ -2099,19 +2125,20 @@ class Parser {
                     let nodeIdx = this.stackOfOpenElements.length - 1;
                     while (true) {
                         if (
-                            this.stackOfOENodeAt(nodeIdx).isElement(
+                            this.stackOfOpenElementsNodeAt(nodeIdx).isElement(
                                 HTML_NAMESPACE,
                                 token.name,
                             )
                         ) {
                             this.generateImpliedEndTags([token.name]);
                             if (
-                                this.stackOfOENodeAt(nodeIdx) !==
+                                this.stackOfOpenElementsNodeAt(nodeIdx) !==
                                 this.currentNode()
                             ) {
                                 // PARSE ERROR
                             }
-                            const targetNode = this.stackOfOENodeAt(nodeIdx);
+                            const targetNode =
+                                this.stackOfOpenElementsNodeAt(nodeIdx);
                             while (true) {
                                 const element =
                                     this.popFromStackOfOpenElements();
@@ -2123,7 +2150,9 @@ class Parser {
                             return;
                         }
                         if (
-                            this.isSpecialElement(this.stackOfOENodeAt(nodeIdx))
+                            this.isSpecialElement(
+                                this.stackOfOpenElementsNodeAt(nodeIdx),
+                            )
                         ) {
                             // PARSE ERROR
                             return;
@@ -2332,7 +2361,9 @@ class Parser {
                     token.type === "start" &&
                     token.name === "form"
                 ) {
-                    if (this.stackOfOEContainsHTMLElement("template")) {
+                    if (
+                        this.stackOfOpenElementsContainsHTMLElement("template")
+                    ) {
                         const node = this.formElementPointer;
                         if (
                             node === null ||
@@ -2939,7 +2970,9 @@ class Parser {
                     // PARSE ERROR
                     return;
                 } else if (token.kind === "eof") {
-                    if (!this.stackOfOEContainsHTMLElement("template")) {
+                    if (
+                        !this.stackOfOpenElementsContainsHTMLElement("template")
+                    ) {
                         this.stopParsing();
                     } else {
                         // PARSE ERROR
@@ -2973,7 +3006,7 @@ class Parser {
                 } else if (token.kind === "comment") {
                     this.insertComment(token, {
                         rel: "after last child",
-                        parentNode: this.stackOfOENodeAt(0),
+                        parentNode: this.stackOfOpenElementsNodeAt(0),
                     });
                 } else if (token.kind === "doctype") {
                     // PARSE ERROR
@@ -3221,7 +3254,7 @@ class Parser {
 
     // https://html.spec.whatwg.org/multipage/parsing.html#current-node
     currentNode(): Element {
-        return this.stackOfOENodeAt(-1);
+        return this.stackOfOpenElementsNodeAt(-1);
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#adjusted-current-node
@@ -3381,7 +3414,7 @@ class Parser {
     ): boolean {
         let elemIdx = this.stackOfOpenElements.length - 1;
         while (true) {
-            const element = this.stackOfOENodeAt(elemIdx);
+            const element = this.stackOfOpenElementsNodeAt(elemIdx);
             if (test(element)) {
                 return true;
             }
@@ -3492,7 +3525,7 @@ class Parser {
      * - 0 or positive index starts from the top of the stack (first pushed item first).
      * - Negative index starts from the bottom of the stack (most recent item first).
      */
-    stackOfOENodeAt(idx: number): Element {
+    stackOfOpenElementsNodeAt(idx: number): Element {
         let res;
         if (0 <= idx) {
             res = this.stackOfOpenElements[idx];
@@ -3534,9 +3567,9 @@ class Parser {
         return element[0];
     }
 
-    stackOfOEContainsHTMLElement(tagName: string): boolean {
+    stackOfOpenElementsContainsHTMLElement(tagName: string): boolean {
         for (let i = 0; i < this.stackOfOpenElements.length; i++) {
-            const elem = this.stackOfOENodeAt(i);
+            const elem = this.stackOfOpenElementsNodeAt(i);
             if (
                 elem instanceof Element &&
                 elem.isElement(HTML_NAMESPACE, tagName)
@@ -4035,7 +4068,7 @@ class Parser {
 
                 // S1.
                 let nodeIdx = this.stackOfOpenElements.length - 1;
-                let node = this.stackOfOENodeAt(nodeIdx);
+                let node = this.stackOfOpenElementsNodeAt(nodeIdx);
 
                 // S2.
                 if (toASCIILowercase(node.tagToken.name) !== token.name) {
@@ -4062,7 +4095,7 @@ class Parser {
 
                     // S5.
                     nodeIdx--;
-                    node = this.stackOfOENodeAt(nodeIdx);
+                    node = this.stackOfOpenElementsNodeAt(nodeIdx);
 
                     // S6.
                     if (node.namespace === HTML_NAMESPACE) {
@@ -4247,7 +4280,7 @@ class Parser {
         if (
             isFormAssociatedElement(element) &&
             this.formElementPointer !== null &&
-            !this.stackOfOEContainsHTMLElement("template") &&
+            !this.stackOfOpenElementsContainsHTMLElement("template") &&
             (isListedElement(element) ||
                 element.attribute(null, "form") === null) &&
             intendedParent.inTheSameTreeAs(this.formElementPointer)
