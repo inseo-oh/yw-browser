@@ -293,10 +293,9 @@ export class Node {
 
         // S7.
         for (const node of nodes) {
-            node.parent = parent;
-
             // S7-1.
             node.adoptNodeInto(parent.nodeDocument);
+            
             if (beforeChild === null) {
                 // S7-2.
                 parent.children.push(node);
@@ -305,6 +304,7 @@ export class Node {
                 const insertIndex = beforeChild.index();
                 parent.children.splice(insertIndex, 0, node);
             }
+            node.parent = parent;
 
             // S7-4.
             if (parent instanceof Element && parent.isShadowHost()) {
@@ -414,6 +414,8 @@ export class Node {
         const oldDocument = this.nodeDocument;
         // S2.
         if (this.parent !== null) {
+            console.log(this.parent);
+            console.trace("what");
             // TODO: remove node
             throw new Error(
                 "TODO[https://dom.spec.whatwg.org/#concept-node-adopt]",
