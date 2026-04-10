@@ -19,6 +19,7 @@ import {
     XMLNS_NAMESPACE,
     isASCIICaseInsensitiveMatch,
     isASCIIWhitespace,
+    toASCIILowercase,
 } from "../../infra.js";
 import { hasPrefixASCIICaseInsensitive, toCodePoint } from "../../utility.js";
 import {
@@ -3795,8 +3796,285 @@ class Parser {
         ) {
             this.useRulesFor(this.insertionMode, tkr, token);
         } else {
-            // TODO: Process the token according to the rules given in the section for parsing tokens in foreign content.
-            throw new Error("not yet implemented");
+            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inforeign
+
+            if (token.kind === "character" && token.data === "\u0000") {
+                // PARSE ERROR
+                this.insertCharacter({ kind: "character", data: "\ufffd" });
+            } else if (
+                token.kind === "character" &&
+                (token.data === "\t" ||
+                    token.data === "\n" ||
+                    token.data === "\f" ||
+                    token.data === "\r" ||
+                    token.data === " ")
+            ) {
+                this.insertCharacter(token);
+            } else if (token.kind === "character") {
+                this.insertCharacter(token);
+                this.framesetOKFlag = "not ok";
+            } else if (token.kind === "comment") {
+                this.insertComment(token, null);
+            } else if (token.kind === "doctype") {
+                // PARSE ERROR
+            } else if (
+                (token.kind === "tag" &&
+                    token.type === "start" &&
+                    (token.name === "b" ||
+                        token.name === "big" ||
+                        token.name === "blockquote" ||
+                        token.name === "body" ||
+                        token.name === "br" ||
+                        token.name === "center" ||
+                        token.name === "code" ||
+                        token.name === "dd" ||
+                        token.name === "div" ||
+                        token.name === "dl" ||
+                        token.name === "dt" ||
+                        token.name === "em" ||
+                        token.name === "embed" ||
+                        token.name === "h1" ||
+                        token.name === "h2" ||
+                        token.name === "h3" ||
+                        token.name === "h4" ||
+                        token.name === "h5" ||
+                        token.name === "h6" ||
+                        token.name === "head" ||
+                        token.name === "hr" ||
+                        token.name === "i" ||
+                        token.name === "img" ||
+                        token.name === "li" ||
+                        token.name === "listing" ||
+                        token.name === "menu" ||
+                        token.name === "meta" ||
+                        token.name === "nobr" ||
+                        token.name === "ol" ||
+                        token.name === "p" ||
+                        token.name === "pre" ||
+                        token.name === "ruby" ||
+                        token.name === "s" ||
+                        token.name === "small" ||
+                        token.name === "span" ||
+                        token.name === "strong" ||
+                        token.name === "strike" ||
+                        token.name === "sub" ||
+                        token.name === "sup" ||
+                        token.name === "table" ||
+                        token.name === "tt" ||
+                        token.name === "u" ||
+                        token.name === "ul" ||
+                        token.name === "var")) ||
+                (token.kind === "tag" &&
+                    token.type === "start" &&
+                    token.name === "font" &&
+                    token.attributes.filter(
+                        (a) =>
+                            a.localName === "color" ||
+                            a.localName === "face" ||
+                            a.localName === "size",
+                    ).length !== 0) ||
+                (token.kind === "tag" &&
+                    token.type === "end" &&
+                    (token.name === "br" || token.name === "p"))
+            ) {
+                // PARSE ERROR
+                while (
+                    !this.isMathmlTextIntegrationPoint(this.currentNode()) &&
+                    !this.isHTMLIntegrationPoint(this.currentNode()) &&
+                    this.currentNode().namespace !== HTML_NAMESPACE
+                ) {
+                    this.popFromStackOfOpenElements();
+                }
+                this.reprocessToken(tkr, token);
+            } else if (token.kind === "tag" && token.type === "start") {
+                if (this.adjustedCurrentNode().namespace === MATHML_NAMESPACE) {
+                    this.adjustMathmlAttributes(token);
+                }
+                if (this.adjustedCurrentNode().namespace === SVG_NAMESPACE) {
+                    const ADJUST_TAG_NAME = [
+                        { localName: "altglyph", newLocalName: "altGlyph" },
+                        {
+                            localName: "altglyphdef",
+                            newLocalName: "altGlyphDef",
+                        },
+                        {
+                            localName: "altglyphitem",
+                            newLocalName: "altGlyphItem",
+                        },
+                        {
+                            localName: "animatecolor",
+                            newLocalName: "animateColor",
+                        },
+                        {
+                            localName: "animatemotion",
+                            newLocalName: "animateMotion",
+                        },
+                        {
+                            localName: "animatetransform",
+                            newLocalName: "animateTransform",
+                        },
+                        { localName: "clippath", newLocalName: "clipPath" },
+                        { localName: "feblend", newLocalName: "feBlend" },
+                        {
+                            localName: "fecolormatrix",
+                            newLocalName: "feColorMatrix",
+                        },
+                        {
+                            localName: "fecomponenttransfer",
+                            newLocalName: "feComponentTransfer",
+                        },
+                        {
+                            localName: "fecomposite",
+                            newLocalName: "feComposite",
+                        },
+                        {
+                            localName: "feconvolvematrix",
+                            newLocalName: "feConvolveMatrix",
+                        },
+                        {
+                            localName: "fediffuselighting",
+                            newLocalName: "feDiffuseLighting",
+                        },
+                        {
+                            localName: "fedisplacementmap",
+                            newLocalName: "feDisplacementMap",
+                        },
+                        {
+                            localName: "fedistantlight",
+                            newLocalName: "feDistantLight",
+                        },
+                        {
+                            localName: "fedropshadow",
+                            newLocalName: "feDropShadow",
+                        },
+                        { localName: "feflood", newLocalName: "feFlood" },
+                        { localName: "fefunca", newLocalName: "feFuncA" },
+                        { localName: "fefuncb", newLocalName: "feFuncB" },
+                        { localName: "fefuncg", newLocalName: "feFuncG" },
+                        { localName: "fefuncr", newLocalName: "feFuncR" },
+                        {
+                            localName: "fegaussianblur",
+                            newLocalName: "feGaussianBlur",
+                        },
+                        { localName: "feimage", newLocalName: "feImage" },
+                        { localName: "femerge", newLocalName: "feMerge" },
+                        {
+                            localName: "femergenode",
+                            newLocalName: "feMergeNode",
+                        },
+                        {
+                            localName: "femorphology",
+                            newLocalName: "feMorphology",
+                        },
+                        { localName: "feoffset", newLocalName: "feOffset" },
+                        {
+                            localName: "fepointlight",
+                            newLocalName: "fePointLight",
+                        },
+                        {
+                            localName: "fespecularlighting",
+                            newLocalName: "feSpecularLighting",
+                        },
+                        {
+                            localName: "fespotlight",
+                            newLocalName: "feSpotLight",
+                        },
+                        { localName: "fetile", newLocalName: "feTile" },
+                        {
+                            localName: "feturbulence",
+                            newLocalName: "feTurbulence",
+                        },
+                        {
+                            localName: "foreignobject",
+                            newLocalName: "foreignObject",
+                        },
+                        { localName: "glyphref", newLocalName: "glyphRef" },
+                        {
+                            localName: "lineargradient",
+                            newLocalName: "linearGradient",
+                        },
+                        {
+                            localName: "radialgradient",
+                            newLocalName: "radialGradient",
+                        },
+                        { localName: "textpath", newLocalName: "textPath" },
+                    ];
+                    for (const adjustTagName of ADJUST_TAG_NAME) {
+                        if (token.name === adjustTagName.localName) {
+                            token.name = adjustTagName.newLocalName;
+                            break;
+                        }
+                    }
+                    this.adjustSVGAttributes(token);
+                }
+                this.adjustForeignAttributes(token);
+                console.assert(this.adjustedCurrentNode().namespace !== null);
+                this.insertForeignElement(
+                    token,
+                    this.adjustedCurrentNode().namespace!,
+                    false,
+                );
+                if (token.isSelfClosing) {
+                    if (
+                        token.name === "script" &&
+                        this.currentNode().namespace === SVG_NAMESPACE
+                    ) {
+                        throw new Error("not yet implemented");
+                    } else {
+                        this.popFromStackOfOpenElements();
+                    }
+                }
+            } else if (
+                token.kind === "tag" &&
+                token.type === "end" &&
+                this.currentNode().isElement(SVG_NAMESPACE, "script")
+            ) {
+                throw new Error("not yet implemented");
+            } else if (token.kind === "tag" && token.type === "end") {
+                // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.10.)
+
+                // S1.
+                let nodeIdx = this.stackOfOpenElements.length - 1;
+                let node = this.stackOfOENodeAt(nodeIdx);
+
+                // S2.
+                if (toASCIILowercase(node.tagToken.name) !== token.name) {
+                    // PARSE ERROR
+                }
+
+                while (true) {
+                    // S3.
+                    if (nodeIdx === 0) {
+                        return;
+                    }
+
+                    // S4.
+                    if (toASCIILowercase(node.tagToken.name) === token.name) {
+                        while (true) {
+                            const poppedNode =
+                                this.popFromStackOfOpenElements();
+                            if (poppedNode === node) {
+                                break;
+                            }
+                        }
+                        return;
+                    }
+
+                    // S5.
+                    nodeIdx--;
+                    node = this.stackOfOENodeAt(nodeIdx);
+
+                    // S6.
+                    if (node.namespace === HTML_NAMESPACE) {
+                        break;
+                    }
+                }
+
+                // S7.
+                this.useRulesFor(this.insertionMode, tkr, token);
+            } else {
+                console.warn("unrecognized token:", token);
+            }
         }
     }
 
