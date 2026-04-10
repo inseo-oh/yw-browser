@@ -1685,14 +1685,16 @@ class Parser {
                                     removeIdx = i;
                                 }
                             }
-                            this.removeFromAFEList(removeIdx);
+                            this.removeFromActiveFormattingElementsList(
+                                removeIdx,
+                            );
                             removeIdx = this.stackOfOpenElements.indexOf(aElem);
                             this.removeFromStackOfOpenElements(removeIdx);
                         }
                     }
                     this.reconstructActiveFormattingElements();
                     const element = this.insertHTMLElement(token);
-                    this.pushOntoListOfAFE(element);
+                    this.pushOntoListOfActiveFormattingElements(element);
                 } else if (
                     token.kind === "tag" &&
                     token.type === "start" &&
@@ -1711,7 +1713,7 @@ class Parser {
                 ) {
                     this.reconstructActiveFormattingElements();
                     const element = this.insertHTMLElement(token);
-                    this.pushOntoListOfAFE(element);
+                    this.pushOntoListOfActiveFormattingElements(element);
                 } else if (
                     token.kind === "tag" &&
                     token.type === "start" &&
@@ -1728,7 +1730,7 @@ class Parser {
                         this.reconstructActiveFormattingElements();
                     }
                     const element = this.insertHTMLElement(token);
-                    this.pushOntoListOfAFE(element);
+                    this.pushOntoListOfActiveFormattingElements(element);
                 } else if (
                     token.kind === "tag" &&
                     token.type === "end" &&
@@ -1791,7 +1793,7 @@ class Parser {
                             break;
                         }
                     }
-                    this.clearListOfAFEUpToLastMarker();
+                    this.clearListOfActiveFormattingElementsUpToLastMarker();
                 } else if (
                     token.kind === "tag" &&
                     token.type === "start" &&
@@ -2453,7 +2455,7 @@ class Parser {
                             break;
                         }
                     }
-                    this.clearListOfAFEUpToLastMarker();
+                    this.clearListOfActiveFormattingElementsUpToLastMarker();
                     this.insertionMode = "in table";
                 } else if (
                     (token.kind === "tag" &&
@@ -2491,7 +2493,7 @@ class Parser {
                             break;
                         }
                     }
-                    this.clearListOfAFEUpToLastMarker();
+                    this.clearListOfActiveFormattingElementsUpToLastMarker();
                     this.insertionMode = "in table";
                     this.reprocessToken(tkr, token);
                 } else if (
@@ -2820,7 +2822,7 @@ class Parser {
                             break;
                         }
                     }
-                    this.clearListOfAFEUpToLastMarker();
+                    this.clearListOfActiveFormattingElementsUpToLastMarker();
                     this.insertionMode = "in row";
                 } else if (
                     token.kind === "tag" &&
@@ -2975,7 +2977,7 @@ class Parser {
                             break;
                         }
                     }
-                    this.clearListOfAFEUpToLastMarker();
+                    this.clearListOfActiveFormattingElementsUpToLastMarker();
                     this.stackOfTemplateInsertionModes.pop();
                     this.resetInsertionModeAppropriately();
                     this.reprocessToken(tkr, token);
@@ -3580,7 +3582,7 @@ class Parser {
     listOfActiveFormattingElements: ActiveFormattingElement[] = [];
 
     // https://html.spec.whatwg.org/multipage/parsing.html#push-onto-the-list-of-active-formatting-elements
-    pushOntoListOfAFE(element: Element) {
+    pushOntoListOfActiveFormattingElements(element: Element) {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.03)
 
         // S1.
@@ -3633,7 +3635,9 @@ class Parser {
             }
         }
         if (3 <= matchingItemIndices.length) {
-            this.removeFromAFEList(matchingItemIndices[0]!);
+            this.removeFromActiveFormattingElementsList(
+                matchingItemIndices[0]!,
+            );
         }
 
         // S2.
@@ -3666,12 +3670,14 @@ class Parser {
         let entryIdx = this.listOfActiveFormattingElements.length - 1;
         let entry = this.listOfActiveFormattingElements[entryIdx];
         if (entry === undefined) {
-            throw Error(`invalid AFE index ${entryIdx}`);
+            throw Error(`invalid ActiveFormattingElements index ${entryIdx}`);
         }
         const updateEntry = () => {
             const e = this.listOfActiveFormattingElements[entryIdx];
             if (e === undefined) {
-                throw Error(`invalid AFE index ${entryIdx}`);
+                throw Error(
+                    `invalid ActiveFormattingElements index ${entryIdx}`,
+                );
             }
             entry = e;
         };
@@ -3732,7 +3738,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#clear-the-list-of-active-formatting-elements-up-to-the-last-marker
-    clearListOfAFEUpToLastMarker() {
+    clearListOfActiveFormattingElementsUpToLastMarker() {
         while (true) {
             // S1.
             const afe =
@@ -3742,7 +3748,7 @@ class Parser {
 
             // S2.
             const wasMarker = afe === "marker";
-            this.removeFromAFEList(
+            this.removeFromActiveFormattingElementsList(
                 this.listOfActiveFormattingElements.length - 1,
             );
 
@@ -3755,7 +3761,7 @@ class Parser {
         }
     }
 
-    removeFromAFEList(idx: number) {
+    removeFromActiveFormattingElementsList(idx: number) {
         this.listOfActiveFormattingElements.splice(idx, 1);
     }
 
@@ -4801,7 +4807,7 @@ class Parser {
                 break;
             }
         }
-        this.clearListOfAFEUpToLastMarker();
+        this.clearListOfActiveFormattingElementsUpToLastMarker();
         this.insertionMode = "in row";
     }
 
