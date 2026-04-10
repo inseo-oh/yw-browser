@@ -9,7 +9,6 @@ import {
     lookupCustomElementDefinition,
     tryUpgradeElement,
 } from "./html/custom_elements.js";
-import { elementInterfaceForHTML } from "./html/elements.js";
 import { type TokenFor } from "./html/parsing/token.js";
 import {
     HTML_NAMESPACE,
@@ -610,19 +609,6 @@ export type ElementInterface = (
     args: ElementConstructionArgs,
 ) => Element;
 
-// https://dom.spec.whatwg.org/#concept-element-interface
-function elementInterfaceFor(
-    namespace: string | null,
-    localName: string,
-): ElementInterface {
-    switch (namespace) {
-        case HTML_NAMESPACE:
-            return elementInterfaceForHTML(localName);
-        default:
-            return (n, a) => new Element(n, a);
-    }
-}
-
 // https://dom.spec.whatwg.org/#is-a-global-custom-element-registry
 export function isGlobalCustomElementRegistry(
     registry: CustomElementRegistry | null,
@@ -847,6 +833,12 @@ export class Element extends Node {
         document: Document,
         localName: string,
         namespace: string | null,
+        // Non-standard parameter, needed to eliminate circular dependency between
+        // DOM and other parts of the engine.
+        elementInterfaceFor: (
+            namespace: string | null,
+            localName: string,
+        ) => ElementInterface,
         tagToken: TokenFor<"tag"> = {
             kind: "tag",
             name: localName,
