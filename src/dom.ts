@@ -830,6 +830,13 @@ export class Element extends Node {
         return this.shadowRoot !== null;
     }
 
+    // https://dom.spec.whatwg.org/#concept-element-qualified-name
+    qualifiedName() {
+        return this.namespacePrefix === null
+            ? this.localName
+            : `${this.namespacePrefix}:${this.localName}`;
+    }
+
     // https://dom.spec.whatwg.org/#concept-create-element
     static create(
         document: Document,
@@ -983,6 +990,13 @@ export class Attr extends Node {
 
     // https://dom.spec.whatwg.org/#concept-attribute-element
     element: Element | null = null;
+
+    // https://dom.spec.whatwg.org/#concept-attribute-qualified-name
+    qualifiedName() {
+        return this.namespacePrefix === null
+            ? this.localName
+            : `${this.namespacePrefix}:${this.localName}`;
+    }
 }
 
 //==============================================================================
