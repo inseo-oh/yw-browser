@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 import { Element, type ElementInterface } from "../dom.js";
+import { HTML_NAMESPACE } from "../infra.js";
 import { isValidCustomElementName } from "./custom_elements.js";
 
 //==========================================================================
@@ -116,3 +117,26 @@ export class HTMLLinkElement extends HTMLElement {}
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlpreelement
 export class HTMLPreElement extends HTMLElement {}
+
+//==========================================================================
+// HTML Standard - 13.1.2.
+//==========================================================================
+
+// https://html.spec.whatwg.org/multipage/syntax.html#void-elements
+export function isVoidElement(element: Element) {
+    return (
+        element.isElement(HTML_NAMESPACE, "area") ||
+        element.isElement(HTML_NAMESPACE, "base") ||
+        element.isElement(HTML_NAMESPACE, "br") ||
+        element.isElement(HTML_NAMESPACE, "col") ||
+        element.isElement(HTML_NAMESPACE, "embed") ||
+        element.isElement(HTML_NAMESPACE, "hr") ||
+        element.isElement(HTML_NAMESPACE, "img") ||
+        element.isElement(HTML_NAMESPACE, "input") ||
+        element.isElement(HTML_NAMESPACE, "link") ||
+        element.isElement(HTML_NAMESPACE, "meta") ||
+        element.isElement(HTML_NAMESPACE, "source") ||
+        element.isElement(HTML_NAMESPACE, "track") ||
+        element.isElement(HTML_NAMESPACE, "wbr")
+    );
+}
