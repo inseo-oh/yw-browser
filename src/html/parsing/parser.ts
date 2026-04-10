@@ -102,6 +102,10 @@ function insertAtLocation(node: Node, location: InsertionLocation) {
     }
 }
 
+function unexpectedToken(token: Token) {
+    console.trace("WARNING: potential bug: unexpected token:", token);
+}
+
 class Parser {
     document: Document = new Document();
     isFragmentParsing = false;
@@ -2148,7 +2152,7 @@ class Parser {
                         nodeIdx--;
                     }
                 } else {
-                    console.warn("unrecognized token:", token);
+                    unexpectedToken(token);
                 }
                 break;
             }
@@ -2176,7 +2180,7 @@ class Parser {
                     this.popFromStackOfOpenElements();
                     this.insertionMode = this.originalInsertionMode;
                 } else {
-                    console.warn("unrecognized token:", token);
+                    unexpectedToken(token);
                 }
                 break;
             }
@@ -2976,7 +2980,7 @@ class Parser {
                     this.resetInsertionModeAppropriately();
                     this.reprocessToken(tkr, token);
                 } else {
-                    console.warn("unrecognized token:", token);
+                    unexpectedToken(token);
                 }
                 break;
             }
@@ -4094,7 +4098,7 @@ class Parser {
                 // S7.
                 this.useRulesFor(this.insertionMode, tkr, token);
             } else {
-                console.warn("unrecognized token:", token);
+                unexpectedToken(token);
             }
         }
     }
