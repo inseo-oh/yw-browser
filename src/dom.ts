@@ -209,11 +209,11 @@ export class Node {
 
     // https://dom.spec.whatwg.org/#concept-tree-index
     index(): number {
-        if (parent === null) {
+        if (this.parent === null) {
             return 0;
         }
-        for (let i = 0; i < this.children.length; i++) {
-            if (this.children[i] === this) {
+        for (let i = 0; i < this.parent.children.length; i++) {
+            if (this.parent.children[i] === this) {
                 return i;
             }
         }
@@ -295,7 +295,7 @@ export class Node {
         for (const node of nodes) {
             // S7-1.
             node.adoptNodeInto(parent.nodeDocument);
-            
+
             if (beforeChild === null) {
                 // S7-2.
                 parent.children.push(node);
