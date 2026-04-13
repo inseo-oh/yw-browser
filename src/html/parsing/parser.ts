@@ -651,7 +651,7 @@ class Parser {
         };
 
         let state: "rewind" | "advance" | "create" = "rewind";
-        while (true) {
+        loop: while (true) {
             switch (state) {
                 case "rewind":
                     // S4.
@@ -674,14 +674,14 @@ class Parser {
                         state = "rewind";
                         continue;
                     }
-
-                // eslint-disable-next-line no-fallthrough
+                    state = "advance";
+                    break;
                 case "advance":
                     // S7.
                     entryIdx++;
                     updateEntry();
-
-                // eslint-disable-next-line no-fallthrough
+                    state = "create";
+                    break;
                 case "create": {
                     // S8.
                     if (entry === "marker") {
@@ -694,11 +694,13 @@ class Parser {
 
                     // S10.
                     if (
-                        this.listOfActiveFormattingElements.indexOf(entry) !=
+                        entryIdx !=
                         this.listOfActiveFormattingElements.length - 1
                     ) {
                         state = "advance";
                         continue;
+                    } else {
+                        break loop;
                     }
                 }
             }
