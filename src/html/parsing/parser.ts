@@ -2872,7 +2872,7 @@ class Parser {
             token.name === "button"
         ) {
             if (
-                !this.hasElementInScope((e) =>
+                this.hasElementInScope((e) =>
                     e.isElement(HTML_NAMESPACE, "button"),
                 )
             ) {
