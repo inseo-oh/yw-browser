@@ -50,7 +50,7 @@ export default function serializeHTMLFragment(
 
     // S3.
     if (node instanceof Element && node.isElement(HTML_NAMESPACE, "template")) {
-        throw new Error("TODO");
+        // STUB: For now we treat template as if it was normal element.
     }
 
     // S4.
