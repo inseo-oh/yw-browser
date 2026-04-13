@@ -591,7 +591,7 @@ class Parser {
                 }
                 for (let i = 0; i < attrsLen; i++) {
                     if (
-                        attrs[i]?.localName !== otherAttrs[i]?.localName &&
+                        attrs[i]?.localName !== otherAttrs[i]?.localName ||
                         attrs[i]?.value !== otherAttrs[i]?.value
                     ) {
                         match = false;
