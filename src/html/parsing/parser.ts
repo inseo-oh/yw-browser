@@ -355,7 +355,7 @@ class Parser {
         ];
 
         for (const entry of SPECIAL_ELEMENTS) {
-            if (element.isElement(entry.localName, entry.localName)) {
+            if (element.isElement(entry.namespace, entry.localName)) {
                 return true;
             }
         }
@@ -1091,7 +1091,7 @@ class Parser {
         ];
 
         for (const entry of SPECIAL_ELEMENTS) {
-            if (element.isElement(entry.localName, entry.localName)) {
+            if (element.isElement(entry.namespace, entry.localName)) {
                 return true;
             }
         }
@@ -1113,7 +1113,7 @@ class Parser {
         ];
 
         for (const entry of SPECIAL_ELEMENTS) {
-            if (element.isElement(entry.localName, entry.localName)) {
+            if (element.isElement(entry.namespace, entry.localName)) {
                 return true;
             }
         }
