@@ -1640,7 +1640,18 @@ class Parser {
                     found = true;
                 }
             }
-            if (!found) {
+            if (
+                !found &&
+                (element.isElement(HTML_NAMESPACE, "dd") ||
+                    element.isElement(HTML_NAMESPACE, "dt") ||
+                    element.isElement(HTML_NAMESPACE, "li") ||
+                    element.isElement(HTML_NAMESPACE, "optgroup") ||
+                    element.isElement(HTML_NAMESPACE, "option") ||
+                    element.isElement(HTML_NAMESPACE, "p") ||
+                    element.isElement(HTML_NAMESPACE, "rb") ||
+                    element.isElement(HTML_NAMESPACE, "rp") ||
+                    element.isElement(HTML_NAMESPACE, "rtc"))
+            ) {
                 this.popFromStackOfOpenElements();
             } else {
                 break;
