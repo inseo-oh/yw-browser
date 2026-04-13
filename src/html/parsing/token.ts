@@ -114,8 +114,8 @@ class TagTokenBuilder implements TokenBuilder {
             type: this.type,
             isSelfClosing: this.isSelfClosing,
             attributes: this.attributes
-                .filter((attr, idx) =>
-                    this.attributeIndicesToRemove.includes(idx),
+                .filter(
+                    (attr, idx) => !this.attributeIndicesToRemove.includes(idx),
                 )
                 .map(({ localName, value }) => ({
                     localName,
