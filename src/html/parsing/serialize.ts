@@ -96,9 +96,6 @@ export default function serializeHTMLFragment(
                 serializableShadowRoots,
                 shadowRoots,
             );
-            if (tagName.toLowerCase() === "clippath") {
-                console.log(tagName);
-            }
             s += `</${tagName}>`;
         } else if (currentNode instanceof Text) {
             if (
