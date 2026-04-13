@@ -128,3101 +128,69 @@ class Parser {
     // https://html.spec.whatwg.org/multipage/parsing.html#using-the-rules-for
     useRulesFor(mode: InsertionMode, tkr: Tokenizer, token: Token) {
         switch (mode) {
-            // https://html.spec.whatwg.org/multipage/parsing.html#the-initial-insertion-mode
-            case "initial": {
-                if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    return;
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, {
-                        rel: "after last child",
-                        parentNode: this.document,
-                    });
-                } else if (token.kind === "doctype") {
-                    const doctype = new DocumentType(
-                        this.document,
-                        token.name ?? "",
-                    );
-                    doctype.publicID = token.publicID ?? "";
-                    doctype.systemID = token.systemID ?? "";
-                    this.document.mode = "no-quirks";
-                    if (
-                        !this.document.isIframeSrcdocDocument &&
-                        !this.document.parserCannotChangeMode
-                    ) {
-                        if (
-                            token.forceQuirks ||
-                            (token.name === null && token.name !== "html") ||
-                            (token.publicID !== null &&
-                                isASCIICaseInsensitiveMatch(
-                                    token.publicID,
-                                    "//W3O//DTD W3 HTML Strict 3.0//EN//",
-                                )) ||
-                            (token.publicID !== null &&
-                                isASCIICaseInsensitiveMatch(
-                                    token.publicID,
-                                    "-/W3C/DTD HTML 4.0 Transitional/EN",
-                                )) ||
-                            (token.publicID !== null &&
-                                isASCIICaseInsensitiveMatch(
-                                    token.publicID,
-                                    "HTML",
-                                )) ||
-                            (token.systemID !== null &&
-                                isASCIICaseInsensitiveMatch(
-                                    token.systemID,
-                                    "http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "+//Silmaril//dtd html Pro v0r11 19970101//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//AS//DTD HTML 3.0 asWedit + extensions//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//AdvaSoft Ltd//DTD HTML 3.0 asWedit + extensions//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 2.0 Level 1//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 2.0 Level 2//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 2.0 Strict Level 1//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 2.0 Strict Level 2//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 2.0 Strict//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 2.0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 2.1E//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 3.0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 3.2 Final//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 3.2//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML 3//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML Level 0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML Level 1//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML Level 2//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML Level 3//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML Strict Level 0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML Strict Level 1//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML Strict Level 2//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML Strict Level 3//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML Strict//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//IETF//DTD HTML//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Metrius//DTD Metrius Presentational//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Microsoft//DTD Internet Explorer 2.0 HTML Strict//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Microsoft//DTD Internet Explorer 2.0 HTML//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Microsoft//DTD Internet Explorer 2.0 Tables//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Microsoft//DTD Internet Explorer 3.0 HTML Strict//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Microsoft//DTD Internet Explorer 3.0 HTML//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Microsoft//DTD Internet Explorer 3.0 Tables//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Netscape Comm. Corp.//DTD HTML//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Netscape Comm. Corp.//DTD Strict HTML//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//O'Reilly and Associates//DTD HTML 2.0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//O'Reilly and Associates//DTD HTML Extended 1.0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//O'Reilly and Associates//DTD HTML Extended Relaxed 1.0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//SQ//DTD HTML 2.0 HoTMetaL + extensions//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//SoftQuad Software//DTD HoTMetaL PRO 6.0::19990601::extensions to HTML 4.0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//SoftQuad//DTD HoTMetaL PRO 4.0::19971010::extensions to HTML 4.0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Spyglass//DTD HTML 2.0 Extended//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Sun Microsystems Corp.//DTD HotJava HTML//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//Sun Microsystems Corp.//DTD HotJava Strict HTML//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 3 1995-03-24//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 3.2 Draft//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 3.2 Final//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 3.2//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 3.2S Draft//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 4.0 Frameset//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 4.0 Transitional//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML Experimental 19960712//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML Experimental 970421//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD W3 HTML//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3O//DTD W3 HTML 3.0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//WebTechs//DTD Mozilla HTML 2.0//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//WebTechs//DTD Mozilla HTML//",
-                                )) ||
-                            ((token.systemID === null ||
-                                token.systemID[0] === "\0") &&
-                                token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 4.01 Frameset//",
-                                )) ||
-                            ((token.systemID === null ||
-                                token.systemID[0] === "\0") &&
-                                token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 4.01 Transitional//",
-                                ))
-                        ) {
-                            this.document.mode = "quirks";
-                        } else if (
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD XHTML 1.0 Frameset//",
-                                )) ||
-                            (token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD XHTML 1.0 Transitional//",
-                                )) ||
-                            (token.systemID !== null &&
-                                token.systemID[0] !== "\0" &&
-                                token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 4.01 Frameset//",
-                                )) ||
-                            (token.systemID !== null &&
-                                token.systemID[0] !== "\0" &&
-                                token.publicID !== null &&
-                                hasPrefixASCIICaseInsensitive(
-                                    token.publicID,
-                                    "-//W3C//DTD HTML 4.01 Transitional//",
-                                ))
-                        ) {
-                            this.document.mode = "limited-quirks";
-                        }
-                    }
-                    this.insertionMode = "before html";
-                } else {
-                    if (!this.document.isIframeSrcdocDocument) {
-                        if (!this.document.parserCannotChangeMode) {
-                            // PARSE ERROR
-                            this.document.mode = "quirks";
-                        }
-                        this.insertionMode = "before html";
-                        this.reprocessToken(tkr, token);
-                    }
-                }
+            case "initial":
+                this.#imodeInitial(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#the-before-html-insertion-mode
-            case "before html": {
-                const anythingElse = () => {
-                    const element = Element.create(
-                        this.document,
-                        "html",
-                        HTML_NAMESPACE,
-                        elementInterfaceFor,
-                    );
-                    this.document.appendChild(element);
-                    this.pushToStackOfOpenElements(element);
-                    this.insertionMode = "before head";
-                    this.reprocessToken(tkr, token);
-                };
-
-                if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, {
-                        rel: "after last child",
-                        parentNode: this.document,
-                    });
-                } else if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    const element = this.createElementForToken(
-                        token,
-                        HTML_NAMESPACE,
-                        this.document,
-                    );
-                    this.document.appendChild(element);
-                    this.pushToStackOfOpenElements(element);
-                    this.insertionMode = "before head";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "head" ||
-                        token.name === "body" ||
-                        token.name === "html" ||
-                        token.name === "br")
-                ) {
-                    anythingElse();
-                } else if (token.kind === "tag" && token.type === "end") {
-                    // PARSE ERROR
-                    return;
-                } else {
-                    anythingElse();
-                }
+            case "before html":
+                this.#imodeBeforeHtml(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#the-before-head-insertion-mode
-            case "before head": {
-                if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    return;
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, null);
-                } else if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "head"
-                ) {
-                    const element = this.insertHTMLElement(token);
-                    this.headElementPointer = element;
-                    this.insertionMode = "in head";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name !== "head" &&
-                    token.name !== "body" &&
-                    token.name !== "html" &&
-                    token.name !== "br"
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else {
-                    const element = this.insertHTMLElement({
-                        kind: "tag",
-                        name: "head",
-                        attributes: [],
-                        type: "start",
-                        isSelfClosing: false,
-                        selfClosingAcknowledged: false,
-                    });
-                    this.headElementPointer = element;
-                    this.insertionMode = "in head";
-                    this.reprocessToken(tkr, token);
-                }
+            case "before head":
+                this.#imodeBeforeHead(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead
-            case "in head": {
-                if (token.kind === "character") {
-                    this.insertCharacter(token);
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, null);
-                } else if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "base" ||
-                        token.name === "basefont" ||
-                        token.name === "bgsound" ||
-                        token.name === "link")
-                ) {
-                    this.insertHTMLElement(token);
-                    this.popFromStackOfOpenElements();
-                    if (token.isSelfClosing) {
-                        token.selfClosingAcknowledged = true;
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "meta"
-                ) {
-                    const element = this.insertHTMLElement(token);
-                    this.popFromStackOfOpenElements();
-                    if (!this.hasActiveSpeculativeParser) {
-                        const charsetAttr = element.attribute(null, "charset");
-                        const httpEquivAttr = element.attribute(
-                            null,
-                            "http-equiv",
-                        );
-                        if (charsetAttr !== undefined) {
-                            // TODO: Set encoding based on charset
-                        }
-                        if (
-                            httpEquivAttr !== undefined &&
-                            isASCIICaseInsensitiveMatch(
-                                httpEquivAttr,
-                                "content-type",
-                            )
-                        ) {
-                            // TODO: Set encoding based on http-equiv Content-Type value
-                        }
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "title"
-                ) {
-                    this.parseGenericRCDATAElement(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    ((token.type === "start" &&
-                        token.name === "noscript" &&
-                        this.scriptingMode !== "Disabled") ||
-                        (token.type === "start" &&
-                            (token.name === "noframes" ||
-                                token.name === "style")))
-                ) {
-                    this.parseGenericRawTextElement(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "noscript" &&
-                    this.scriptingMode === "Disabled"
-                ) {
-                    this.insertHTMLElement(token);
-                    this.insertionMode = "in head noscript";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "script"
-                ) {
-                    // STUB.
-                    this.parseGenericRawTextElement(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "head"
-                ) {
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = "after head";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "template"
-                ) {
-                    throw new Error("not yet implemented");
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "template"
-                ) {
-                    throw new Error("not yet implemented");
-                } else if (
-                    token.kind === "tag" &&
-                    ((token.type === "end" &&
-                        token.name !== "body" &&
-                        token.name !== "html" &&
-                        token.name !== "br") ||
-                        (token.type === "start" && token.name === "head"))
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else {
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = "after head";
-                    this.reprocessToken(tkr, token);
-                }
+            case "in head":
+                this.#imodeInHead(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inheadnoscript
-            case "in head noscript": {
-                if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "noscript"
-                ) {
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = "in head";
-                } else if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    this.useRulesFor("in head", tkr, token);
-                } else if (token.kind === "comment") {
-                    this.useRulesFor("in head", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "basefont" ||
-                        token.name === "bgsound" ||
-                        token.name === "link" ||
-                        token.name === "meta" ||
-                        token.name === "noframes" ||
-                        token.name === "style")
-                ) {
-                    this.useRulesFor("in head", tkr, token);
-                } else if (
-                    (token.kind === "tag" &&
-                        token.type === "end" &&
-                        token.name === "br") ||
-                    (token.kind === "tag" &&
-                        token.type === "start" &&
-                        (token.name === "head" || token.name === "noscript"))
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else {
-                    // PARSE ERROR
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = "in head";
-                    this.reprocessToken(tkr, token);
-                }
+            case "in head noscript":
+                this.#imodeInHeadNoscript(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#the-after-head-insertion-mode
-            case "after head": {
-                if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    this.insertCharacter(token);
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, null);
-                } else if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "body"
-                ) {
-                    this.insertHTMLElement(token);
-                    this.framesetOKFlag = "not ok";
-                    this.insertionMode = "in body";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "frameset"
-                ) {
-                    this.insertHTMLElement(token);
-                    this.insertionMode = "in frameset";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "base" ||
-                        token.name === "basefont" ||
-                        token.name === "bgsound" ||
-                        token.name === "link" ||
-                        token.name === "meta" ||
-                        token.name === "noframes" ||
-                        token.name === "script" ||
-                        token.name === "style" ||
-                        token.name === "template" ||
-                        token.name === "title")
-                ) {
-                    // PARSE ERROR
-                    if (this.headElementPointer === null) {
-                        throw Error(
-                            "head element pointer must be set at this point",
-                        );
-                    }
-                    this.pushToStackOfOpenElements(this.headElementPointer);
-                    this.insertionMode = "in head";
-                    const removeIdx = this.stackOfOpenElements.indexOf(
-                        this.headElementPointer,
-                    );
-                    this.removeFromStackOfOpenElements(removeIdx);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "template"
-                ) {
-                    this.useRulesFor("in head", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    ((token.type === "end" &&
-                        token.name !== "body" &&
-                        token.name !== "html" &&
-                        token.name !== "br") ||
-                        (token.type === "start" && token.name === "head"))
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else {
-                    this.insertHTMLElement({
-                        kind: "tag",
-                        name: "body",
-                        attributes: [],
-                        type: "start",
-                        isSelfClosing: false,
-                        selfClosingAcknowledged: false,
-                    });
-                    this.insertionMode = "in body";
-                    this.useRulesFor("in body", tkr, token);
-                }
+            case "after head":
+                this.#imodeAfterHead(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody
-            case "in body": {
-                if (token.kind === "character" && token.data === "\0") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    this.reconstructActiveFormattingElements();
-                    this.insertCharacter(token);
-                } else if (token.kind === "character") {
-                    this.reconstructActiveFormattingElements();
-                    this.insertCharacter(token);
-                    this.framesetOKFlag = "not ok";
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, null);
-                } else if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    // PARSE ERROR
-                    if (
-                        this.stackOfOpenElementsContainsHTMLElement("template")
-                    ) {
-                        return;
-                    } else {
-                        throw new Error("not yet implemented");
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    ((token.type === "start" &&
-                        (token.name === "base" ||
-                            token.name === "basefont" ||
-                            token.name === "bgsound" ||
-                            token.name === "link" ||
-                            token.name === "meta" ||
-                            token.name === "noframes" ||
-                            token.name === "script" ||
-                            token.name === "style" ||
-                            token.name === "template" ||
-                            token.name === "title")) ||
-                        (token.type === "end" && token.name === "template"))
-                ) {
-                    this.useRulesFor("in head", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "body"
-                ) {
-                    // PARSE ERROR
-                    if (
-                        this.stackOfOpenElements.length === 1 ||
-                        !this.stackOfOpenElementsNodeAt(1).isElement(
-                            HTML_NAMESPACE,
-                            "body",
-                        ) ||
-                        this.stackOfOpenElementsContainsHTMLElement("template")
-                    ) {
-                        return;
-                    } else {
-                        this.framesetOKFlag = "not ok";
-                        throw new Error("not yet implemented");
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "frameset"
-                ) {
-                    // PARSE ERROR
-                    if (
-                        this.stackOfOpenElements.length === 1 ||
-                        !this.stackOfOpenElementsNodeAt(1).isElement(
-                            HTML_NAMESPACE,
-                            "body",
-                        )
-                    ) {
-                        return;
-                    } else if (this.framesetOKFlag === "not ok") {
-                        return;
-                    } else {
-                        throw new Error("not yet implemented");
-                    }
-                } else if (token.kind === "eof") {
-                    if (this.stackOfTemplateInsertionModes.length !== 0) {
-                        this.useRulesFor("in template", tkr, token);
-                    } else {
-                        if (
-                            this.stackOfOpenElementsContainsHTMLElement("dd") ||
-                            this.stackOfOpenElementsContainsHTMLElement("dt") ||
-                            this.stackOfOpenElementsContainsHTMLElement("li") ||
-                            this.stackOfOpenElementsContainsHTMLElement(
-                                "optgroup",
-                            ) ||
-                            this.stackOfOpenElementsContainsHTMLElement(
-                                "option",
-                            ) ||
-                            this.stackOfOpenElementsContainsHTMLElement("p") ||
-                            this.stackOfOpenElementsContainsHTMLElement("rb") ||
-                            this.stackOfOpenElementsContainsHTMLElement("rp") ||
-                            this.stackOfOpenElementsContainsHTMLElement("rt") ||
-                            this.stackOfOpenElementsContainsHTMLElement(
-                                "rtc",
-                            ) ||
-                            this.stackOfOpenElementsContainsHTMLElement(
-                                "tbody",
-                            ) ||
-                            this.stackOfOpenElementsContainsHTMLElement("td") ||
-                            this.stackOfOpenElementsContainsHTMLElement(
-                                "tfoot",
-                            ) ||
-                            this.stackOfOpenElementsContainsHTMLElement("th") ||
-                            this.stackOfOpenElementsContainsHTMLElement(
-                                "thead",
-                            ) ||
-                            this.stackOfOpenElementsContainsHTMLElement("tr") ||
-                            this.stackOfOpenElementsContainsHTMLElement(
-                                "body",
-                            ) ||
-                            this.stackOfOpenElementsContainsHTMLElement("html")
-                        ) {
-                            // PARSE ERROR
-                        }
-                        this.stopParsing();
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "body"
-                ) {
-                    if (
-                        !this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "body"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    } else if (
-                        this.stackOfOpenElementsContainsHTMLElement("dd") ||
-                        this.stackOfOpenElementsContainsHTMLElement("dt") ||
-                        this.stackOfOpenElementsContainsHTMLElement("li") ||
-                        this.stackOfOpenElementsContainsHTMLElement(
-                            "optgroup",
-                        ) ||
-                        this.stackOfOpenElementsContainsHTMLElement("option") ||
-                        this.stackOfOpenElementsContainsHTMLElement("p") ||
-                        this.stackOfOpenElementsContainsHTMLElement("rb") ||
-                        this.stackOfOpenElementsContainsHTMLElement("rp") ||
-                        this.stackOfOpenElementsContainsHTMLElement("rt") ||
-                        this.stackOfOpenElementsContainsHTMLElement("rtc") ||
-                        this.stackOfOpenElementsContainsHTMLElement("tbody") ||
-                        this.stackOfOpenElementsContainsHTMLElement("td") ||
-                        this.stackOfOpenElementsContainsHTMLElement("tfoot") ||
-                        this.stackOfOpenElementsContainsHTMLElement("th") ||
-                        this.stackOfOpenElementsContainsHTMLElement("thead") ||
-                        this.stackOfOpenElementsContainsHTMLElement("tr") ||
-                        this.stackOfOpenElementsContainsHTMLElement("body") ||
-                        this.stackOfOpenElementsContainsHTMLElement("html")
-                    ) {
-                        // PARSE ERROR
-                    }
-                    this.insertionMode = "after body";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "html"
-                ) {
-                    if (
-                        !this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "body"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    } else if (
-                        this.stackOfOpenElementsContainsHTMLElement("dd") ||
-                        this.stackOfOpenElementsContainsHTMLElement("dt") ||
-                        this.stackOfOpenElementsContainsHTMLElement("li") ||
-                        this.stackOfOpenElementsContainsHTMLElement(
-                            "optgroup",
-                        ) ||
-                        this.stackOfOpenElementsContainsHTMLElement("option") ||
-                        this.stackOfOpenElementsContainsHTMLElement("p") ||
-                        this.stackOfOpenElementsContainsHTMLElement("rb") ||
-                        this.stackOfOpenElementsContainsHTMLElement("rp") ||
-                        this.stackOfOpenElementsContainsHTMLElement("rt") ||
-                        this.stackOfOpenElementsContainsHTMLElement("rtc") ||
-                        this.stackOfOpenElementsContainsHTMLElement("tbody") ||
-                        this.stackOfOpenElementsContainsHTMLElement("td") ||
-                        this.stackOfOpenElementsContainsHTMLElement("tfoot") ||
-                        this.stackOfOpenElementsContainsHTMLElement("th") ||
-                        this.stackOfOpenElementsContainsHTMLElement("thead") ||
-                        this.stackOfOpenElementsContainsHTMLElement("tr") ||
-                        this.stackOfOpenElementsContainsHTMLElement("body") ||
-                        this.stackOfOpenElementsContainsHTMLElement("html")
-                    ) {
-                        // PARSE ERROR
-                    }
-                    this.insertionMode = "after body";
-                    this.reprocessToken(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "address" ||
-                        token.name === "article" ||
-                        token.name === "aside" ||
-                        token.name === "blockquote" ||
-                        token.name === "center" ||
-                        token.name === "details" ||
-                        token.name === "dialog" ||
-                        token.name === "dir" ||
-                        token.name === "div" ||
-                        token.name === "dl" ||
-                        token.name === "fieldset" ||
-                        token.name === "figcaption" ||
-                        token.name === "figure" ||
-                        token.name === "footer" ||
-                        token.name === "header" ||
-                        token.name === "hgroup" ||
-                        token.name === "main" ||
-                        token.name === "menu" ||
-                        token.name === "nav" ||
-                        token.name === "ol" ||
-                        token.name === "p" ||
-                        token.name === "search" ||
-                        token.name === "section" ||
-                        token.name === "summary" ||
-                        token.name === "ul")
-                ) {
-                    if (
-                        this.hasElementInButtonScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "p"),
-                        )
-                    ) {
-                        this.closePElement();
-                    }
-                    this.insertHTMLElement(token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "h1" ||
-                        token.name === "h2" ||
-                        token.name === "h3" ||
-                        token.name === "h4" ||
-                        token.name === "h5" ||
-                        token.name === "h6")
-                ) {
-                    if (
-                        this.hasElementInButtonScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "p"),
-                        )
-                    ) {
-                        this.closePElement();
-                    }
-                    if (
-                        this.currentNode().isElement(HTML_NAMESPACE, "h1") ||
-                        this.currentNode().isElement(HTML_NAMESPACE, "h2") ||
-                        this.currentNode().isElement(HTML_NAMESPACE, "h3") ||
-                        this.currentNode().isElement(HTML_NAMESPACE, "h4") ||
-                        this.currentNode().isElement(HTML_NAMESPACE, "h5") ||
-                        this.currentNode().isElement(HTML_NAMESPACE, "h6")
-                    ) {
-                        // PARSE ERROR
-                        this.popFromStackOfOpenElements();
-                    }
-                    this.insertHTMLElement(token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "pre" || token.name === "listing")
-                ) {
-                    if (
-                        this.hasElementInButtonScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "p"),
-                        )
-                    ) {
-                        this.closePElement();
-                    }
-                    this.insertHTMLElement(token);
-                    this.ignoreNextNewline = true;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "form"
-                ) {
-                    if (
-                        this.formElementPointer !== null &&
-                        !this.stackOfOpenElementsContainsHTMLElement("template")
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    } else {
-                        if (
-                            this.hasElementInButtonScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "p"),
-                            )
-                        ) {
-                            this.closePElement();
-                        }
-                        const element = this.insertHTMLElement(token);
-                        if (
-                            !this.stackOfOpenElementsContainsHTMLElement(
-                                "template",
-                            )
-                        ) {
-                            this.formElementPointer = element;
-                        }
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "li"
-                ) {
-                    this.framesetOKFlag = "not ok";
-                    let node = this.currentNode();
-                    while (true) {
-                        if (node.isElement(HTML_NAMESPACE, "li")) {
-                            this.generateImpliedEndTags(["li"]);
-                            if (
-                                !this.currentNode().isElement(
-                                    HTML_NAMESPACE,
-                                    "li",
-                                )
-                            ) {
-                                // PARSE ERROR
-                            }
-                            while (true) {
-                                const poppedElem =
-                                    this.popFromStackOfOpenElements();
-                                if (
-                                    poppedElem.isElement(HTML_NAMESPACE, "li")
-                                ) {
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                        if (
-                            this.isSpecialElement(node) &&
-                            !(
-                                this.currentNode().isElement(
-                                    HTML_NAMESPACE,
-                                    "address",
-                                ) ||
-                                this.currentNode().isElement(
-                                    HTML_NAMESPACE,
-                                    "div",
-                                ) ||
-                                this.currentNode().isElement(
-                                    HTML_NAMESPACE,
-                                    "p",
-                                )
-                            )
-                        ) {
-                            break;
-                        } else {
-                            const nodeIdx =
-                                this.stackOfOpenElements.indexOf(node) - 1;
-                            node = this.stackOfOpenElementsNodeAt(nodeIdx);
-                        }
-                    }
-                    if (
-                        this.hasElementInButtonScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "p"),
-                        )
-                    ) {
-                        this.closePElement();
-                    }
-                    this.insertHTMLElement(token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "dt" || token.name === "dd")
-                ) {
-                    this.framesetOKFlag = "not ok";
-                    let node = this.currentNode();
-                    while (true) {
-                        if (node.isElement(HTML_NAMESPACE, "dd")) {
-                            this.generateImpliedEndTags(["dd"]);
-                            if (
-                                !this.currentNode().isElement(
-                                    HTML_NAMESPACE,
-                                    "dd",
-                                )
-                            ) {
-                                // PARSE ERROR
-                            }
-                            while (true) {
-                                const poppedElem =
-                                    this.popFromStackOfOpenElements();
-                                if (
-                                    poppedElem.isElement(HTML_NAMESPACE, "dd")
-                                ) {
-                                    break;
-                                }
-                            }
-                            break;
-                        } else if (node.isElement(HTML_NAMESPACE, "dt")) {
-                            this.generateImpliedEndTags(["dt"]);
-                            if (
-                                !this.currentNode().isElement(
-                                    HTML_NAMESPACE,
-                                    "dt",
-                                )
-                            ) {
-                                // PARSE ERROR
-                            }
-                            while (true) {
-                                const poppedElem =
-                                    this.popFromStackOfOpenElements();
-                                if (
-                                    poppedElem.isElement(HTML_NAMESPACE, "dt")
-                                ) {
-                                    break;
-                                }
-                            }
-                            break;
-                        }
-                        if (
-                            this.isSpecialElement(node) &&
-                            !(
-                                this.currentNode().isElement(
-                                    HTML_NAMESPACE,
-                                    "address",
-                                ) ||
-                                this.currentNode().isElement(
-                                    HTML_NAMESPACE,
-                                    "div",
-                                ) ||
-                                this.currentNode().isElement(
-                                    HTML_NAMESPACE,
-                                    "p",
-                                )
-                            )
-                        ) {
-                            break;
-                        } else {
-                            const nodeIdx =
-                                this.stackOfOpenElements.indexOf(node) - 1;
-                            node = this.stackOfOpenElementsNodeAt(nodeIdx);
-                        }
-                    }
-                    if (
-                        this.hasElementInButtonScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "p"),
-                        )
-                    ) {
-                        this.closePElement();
-                    }
-                    this.insertHTMLElement(token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "plaintext"
-                ) {
-                    if (
-                        this.hasElementInButtonScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "p"),
-                        )
-                    ) {
-                        this.closePElement();
-                    }
-                    this.insertHTMLElement(token);
-                    tkr.state = "PLAINTEXT";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "button"
-                ) {
-                    if (
-                        !this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "button"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        this.generateImpliedEndTags([]);
-                        while (true) {
-                            const poppedElem =
-                                this.popFromStackOfOpenElements();
-                            if (
-                                poppedElem.isElement(HTML_NAMESPACE, "button")
-                            ) {
-                                break;
-                            }
-                        }
-                    }
-                    this.reconstructActiveFormattingElements();
-                    this.insertHTMLElement(token);
-                    this.framesetOKFlag = "not ok";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "address" ||
-                        token.name === "article" ||
-                        token.name === "aside" ||
-                        token.name === "blockquote" ||
-                        token.name === "button" ||
-                        token.name === "center" ||
-                        token.name === "details" ||
-                        token.name === "dialog" ||
-                        token.name === "dir" ||
-                        token.name === "dl" ||
-                        token.name === "fieldset" ||
-                        token.name === "figcaption" ||
-                        token.name === "figure" ||
-                        token.name === "footer" ||
-                        token.name === "header" ||
-                        token.name === "hgroup" ||
-                        token.name === "listing" ||
-                        token.name === "main" ||
-                        token.name === "menu" ||
-                        token.name === "nav" ||
-                        token.name === "ol" ||
-                        token.name === "pre" ||
-                        token.name === "search" ||
-                        token.name === "section" ||
-                        token.name === "select" ||
-                        token.name === "summary" ||
-                        token.name === "ul")
-                ) {
-                    if (
-                        !this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, token.name),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    } else {
-                        this.generateImpliedEndTags([]);
-                        if (
-                            !this.currentNode().isElement(
-                                HTML_NAMESPACE,
-                                token.name,
-                            )
-                        ) {
-                            // PARSE ERROR
-                        }
-                        while (true) {
-                            const poppedElem =
-                                this.popFromStackOfOpenElements();
-                            if (
-                                poppedElem.isElement(HTML_NAMESPACE, token.name)
-                            ) {
-                                break;
-                            }
-                        }
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "form"
-                ) {
-                    if (
-                        this.stackOfOpenElementsContainsHTMLElement("template")
-                    ) {
-                        const node = this.formElementPointer;
-                        if (
-                            node === null ||
-                            !this.hasElementInScope((e) => e === node)
-                        ) {
-                            // PARSE ERROR
-                            return;
-                        }
-                        this.generateImpliedEndTags([]);
-                        if (this.currentNode() !== node) {
-                            // PARSE ERROR
-                        }
-                        const removeIdx =
-                            this.stackOfOpenElements.indexOf(node);
-                        this.removeFromStackOfOpenElements(removeIdx);
-                    } else {
-                        if (
-                            this.hasElementInScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "form"),
-                            )
-                        ) {
-                            // PARSE ERROR
-                            return;
-                        }
-                        this.generateImpliedEndTags([]);
-                        if (
-                            !this.currentNode().isElement(
-                                HTML_NAMESPACE,
-                                "form",
-                            )
-                        ) {
-                            // PARSE ERROR
-                        }
-                        while (true) {
-                            const poppedElem =
-                                this.popFromStackOfOpenElements();
-                            if (poppedElem.isElement(HTML_NAMESPACE, "form")) {
-                                break;
-                            }
-                        }
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "p"
-                ) {
-                    if (
-                        !this.hasElementInButtonScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "p"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        this.insertHTMLElement({
-                            kind: "tag",
-                            name: "p",
-                            attributes: [],
-                            type: "start",
-                            isSelfClosing: false,
-                            selfClosingAcknowledged: false,
-                        });
-                    }
-                    this.closePElement();
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "li"
-                ) {
-                    if (
-                        !this.hasElementInListItemScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "li"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.generateImpliedEndTags(["li"]);
-                    if (!this.currentNode().isElement(HTML_NAMESPACE, "li")) {
-                        // PARSE ERROR
-                    }
-                    while (true) {
-                        const poppedElem = this.popFromStackOfOpenElements();
-                        if (poppedElem.isElement(HTML_NAMESPACE, "li")) {
-                            break;
-                        }
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "dt" || token.name === "dd")
-                ) {
-                    if (
-                        !this.hasElementInListItemScope((e) =>
-                            e.isElement(HTML_NAMESPACE, token.name),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-
-                    let except;
-                    if (token.name === "dt") {
-                        except = ["dt"];
-                    } else if (token.name === "dd") {
-                        except = ["dd"];
-                    } else {
-                        throw new Error("unreachable");
-                    }
-                    this.generateImpliedEndTags(except);
-                    if (
-                        !this.currentNode().isElement(
-                            HTML_NAMESPACE,
-                            token.name,
-                        )
-                    ) {
-                        // PARSE ERROR
-                    }
-                    while (true) {
-                        const poppedElem = this.popFromStackOfOpenElements();
-                        if (poppedElem.isElement(HTML_NAMESPACE, token.name)) {
-                            break;
-                        }
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "h1" ||
-                        token.name === "h2" ||
-                        token.name === "h3" ||
-                        token.name === "h4" ||
-                        token.name === "h5" ||
-                        token.name === "h6")
-                ) {
-                    if (
-                        !this.hasElementInListItemScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "h1"),
-                        ) ||
-                        !this.hasElementInListItemScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "h2"),
-                        ) ||
-                        !this.hasElementInListItemScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "h3"),
-                        ) ||
-                        !this.hasElementInListItemScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "h4"),
-                        ) ||
-                        !this.hasElementInListItemScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "h5"),
-                        ) ||
-                        !this.hasElementInListItemScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "h6"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.generateImpliedEndTags([]);
-                    if (
-                        !this.currentNode().isElement(
-                            HTML_NAMESPACE,
-                            token.name,
-                        )
-                    ) {
-                        // PARSE ERROR
-                    }
-                    while (true) {
-                        const poppedElem = this.popFromStackOfOpenElements();
-                        if (
-                            poppedElem.isElement(HTML_NAMESPACE, "h1") ||
-                            poppedElem.isElement(HTML_NAMESPACE, "h2") ||
-                            poppedElem.isElement(HTML_NAMESPACE, "h3") ||
-                            poppedElem.isElement(HTML_NAMESPACE, "h4") ||
-                            poppedElem.isElement(HTML_NAMESPACE, "h5") ||
-                            poppedElem.isElement(HTML_NAMESPACE, "h6")
-                        ) {
-                            break;
-                        }
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "a"
-                ) {
-                    {
-                        const lastMarkerIdx =
-                            this.listOfActiveFormattingElements.lastIndexOf(
-                                "marker",
-                            );
-                        let checkStartIdx = 0;
-                        if (0 <= lastMarkerIdx) {
-                            checkStartIdx = lastMarkerIdx + 1;
-                        }
-                        let aElem;
-                        for (
-                            let i = checkStartIdx;
-                            i < this.listOfActiveFormattingElements.length;
-                            i++
-                        ) {
-                            const elem = this.listOfActiveFormattingElements[i];
-                            if (!(elem instanceof Element)) {
-                                throw Error(`expected element, got ${elem}`);
-                            }
-                            if (elem.isElement(HTML_NAMESPACE, "a")) {
-                                aElem = elem;
-                            }
-                        }
-                        if (aElem !== undefined) {
-                            // PARSE ERROR
-                            this.adoptionAgencyAlgorithm(token);
-                            let removeIdx = -1;
-                            for (
-                                let i = 0;
-                                i < this.listOfActiveFormattingElements.length;
-                                i++
-                            ) {
-                                if (
-                                    this.listOfActiveFormattingElements[i] ===
-                                    aElem
-                                ) {
-                                    removeIdx = i;
-                                }
-                            }
-                            this.removeFromActiveFormattingElementsList(
-                                removeIdx,
-                            );
-                            removeIdx = this.stackOfOpenElements.indexOf(aElem);
-                            this.removeFromStackOfOpenElements(removeIdx);
-                        }
-                    }
-                    this.reconstructActiveFormattingElements();
-                    const element = this.insertHTMLElement(token);
-                    this.pushOntoListOfActiveFormattingElements(element);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "b" ||
-                        token.name === "big" ||
-                        token.name === "code" ||
-                        token.name === "em" ||
-                        token.name === "font" ||
-                        token.name === "i" ||
-                        token.name === "s" ||
-                        token.name === "small" ||
-                        token.name === "strike" ||
-                        token.name === "strong" ||
-                        token.name === "tt" ||
-                        token.name === "u")
-                ) {
-                    this.reconstructActiveFormattingElements();
-                    const element = this.insertHTMLElement(token);
-                    this.pushOntoListOfActiveFormattingElements(element);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "nobr"
-                ) {
-                    this.reconstructActiveFormattingElements();
-                    if (
-                        this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "nobr"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        this.adoptionAgencyAlgorithm(token);
-                        this.reconstructActiveFormattingElements();
-                    }
-                    const element = this.insertHTMLElement(token);
-                    this.pushOntoListOfActiveFormattingElements(element);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "a" ||
-                        token.name === "b" ||
-                        token.name === "big" ||
-                        token.name === "code" ||
-                        token.name === "em" ||
-                        token.name === "font" ||
-                        token.name === "i" ||
-                        token.name === "nobr" ||
-                        token.name === "s" ||
-                        token.name === "small" ||
-                        token.name === "strike" ||
-                        token.name === "strong" ||
-                        token.name === "tt" ||
-                        token.name === "u")
-                ) {
-                    this.adoptionAgencyAlgorithm(token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "applet" ||
-                        token.name === "marquee" ||
-                        token.name === "object")
-                ) {
-                    this.reconstructActiveFormattingElements();
-                    this.insertHTMLElement(token);
-
-                    this.listOfActiveFormattingElements.push("marker");
-                    this.framesetOKFlag = "not ok";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "applet" ||
-                        token.name === "marquee" ||
-                        token.name === "object")
-                ) {
-                    if (
-                        !this.currentNode().isElement(
-                            HTML_NAMESPACE,
-                            token.name,
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.generateImpliedEndTags([]);
-                    if (
-                        !this.currentNode().isElement(
-                            HTML_NAMESPACE,
-                            token.name,
-                        )
-                    ) {
-                        // PARSE ERROR
-                    }
-                    while (true) {
-                        const poppedElem = this.popFromStackOfOpenElements();
-                        if (poppedElem.isElement(HTML_NAMESPACE, token.name)) {
-                            break;
-                        }
-                    }
-                    this.clearListOfActiveFormattingElementsUpToLastMarker();
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "table"
-                ) {
-                    if (
-                        this.document.mode !== "quirks" &&
-                        this.hasElementInButtonScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "p"),
-                        )
-                    ) {
-                        this.closePElement();
-                    }
-                    this.insertHTMLElement(token);
-                    this.framesetOKFlag = "not ok";
-                    this.insertionMode = "in table";
-                } else if (
-                    (token.kind === "tag" &&
-                        token.type === "end" &&
-                        token.name === "br") ||
-                    (token.type === "start" &&
-                        (token.name === "area" ||
-                            token.name === "br" ||
-                            token.name === "embed" ||
-                            token.name === "img" ||
-                            token.name === "keygen"))
-                ) {
-                    if (token.type === "end" && token.name === "br") {
-                        // PARSE ERROR
-                        token.attributes = [];
-                        token.type = "start";
-                    }
-                    this.reconstructActiveFormattingElements();
-                    this.insertHTMLElement(token);
-                    this.popFromStackOfOpenElements();
-                    token.selfClosingAcknowledged = true;
-                    this.framesetOKFlag = "not ok";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "input"
-                ) {
-                    if (this.isFragmentParsing) {
-                        throw new Error("not yet implemented");
-                    }
-                    if (
-                        this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "select"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        while (true) {
-                            const poppedElem =
-                                this.popFromStackOfOpenElements();
-                            if (
-                                poppedElem.isElement(HTML_NAMESPACE, "select")
-                            ) {
-                                break;
-                            }
-                        }
-                    }
-                    this.reconstructActiveFormattingElements();
-                    this.insertHTMLElement(token);
-                    this.popFromStackOfOpenElements();
-                    token.selfClosingAcknowledged = true;
-                    if (!tagAttributeEquals(token, "type", "hidden")) {
-                        this.framesetOKFlag = "not ok";
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "hr"
-                ) {
-                    if (
-                        this.hasElementInButtonScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "p"),
-                        )
-                    ) {
-                        this.closePElement();
-                    }
-                    if (
-                        this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "select"),
-                        )
-                    ) {
-                        this.generateImpliedEndTags([]);
-                        if (
-                            this.hasElementInScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "option"),
-                            ) ||
-                            this.hasElementInScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "optgroup"),
-                            )
-                        ) {
-                            // PARSE ERROR
-                        }
-                    }
-                    this.insertHTMLElement(token);
-                    this.popFromStackOfOpenElements();
-                    token.selfClosingAcknowledged = true;
-                    this.framesetOKFlag = "not ok";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "image"
-                ) {
-                    // PARSE ERROR
-                    token.name = "img";
-                    this.reprocessToken(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "textarea"
-                ) {
-                    this.insertHTMLElement(token);
-                    this.ignoreNextNewline = true;
-                    tkr.state = "RCDATA";
-                    this.originalInsertionMode = this.insertionMode;
-                    this.framesetOKFlag = "not ok";
-                    this.insertionMode = "text";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "xmp"
-                ) {
-                    if (
-                        this.hasElementInButtonScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "p"),
-                        )
-                    ) {
-                        this.closePElement();
-                    }
-                    this.reconstructActiveFormattingElements();
-                    this.framesetOKFlag = "not ok";
-                    this.parseGenericRawTextElement(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "iframe"
-                ) {
-                    this.framesetOKFlag = "not ok";
-                    this.parseGenericRawTextElement(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    ((token.type === "start" && token.name === "noembed") ||
-                        (token.type === "start" &&
-                            token.name === "noscript" &&
-                            this.scriptingMode !== "Disabled"))
-                ) {
-                    this.parseGenericRawTextElement(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "select"
-                ) {
-                    if (this.isFragmentParsing) {
-                        throw new Error("not yet implemented");
-                    }
-                    if (
-                        this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "select"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        while (true) {
-                            const poppedElem =
-                                this.popFromStackOfOpenElements();
-                            if (
-                                poppedElem.isElement(HTML_NAMESPACE, "select")
-                            ) {
-                                break;
-                            }
-                        }
-                        return;
-                    }
-                    this.reconstructActiveFormattingElements();
-                    this.insertHTMLElement(token);
-                    this.framesetOKFlag = "not ok";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "option"
-                ) {
-                    if (
-                        this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "select"),
-                        )
-                    ) {
-                        this.generateImpliedEndTags(["optgroup"]);
-                        if (
-                            this.hasElementInScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "option"),
-                            )
-                        ) {
-                            // PARSE ERROR
-                        }
-                    } else {
-                        if (
-                            this.currentNode().isElement(
-                                HTML_NAMESPACE,
-                                "option",
-                            )
-                        ) {
-                            this.popFromStackOfOpenElements();
-                        }
-                    }
-                    this.reconstructActiveFormattingElements();
-                    this.insertHTMLElement(token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "optgroup"
-                ) {
-                    if (
-                        this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "select"),
-                        )
-                    ) {
-                        this.generateImpliedEndTags([]);
-                        if (
-                            this.hasElementInScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "option"),
-                            ) ||
-                            this.hasElementInScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "optgroup"),
-                            )
-                        ) {
-                            // PARSE ERROR
-                        }
-                    } else {
-                        if (
-                            this.currentNode().isElement(
-                                HTML_NAMESPACE,
-                                "option",
-                            )
-                        ) {
-                            this.popFromStackOfOpenElements();
-                        }
-                    }
-                    this.reconstructActiveFormattingElements();
-                    this.insertHTMLElement(token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "rb" || token.name === "rtc")
-                ) {
-                    if (
-                        this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "ruby"),
-                        )
-                    ) {
-                        this.generateImpliedEndTags([]);
-                        if (
-                            !this.currentNode().isElement(
-                                HTML_NAMESPACE,
-                                "ruby",
-                            )
-                        ) {
-                            // PARSE ERROR
-                        }
-                    }
-                    this.insertHTMLElement(token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "rp" || token.name === "rt")
-                ) {
-                    if (
-                        this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "ruby"),
-                        )
-                    ) {
-                        this.generateImpliedEndTags(["rtc"]);
-                        if (
-                            !this.currentNode().isElement(
-                                HTML_NAMESPACE,
-                                "rtc",
-                            ) &&
-                            !this.currentNode().isElement(
-                                HTML_NAMESPACE,
-                                "ruby",
-                            )
-                        ) {
-                            // PARSE ERROR
-                        }
-                    }
-                    this.insertHTMLElement(token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "math"
-                ) {
-                    this.reconstructActiveFormattingElements();
-                    this.adjustMathmlAttributes(token);
-                    this.adjustForeignAttributes(token);
-                    this.insertForeignElement(token, MATHML_NAMESPACE, false);
-                    if (token.isSelfClosing) {
-                        this.popFromStackOfOpenElements();
-                        token.selfClosingAcknowledged = true;
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "svg"
-                ) {
-                    this.reconstructActiveFormattingElements();
-                    this.adjustSVGAttributes(token);
-                    this.adjustForeignAttributes(token);
-                    this.insertForeignElement(token, SVG_NAMESPACE, false);
-                    if (token.isSelfClosing) {
-                        this.popFromStackOfOpenElements();
-                        token.selfClosingAcknowledged = true;
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "caption" ||
-                        token.name === "col" ||
-                        token.name === "colgroup" ||
-                        token.name === "frame" ||
-                        token.name === "head" ||
-                        token.name === "tbody" ||
-                        token.name === "td" ||
-                        token.name === "tfoot" ||
-                        token.name === "th" ||
-                        token.name === "thead" ||
-                        token.name === "tr")
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else if (token.kind === "tag" && token.type !== "end") {
-                    this.reconstructActiveFormattingElements();
-                    this.insertHTMLElement(token);
-                } else if (token.kind === "tag" && token.type === "end") {
-                    let nodeIdx = this.stackOfOpenElements.length - 1;
-                    while (true) {
-                        const node = this.stackOfOpenElementsNodeAt(nodeIdx);
-                        if (node.isElement(HTML_NAMESPACE, token.name)) {
-                            this.generateImpliedEndTags([token.name]);
-                            if (node !== this.currentNode()) {
-                                // PARSE ERROR
-                            }
-                            const targetNode = node;
-                            while (true) {
-                                const element =
-                                    this.popFromStackOfOpenElements();
-                                const found = element === targetNode;
-                                if (found) {
-                                    break;
-                                }
-                            }
-                            return;
-                        }
-                        if (this.isSpecialElement(node)) {
-                            // PARSE ERROR
-                            return;
-                        }
-                        nodeIdx--;
-                    }
-                } else {
-                    unexpectedToken(token);
-                }
+            case "in body":
+                this.#imodeInBody(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-incdata
-            case "text": {
-                if (token.kind === "character") {
-                    this.insertCharacter(token);
-                } else if (token.kind === "eof") {
-                    // PARSE ERROR
-                    if (
-                        this.currentNode().isElement(HTML_NAMESPACE, "script")
-                    ) {
-                        // TODO: Set script element's "already started" to true.
-                    }
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = this.originalInsertionMode;
-                    this.reprocessToken(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "script"
-                ) {
-                    // STUB.
-                } else if (token.kind === "tag" && token.type === "end") {
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = this.originalInsertionMode;
-                } else {
-                    unexpectedToken(token);
-                }
+            case "text":
+                this.#imodeText(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intable
-            case "in table": {
-                if (
-                    token.kind === "character" &&
-                    (this.currentNode().isElement(HTML_NAMESPACE, "table") ||
-                        this.currentNode().isElement(HTML_NAMESPACE, "tbody") ||
-                        this.currentNode().isElement(
-                            HTML_NAMESPACE,
-                            "template",
-                        ) ||
-                        this.currentNode().isElement(HTML_NAMESPACE, "tfoot") ||
-                        this.currentNode().isElement(HTML_NAMESPACE, "thead") ||
-                        this.currentNode().isElement(HTML_NAMESPACE, "tr"))
-                ) {
-                    this.originalInsertionMode = this.insertionMode;
-                    this.insertionMode = "in table text";
-                    this.reprocessToken(tkr, token);
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, null);
-                } else if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "caption"
-                ) {
-                    this.clearStackBackToTableContext();
-                    this.listOfActiveFormattingElements.push("marker");
-                    this.insertHTMLElement(token);
-                    this.insertionMode = "in caption";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "colgroup"
-                ) {
-                    this.clearStackBackToTableContext();
-                    this.insertHTMLElement(token);
-                    this.insertionMode = "in column group";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "col"
-                ) {
-                    this.clearStackBackToTableContext();
-                    this.insertHTMLElement({
-                        kind: "tag",
-                        name: "colgroup",
-                        attributes: [],
-                        type: "start",
-                        isSelfClosing: false,
-                        selfClosingAcknowledged: false,
-                    });
-                    this.insertionMode = "in column group";
-                    this.reprocessToken(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "tbody" ||
-                        token.name === "tfoot" ||
-                        token.name === "thead" ||
-                        token.name === "thead" ||
-                        token.name === "tr")
-                ) {
-                    this.clearStackBackToTableContext();
-                    this.insertionMode = "in table body";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "td" ||
-                        token.name === "th" ||
-                        token.name === "tr")
-                ) {
-                    this.clearStackBackToTableContext();
-                    this.insertHTMLElement({
-                        kind: "tag",
-                        name: "tbody",
-                        attributes: [],
-                        type: "start",
-                        isSelfClosing: false,
-                        selfClosingAcknowledged: false,
-                    });
-                    this.useRulesFor("in table body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "table"
-                ) {
-                    // PARSE ERROR
-                    if (
-                        !this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "table"),
-                        )
-                    ) {
-                        return;
-                    } else {
-                        while (true) {
-                            const poppedElem =
-                                this.popFromStackOfOpenElements();
-                            if (poppedElem.isElement(HTML_NAMESPACE, "table")) {
-                                break;
-                            }
-                        }
-                        this.resetInsertionModeAppropriately();
-                        this.reprocessToken(tkr, token);
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "table"
-                ) {
-                    if (
-                        !this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "table"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    while (true) {
-                        const poppedElem = this.popFromStackOfOpenElements();
-                        if (poppedElem.isElement(HTML_NAMESPACE, "table")) {
-                            break;
-                        }
-                    }
-                    this.resetInsertionModeAppropriately();
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "body" ||
-                        token.name === "caption" ||
-                        token.name === "col" ||
-                        token.name === "colgroup" ||
-                        token.name === "html" ||
-                        token.name === "tbody" ||
-                        token.name === "td" ||
-                        token.name === "tfoot" ||
-                        token.name === "th" ||
-                        token.name === "thead" ||
-                        token.name === "tr")
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    (token.kind === "tag" &&
-                        token.type === "start" &&
-                        (token.name === "style" ||
-                            token.name === "script" ||
-                            token.name === "template")) ||
-                    (token.kind === "tag" &&
-                        token.type === "end" &&
-                        token.name === "template")
-                ) {
-                    this.useRulesFor("in head", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "input" &&
-                    tagAttributeEquals(token, "type", "hidden")
-                ) {
-                    // PARSE ERROR
-                    this.insertHTMLElement(token);
-                    this.popFromStackOfOpenElements();
-                    token.selfClosingAcknowledged = true;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "form"
-                ) {
-                    if (
-                        this.stackOfOpenElementsContainsHTMLElement("template")
-                    ) {
-                        const node = this.formElementPointer;
-                        if (
-                            node === null ||
-                            !this.hasElementInScope((e) => e === node)
-                        ) {
-                            // PARSE ERROR
-                            return;
-                        }
-                        this.generateImpliedEndTags([]);
-                        if (this.currentNode() !== node) {
-                            // PARSE ERROR
-                        }
-                        const removeIdx =
-                            this.stackOfOpenElements.indexOf(node);
-                        this.removeFromStackOfOpenElements(removeIdx);
-                    } else {
-                        // PARSE ERROR
-                        if (
-                            this.hasElementInScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "form"),
-                            ) ||
-                            this.formElementPointer !== null
-                        ) {
-                            return;
-                        }
-                        this.insertHTMLElement(token);
-                        this.popFromStackOfOpenElements();
-                    }
-                } else if (token.kind === "eof") {
-                    this.useRulesFor("in body", tkr, token);
-                } else {
-                    // PARSE ERROR
-                    this.enableFosterParenting = true;
-                    this.useRulesFor("in body", tkr, token);
-                    this.enableFosterParenting = false;
-                }
+            case "in table":
+                this.#imodeInTable(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intabletext
-            case "in table text": {
-                if (token.kind === "character" && token.data === "\u0000") {
-                    // PARSE ERROR
-                    return;
-                } else if (token.kind === "character") {
-                    this.pendingTableCharacterTokens.push(token);
-                } else {
-                    let containsNonWhitespace = false;
-                    for (const token of this.pendingTableCharacterTokens) {
-                        if (!isASCIIWhitespace(toCodePoint(token.data))) {
-                            containsNonWhitespace = true;
-                        }
-                    }
-                    if (containsNonWhitespace) {
-                        // PARSE ERROR
-                        // Below do the same thing as "else" in "in table" insertion mode.
-                        this.enableFosterParenting = true;
-                        for (const token of this.pendingTableCharacterTokens) {
-                            this.useRulesFor("in body", tkr, token);
-                        }
-                        this.enableFosterParenting = false;
-                    } else {
-                        for (const token of this.pendingTableCharacterTokens) {
-                            this.insertCharacter(token);
-                        }
-                    }
-                    this.insertionMode = this.originalInsertionMode;
-                    this.reprocessToken(tkr, token);
-                }
+            case "in table text":
+                this.#imodeInTableText(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-incaption
-            case "in caption": {
-                if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "caption"
-                ) {
-                    if (
-                        !this.hasElementInTableScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "caption"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.generateImpliedEndTags([]);
-                    if (
-                        !this.currentNode().isElement(HTML_NAMESPACE, "caption")
-                    ) {
-                        // PARSE ERROR
-                    }
-                    while (true) {
-                        const poppedElem = this.popFromStackOfOpenElements();
-                        if (poppedElem.isElement(HTML_NAMESPACE, "caption")) {
-                            break;
-                        }
-                    }
-                    this.clearListOfActiveFormattingElementsUpToLastMarker();
-                    this.insertionMode = "in table";
-                } else if (
-                    (token.kind === "tag" &&
-                        token.type === "start" &&
-                        (token.name === "caption" ||
-                            token.name === "col" ||
-                            token.name === "colgroup" ||
-                            token.name === "tbody" ||
-                            token.name === "td" ||
-                            token.name === "tfoot" ||
-                            token.name === "th" ||
-                            token.name === "thead" ||
-                            token.name === "tr")) ||
-                    (token.kind === "tag" &&
-                        token.type === "end" &&
-                        token.name === "table")
-                ) {
-                    if (
-                        !this.hasElementInTableScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "caption"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.generateImpliedEndTags([]);
-                    if (
-                        !this.currentNode().isElement(HTML_NAMESPACE, "caption")
-                    ) {
-                        // PARSE ERROR
-                    }
-                    while (true) {
-                        const poppedElem = this.popFromStackOfOpenElements();
-                        if (poppedElem.isElement(HTML_NAMESPACE, "caption")) {
-                            break;
-                        }
-                    }
-                    this.clearListOfActiveFormattingElementsUpToLastMarker();
-                    this.insertionMode = "in table";
-                    this.reprocessToken(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "body" ||
-                        token.name === "col" ||
-                        token.name === "colgroup" ||
-                        token.name === "html" ||
-                        token.name === "tbody" ||
-                        token.name === "td" ||
-                        token.name === "tfoot" ||
-                        token.name === "th" ||
-                        token.name === "thead" ||
-                        token.name === "tr")
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else {
-                    this.useRulesFor("in body", tkr, token);
-                }
+            case "in caption":
+                this.#imodeInCaption(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-incolgroup
-            case "in column group": {
-                if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    this.insertCharacter(token);
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, null);
-                } else if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "col"
-                ) {
-                    this.insertHTMLElement(token);
-                    this.popFromStackOfOpenElements();
-                    if (token.isSelfClosing) {
-                        token.selfClosingAcknowledged = true;
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "colgroup"
-                ) {
-                    if (
-                        !this.currentNode().isElement(
-                            HTML_NAMESPACE,
-                            "colgroup",
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = "in table";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "col"
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    (token.kind === "tag" &&
-                        token.type === "start" &&
-                        token.name === "template") ||
-                    (token.kind === "tag" &&
-                        token.type === "end" &&
-                        token.name === "template")
-                ) {
-                    this.useRulesFor("in head", tkr, token);
-                } else if (token.kind === "eof") {
-                    this.useRulesFor("in body", tkr, token);
-                } else {
-                    if (
-                        !this.currentNode().isElement(
-                            HTML_NAMESPACE,
-                            "colgroup",
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = "in table";
-                    this.reprocessToken(tkr, token);
-                }
+            case "in column group":
+                this.#imodeInColumnGroup(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intbody
-            case "in table body": {
-                if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "tr"
-                ) {
-                    this.clearStackBackToTableBodyContext();
-                    this.insertHTMLElement(token);
-                    this.insertionMode = "in row";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "th" || token.name === "td")
-                ) {
-                    // PARSE ERROR
-                    this.clearStackBackToTableBodyContext();
-                    this.insertHTMLElement({
-                        kind: "tag",
-                        name: "tr",
-                        attributes: [],
-                        type: "start",
-                        isSelfClosing: false,
-                        selfClosingAcknowledged: false,
-                    });
-                    this.insertionMode = "in row";
-                    this.useRulesFor("in row", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "tbody" ||
-                        token.name === "tfoot" ||
-                        token.name === "thead")
-                ) {
-                    if (
-                        !this.hasElementInTableScope((e) =>
-                            e.isElement(HTML_NAMESPACE, token.name),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.clearStackBackToTableBodyContext();
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = "in table";
-                } else if (
-                    (token.kind === "tag" &&
-                        token.type === "start" &&
-                        (token.name === "caption" ||
-                            token.name === "col" ||
-                            token.name === "colgroup" ||
-                            token.name === "tbody" ||
-                            token.name === "tfoot" ||
-                            token.name === "thead")) ||
-                    (token.kind === "tag" &&
-                        token.type === "end" &&
-                        token.name === "table")
-                ) {
-                    if (
-                        !(
-                            this.hasElementInTableScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "tbody"),
-                            ) ||
-                            this.hasElementInTableScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "thead"),
-                            ) ||
-                            this.hasElementInTableScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "tfoot"),
-                            )
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.clearStackBackToTableBodyContext();
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = "in table";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "body" ||
-                        token.name === "caption" ||
-                        token.name === "col" ||
-                        token.name === "colgroup" ||
-                        token.name === "html" ||
-                        token.name === "td" ||
-                        token.name === "th" ||
-                        token.name === "tr")
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else {
-                    this.useRulesFor("in table", tkr, token);
-                }
+            case "in table body":
+                this.#imodeInTableBody(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intr
-            case "in row": {
-                if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "th" || token.name === "td")
-                ) {
-                    this.clearStackBackToTableRowContext();
-                    this.insertHTMLElement(token);
-                    this.insertionMode = "in cell";
-                    this.listOfActiveFormattingElements.push("marker");
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "tr"
-                ) {
-                    if (
-                        !this.hasElementInTableScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "tr"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.clearStackBackToTableRowContext();
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = "in table body";
-                } else if (
-                    (token.kind === "tag" &&
-                        token.type === "start" &&
-                        (token.name === "caption" ||
-                            token.name === "col" ||
-                            token.name === "colgroup" ||
-                            token.name === "tbody" ||
-                            token.name === "tfoot" ||
-                            token.name === "thead" ||
-                            token.name === "tr")) ||
-                    (token.kind === "tag" &&
-                        token.type === "end" &&
-                        token.name === "table")
-                ) {
-                    if (
-                        !this.hasElementInTableScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "tr"),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.clearStackBackToTableRowContext();
-                    this.popFromStackOfOpenElements();
-                    this.insertionMode = "in table body";
-                    this.reprocessToken(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "tbody" ||
-                        token.name === "tfoot" ||
-                        token.name === "thead")
-                ) {
-                    if (
-                        !this.hasElementInTableScope((e) =>
-                            e.isElement(HTML_NAMESPACE, token.name),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    if (
-                        !this.hasElementInTableScope((e) =>
-                            e.isElement(HTML_NAMESPACE, "tr"),
-                        )
-                    ) {
-                        return;
-                    } else {
-                        this.clearStackBackToTableRowContext();
-                        this.popFromStackOfOpenElements();
-                        this.insertionMode = "in table body";
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "body" ||
-                        token.name === "caption" ||
-                        token.name === "col" ||
-                        token.name === "colgroup" ||
-                        token.name === "html" ||
-                        token.name === "td" ||
-                        token.name === "th")
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else {
-                    this.useRulesFor("in table", tkr, token);
-                }
+            case "in row":
+                this.#imodeInRow(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intd
-            case "in cell": {
-                if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "th" || token.name === "td")
-                ) {
-                    if (
-                        !this.hasElementInTableScope((e) =>
-                            e.isElement(HTML_NAMESPACE, token.name),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.generateImpliedEndTags([]);
-                    if (
-                        !this.currentNode().isElement(
-                            HTML_NAMESPACE,
-                            token.name,
-                        )
-                    ) {
-                        // PARSE ERROR
-                    }
-                    while (true) {
-                        const poppedElem = this.popFromStackOfOpenElements();
-                        if (poppedElem.isElement(HTML_NAMESPACE, token.name)) {
-                            break;
-                        }
-                    }
-                    this.clearListOfActiveFormattingElementsUpToLastMarker();
-                    this.insertionMode = "in row";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "caption" ||
-                        token.name === "col" ||
-                        token.name === "colgroup" ||
-                        token.name === "tbody" ||
-                        token.name === "td" ||
-                        token.name === "tfoot" ||
-                        token.name === "th" ||
-                        token.name === "thead" ||
-                        token.name === "tr")
-                ) {
-                    if (
-                        !(
-                            this.hasElementInTableScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "td"),
-                            ) ||
-                            this.hasElementInTableScope((e) =>
-                                e.isElement(HTML_NAMESPACE, "th"),
-                            )
-                        )
-                    ) {
-                        throw new Error(
-                            "we should have td or th in SOE at this point",
-                        );
-                    }
-                    this.closeCell();
-                    this.useRulesFor("in row", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "body" ||
-                        token.name === "caption" ||
-                        token.name === "col" ||
-                        token.name === "colgroup" ||
-                        token.name === "html")
-                ) {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    (token.name === "table" ||
-                        token.name === "tbody" ||
-                        token.name === "tfoot" ||
-                        token.name === "thead" ||
-                        token.name === "tr")
-                ) {
-                    if (
-                        !this.hasElementInScope((e) =>
-                            e.isElement(HTML_NAMESPACE, token.name),
-                        )
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.closeCell();
-                    this.useRulesFor("in row", tkr, token);
-                } else {
-                    this.useRulesFor("in body", tkr, token);
-                }
+            case "in cell":
+                this.#imodeInCell(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intemplate
-            case "in template": {
-                if (token.kind === "character") {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (token.kind === "comment") {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (token.kind === "doctype") {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    (token.kind === "tag" &&
-                        token.type === "start" &&
-                        (token.name === "base" ||
-                            token.name === "basefont" ||
-                            token.name === "bgsound" ||
-                            token.name === "link" ||
-                            token.name === "meta" ||
-                            token.name === "noframes" ||
-                            token.name === "script" ||
-                            token.name === "script" ||
-                            token.name === "style" ||
-                            token.name === "template" ||
-                            token.name === "title")) ||
-                    (token.kind === "tag" &&
-                        token.type === "end" &&
-                        token.name === "template")
-                ) {
-                    this.useRulesFor("in head", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "caption" ||
-                        token.name === "colgroup" ||
-                        token.name === "tbody" ||
-                        token.name === "tfoot" ||
-                        token.name === "thead")
-                ) {
-                    this.stackOfTemplateInsertionModes.pop();
-                    this.stackOfTemplateInsertionModes.push("in table");
-                    this.insertionMode = "in table";
-                    this.reprocessToken(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "col"
-                ) {
-                    this.stackOfTemplateInsertionModes.pop();
-                    this.stackOfTemplateInsertionModes.push("in column group");
-                    this.insertionMode = "in column group";
-                    this.reprocessToken(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "tr"
-                ) {
-                    this.stackOfTemplateInsertionModes.pop();
-                    this.stackOfTemplateInsertionModes.push("in table body");
-                    this.insertionMode = "in table body";
-                    this.reprocessToken(tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    (token.name === "th" || token.name === "td")
-                ) {
-                    this.stackOfTemplateInsertionModes.pop();
-                    this.stackOfTemplateInsertionModes.push("in row");
-                    this.insertionMode = "in row";
-                    this.reprocessToken(tkr, token);
-                } else if (token.kind === "tag" && token.type === "start") {
-                    this.stackOfTemplateInsertionModes.pop();
-                    this.stackOfTemplateInsertionModes.push("in body");
-                    this.insertionMode = "in body";
-                    this.reprocessToken(tkr, token);
-                } else if (token.kind === "tag" && token.type === "end") {
-                    // PARSE ERROR
-                    return;
-                } else if (token.kind === "eof") {
-                    if (
-                        !this.stackOfOpenElementsContainsHTMLElement("template")
-                    ) {
-                        this.stopParsing();
-                    } else {
-                        // PARSE ERROR
-                    }
-                    while (true) {
-                        const poppedElem = this.popFromStackOfOpenElements();
-                        if (poppedElem.isElement(HTML_NAMESPACE, "template")) {
-                            break;
-                        }
-                    }
-                    this.clearListOfActiveFormattingElementsUpToLastMarker();
-                    this.stackOfTemplateInsertionModes.pop();
-                    this.resetInsertionModeAppropriately();
-                    this.reprocessToken(tkr, token);
-                } else {
-                    unexpectedToken(token);
-                }
+            case "in template":
+                this.#imodeInTemplate(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-afterbody
-            case "after body": {
-                if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, {
-                        rel: "after last child",
-                        parentNode: this.stackOfOpenElementsNodeAt(0),
-                    });
-                } else if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "html"
-                ) {
-                    if (this.isFragmentParsing) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.insertionMode = "after after body";
-                } else if (token.kind === "eof") {
-                    this.stopParsing();
-                } else {
-                    // PARSE ERROR
-                    this.insertionMode = "in body";
-                    this.useRulesFor("in body", tkr, token);
-                }
+            case "after body":
+                this.#imodeAfterBody(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inframeset
-            case "in frameset": {
-                if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    this.insertCharacter(token);
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, null);
-                } else if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "frameset"
-                ) {
-                    this.insertHTMLElement(token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "framesets"
-                ) {
-                    if (
-                        this.currentNode().isElement(HTML_NAMESPACE, "html") &&
-                        this.currentNode().parent !== null
-                    ) {
-                        // PARSE ERROR
-                        return;
-                    }
-                    this.popFromStackOfOpenElements();
-                    if (
-                        !this.isFragmentParsing &&
-                        !this.currentNode().isElement(
-                            HTML_NAMESPACE,
-                            "frameset",
-                        )
-                    ) {
-                        this.insertionMode = "after frameset";
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "frame"
-                ) {
-                    this.insertHTMLElement(token);
-                    this.popFromStackOfOpenElements();
-                    if (token.isSelfClosing) {
-                        token.selfClosingAcknowledged = true;
-                    }
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "noframes"
-                ) {
-                    this.useRulesFor("in head", tkr, token);
-                } else if (token.kind === "eof") {
-                    if (
-                        !this.currentNode().isElement(HTML_NAMESPACE, "html") ||
-                        this.currentNode().parent !== null
-                    ) {
-                        // PARSE ERROR
-                    }
-                    this.stopParsing();
-                } else {
-                    // PARSE ERROR
-                    return;
-                }
+            case "in frameset":
+                this.#imodeInFrameset(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-afterframeset
-            case "after frameset": {
-                if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    this.insertCharacter(token);
-                } else if (token.kind === "comment") {
-                    this.insertComment(token, null);
-                } else if (token.kind === "doctype") {
-                    // PARSE ERROR
-                    return;
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "end" &&
-                    token.name === "html"
-                ) {
-                    this.insertionMode = "after after frameset";
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "noframes"
-                ) {
-                    this.useRulesFor("in head", tkr, token);
-                } else if (token.kind === "eof") {
-                    this.stopParsing();
-                } else {
-                    // PARSE ERROR
-                    return;
-                }
+            case "after frameset":
+                this.#imodeAfterFrameset(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#the-after-after-body-insertion-mode
-            case "after after body": {
-                if (token.kind === "comment") {
-                    this.insertComment(token, {
-                        rel: "after last child",
-                        parentNode: this.document,
-                    });
-                } else if (token.kind === "doctype") {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (token.kind === "eof") {
-                    this.stopParsing();
-                } else {
-                    // PARSE ERROR
-                    this.insertionMode = "in body";
-                    this.useRulesFor("in body", tkr, token);
-                }
+            case "after after body":
+                this.#imodeAfterAfterBody(tkr, token);
                 break;
-            }
-            // https://html.spec.whatwg.org/multipage/parsing.html#the-after-after-frameset-insertion-mode
-            case "after after frameset": {
-                if (token.kind === "comment") {
-                    this.insertComment(token, {
-                        rel: "after last child",
-                        parentNode: this.document,
-                    });
-                } else if (token.kind === "doctype") {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "character" &&
-                    (token.data === "\t" ||
-                        token.data === "\n" ||
-                        token.data === "\f" ||
-                        token.data === "\r" ||
-                        token.data === " ")
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "html"
-                ) {
-                    this.useRulesFor("in body", tkr, token);
-                } else if (token.kind === "eof") {
-                    this.stopParsing();
-                } else if (
-                    token.kind === "tag" &&
-                    token.type === "start" &&
-                    token.name === "noframes"
-                ) {
-                    this.useRulesFor("in head", tkr, token);
-                } else {
-                    // PARSE ERROR
-                    return;
-                }
+            case "after after frameset":
+                this.#imodeAfterAfterFrameset(tkr, token);
                 break;
-            }
             default:
                 throw new Error("bad mode value");
         }
@@ -3804,12 +772,12 @@ class Parser {
             this.stackOfOpenElements.length === 0 ||
             (this.adjustedCurrentNode().namespace !== null &&
                 this.adjustedCurrentNode().namespace === HTML_NAMESPACE) ||
-            (this.isMathmlTextIntegrationPoint(this.adjustedCurrentNode()) &&
+            (this.isMathMLTextIntegrationPoint(this.adjustedCurrentNode()) &&
                 (!(token.kind === "tag") ||
                     token.type !== "start" ||
                     (token.name !== "mglyph" &&
                         token.name !== "malignmark"))) ||
-            (this.isMathmlTextIntegrationPoint(this.adjustedCurrentNode()) &&
+            (this.isMathMLTextIntegrationPoint(this.adjustedCurrentNode()) &&
                 token.kind === "character") ||
             (this.adjustedCurrentNode().isElement(
                 MATHML_NAMESPACE,
@@ -3910,7 +878,7 @@ class Parser {
             ) {
                 // PARSE ERROR
                 while (
-                    !this.isMathmlTextIntegrationPoint(this.currentNode()) &&
+                    !this.isMathMLTextIntegrationPoint(this.currentNode()) &&
                     !this.isHTMLIntegrationPoint(this.currentNode()) &&
                     this.currentNode().namespace !== HTML_NAMESPACE
                 ) {
@@ -4110,7 +1078,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#mathml-text-integration-point
-    isMathmlTextIntegrationPoint(element: Element): boolean {
+    isMathMLTextIntegrationPoint(element: Element): boolean {
         const SPECIAL_ELEMENTS = [
             { namespace: MATHML_NAMESPACE, localName: "mi" },
             { namespace: MATHML_NAMESPACE, localName: "mo" },
@@ -4714,8 +1682,1884 @@ class Parser {
     // HTML Standard - 13.2.6.4.
     //==========================================================================
 
+    // https://html.spec.whatwg.org/multipage/parsing.html#the-initial-insertion-mode
+    #imodeInitial(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            return;
+        } else if (token.kind === "comment") {
+            this.insertComment(token, {
+                rel: "after last child",
+                parentNode: this.document,
+            });
+        } else if (token.kind === "doctype") {
+            const doctype = new DocumentType(this.document, token.name ?? "");
+            doctype.publicID = token.publicID ?? "";
+            doctype.systemID = token.systemID ?? "";
+            this.document.mode = "no-quirks";
+            if (
+                !this.document.isIframeSrcdocDocument &&
+                !this.document.parserCannotChangeMode
+            ) {
+                if (
+                    token.forceQuirks ||
+                    (token.name === null && token.name !== "html") ||
+                    (token.publicID !== null &&
+                        isASCIICaseInsensitiveMatch(
+                            token.publicID,
+                            "//W3O//DTD W3 HTML Strict 3.0//EN//",
+                        )) ||
+                    (token.publicID !== null &&
+                        isASCIICaseInsensitiveMatch(
+                            token.publicID,
+                            "-/W3C/DTD HTML 4.0 Transitional/EN",
+                        )) ||
+                    (token.publicID !== null &&
+                        isASCIICaseInsensitiveMatch(token.publicID, "HTML")) ||
+                    (token.systemID !== null &&
+                        isASCIICaseInsensitiveMatch(
+                            token.systemID,
+                            "http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "+//Silmaril//dtd html Pro v0r11 19970101//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//AS//DTD HTML 3.0 asWedit + extensions//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//AdvaSoft Ltd//DTD HTML 3.0 asWedit + extensions//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 2.0 Level 1//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 2.0 Level 2//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 2.0 Strict Level 1//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 2.0 Strict Level 2//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 2.0 Strict//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 2.0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 2.1E//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 3.0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 3.2 Final//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 3.2//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML 3//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML Level 0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML Level 1//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML Level 2//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML Level 3//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML Strict Level 0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML Strict Level 1//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML Strict Level 2//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML Strict Level 3//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML Strict//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//IETF//DTD HTML//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Metrius//DTD Metrius Presentational//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Microsoft//DTD Internet Explorer 2.0 HTML Strict//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Microsoft//DTD Internet Explorer 2.0 HTML//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Microsoft//DTD Internet Explorer 2.0 Tables//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Microsoft//DTD Internet Explorer 3.0 HTML Strict//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Microsoft//DTD Internet Explorer 3.0 HTML//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Microsoft//DTD Internet Explorer 3.0 Tables//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Netscape Comm. Corp.//DTD HTML//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Netscape Comm. Corp.//DTD Strict HTML//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//O'Reilly and Associates//DTD HTML 2.0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//O'Reilly and Associates//DTD HTML Extended 1.0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//O'Reilly and Associates//DTD HTML Extended Relaxed 1.0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//SQ//DTD HTML 2.0 HoTMetaL + extensions//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//SoftQuad Software//DTD HoTMetaL PRO 6.0::19990601::extensions to HTML 4.0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//SoftQuad//DTD HoTMetaL PRO 4.0::19971010::extensions to HTML 4.0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Spyglass//DTD HTML 2.0 Extended//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Sun Microsystems Corp.//DTD HotJava HTML//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//Sun Microsystems Corp.//DTD HotJava Strict HTML//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 3 1995-03-24//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 3.2 Draft//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 3.2 Final//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 3.2//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 3.2S Draft//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 4.0 Frameset//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 4.0 Transitional//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML Experimental 19960712//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML Experimental 970421//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD W3 HTML//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3O//DTD W3 HTML 3.0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//WebTechs//DTD Mozilla HTML 2.0//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//WebTechs//DTD Mozilla HTML//",
+                        )) ||
+                    ((token.systemID === null || token.systemID[0] === "\0") &&
+                        token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 4.01 Frameset//",
+                        )) ||
+                    ((token.systemID === null || token.systemID[0] === "\0") &&
+                        token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 4.01 Transitional//",
+                        ))
+                ) {
+                    this.document.mode = "quirks";
+                } else if (
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD XHTML 1.0 Frameset//",
+                        )) ||
+                    (token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD XHTML 1.0 Transitional//",
+                        )) ||
+                    (token.systemID !== null &&
+                        token.systemID[0] !== "\0" &&
+                        token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 4.01 Frameset//",
+                        )) ||
+                    (token.systemID !== null &&
+                        token.systemID[0] !== "\0" &&
+                        token.publicID !== null &&
+                        hasPrefixASCIICaseInsensitive(
+                            token.publicID,
+                            "-//W3C//DTD HTML 4.01 Transitional//",
+                        ))
+                ) {
+                    this.document.mode = "limited-quirks";
+                }
+            }
+            this.insertionMode = "before html";
+        } else {
+            if (!this.document.isIframeSrcdocDocument) {
+                if (!this.document.parserCannotChangeMode) {
+                    // PARSE ERROR
+                    this.document.mode = "quirks";
+                }
+                this.insertionMode = "before html";
+                this.reprocessToken(tkr, token);
+            }
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#the-before-html-insertion-mode
+    #imodeBeforeHtml(tkr: Tokenizer, token: Token) {
+        const anythingElse = () => {
+            const element = Element.create(
+                this.document,
+                "html",
+                HTML_NAMESPACE,
+                elementInterfaceFor,
+            );
+            this.document.appendChild(element);
+            this.pushToStackOfOpenElements(element);
+            this.insertionMode = "before head";
+            this.reprocessToken(tkr, token);
+        };
+
+        if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (token.kind === "comment") {
+            this.insertComment(token, {
+                rel: "after last child",
+                parentNode: this.document,
+            });
+        } else if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            const element = this.createElementForToken(
+                token,
+                HTML_NAMESPACE,
+                this.document,
+            );
+            this.document.appendChild(element);
+            this.pushToStackOfOpenElements(element);
+            this.insertionMode = "before head";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "head" ||
+                token.name === "body" ||
+                token.name === "html" ||
+                token.name === "br")
+        ) {
+            anythingElse();
+        } else if (token.kind === "tag" && token.type === "end") {
+            // PARSE ERROR
+            return;
+        } else {
+            anythingElse();
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#the-before-head-insertion-mode
+    #imodeBeforeHead(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            return;
+        } else if (token.kind === "comment") {
+            this.insertComment(token, null);
+        } else if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "head"
+        ) {
+            const element = this.insertHTMLElement(token);
+            this.headElementPointer = element;
+            this.insertionMode = "in head";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name !== "head" &&
+            token.name !== "body" &&
+            token.name !== "html" &&
+            token.name !== "br"
+        ) {
+            // PARSE ERROR
+            return;
+        } else {
+            const element = this.insertHTMLElement({
+                kind: "tag",
+                name: "head",
+                attributes: [],
+                type: "start",
+                isSelfClosing: false,
+                selfClosingAcknowledged: false,
+            });
+            this.headElementPointer = element;
+            this.insertionMode = "in head";
+            this.reprocessToken(tkr, token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead
+    #imodeInHead(tkr: Tokenizer, token: Token) {
+        if (token.kind === "character") {
+            this.insertCharacter(token);
+        } else if (token.kind === "comment") {
+            this.insertComment(token, null);
+        } else if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "base" ||
+                token.name === "basefont" ||
+                token.name === "bgsound" ||
+                token.name === "link")
+        ) {
+            this.insertHTMLElement(token);
+            this.popFromStackOfOpenElements();
+            if (token.isSelfClosing) {
+                token.selfClosingAcknowledged = true;
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "meta"
+        ) {
+            const element = this.insertHTMLElement(token);
+            this.popFromStackOfOpenElements();
+            if (!this.hasActiveSpeculativeParser) {
+                const charsetAttr = element.attribute(null, "charset");
+                const httpEquivAttr = element.attribute(null, "http-equiv");
+                if (charsetAttr !== undefined) {
+                    // TODO: Set encoding based on charset
+                }
+                if (
+                    httpEquivAttr !== undefined &&
+                    isASCIICaseInsensitiveMatch(httpEquivAttr, "content-type")
+                ) {
+                    // TODO: Set encoding based on http-equiv Content-Type value
+                }
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "title"
+        ) {
+            this.parseGenericRCDATAElement(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            ((token.type === "start" &&
+                token.name === "noscript" &&
+                this.scriptingMode !== "Disabled") ||
+                (token.type === "start" &&
+                    (token.name === "noframes" || token.name === "style")))
+        ) {
+            this.parseGenericRawTextElement(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "noscript" &&
+            this.scriptingMode === "Disabled"
+        ) {
+            this.insertHTMLElement(token);
+            this.insertionMode = "in head noscript";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "script"
+        ) {
+            // STUB.
+            this.parseGenericRawTextElement(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "head"
+        ) {
+            this.popFromStackOfOpenElements();
+            this.insertionMode = "after head";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "template"
+        ) {
+            throw new Error("not yet implemented");
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "template"
+        ) {
+            throw new Error("not yet implemented");
+        } else if (
+            token.kind === "tag" &&
+            ((token.type === "end" &&
+                token.name !== "body" &&
+                token.name !== "html" &&
+                token.name !== "br") ||
+                (token.type === "start" && token.name === "head"))
+        ) {
+            // PARSE ERROR
+            return;
+        } else {
+            this.popFromStackOfOpenElements();
+            this.insertionMode = "after head";
+            this.reprocessToken(tkr, token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inheadnoscript
+    #imodeInHeadNoscript(tkr: Tokenizer, token: Token) {
+        if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "noscript"
+        ) {
+            this.popFromStackOfOpenElements();
+            this.insertionMode = "in head";
+        } else if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            this.useRulesFor("in head", tkr, token);
+        } else if (token.kind === "comment") {
+            this.useRulesFor("in head", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "basefont" ||
+                token.name === "bgsound" ||
+                token.name === "link" ||
+                token.name === "meta" ||
+                token.name === "noframes" ||
+                token.name === "style")
+        ) {
+            this.useRulesFor("in head", tkr, token);
+        } else if (
+            (token.kind === "tag" &&
+                token.type === "end" &&
+                token.name === "br") ||
+            (token.kind === "tag" &&
+                token.type === "start" &&
+                (token.name === "head" || token.name === "noscript"))
+        ) {
+            // PARSE ERROR
+            return;
+        } else {
+            // PARSE ERROR
+            this.popFromStackOfOpenElements();
+            this.insertionMode = "in head";
+            this.reprocessToken(tkr, token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#the-after-head-insertion-mode
+    #imodeAfterHead(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            this.insertCharacter(token);
+        } else if (token.kind === "comment") {
+            this.insertComment(token, null);
+        } else if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "body"
+        ) {
+            this.insertHTMLElement(token);
+            this.framesetOKFlag = "not ok";
+            this.insertionMode = "in body";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "frameset"
+        ) {
+            this.insertHTMLElement(token);
+            this.insertionMode = "in frameset";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "base" ||
+                token.name === "basefont" ||
+                token.name === "bgsound" ||
+                token.name === "link" ||
+                token.name === "meta" ||
+                token.name === "noframes" ||
+                token.name === "script" ||
+                token.name === "style" ||
+                token.name === "template" ||
+                token.name === "title")
+        ) {
+            // PARSE ERROR
+            if (this.headElementPointer === null) {
+                throw Error("head element pointer must be set at this point");
+            }
+            this.pushToStackOfOpenElements(this.headElementPointer);
+            this.insertionMode = "in head";
+            const removeIdx = this.stackOfOpenElements.indexOf(
+                this.headElementPointer,
+            );
+            this.removeFromStackOfOpenElements(removeIdx);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "template"
+        ) {
+            this.useRulesFor("in head", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            ((token.type === "end" &&
+                token.name !== "body" &&
+                token.name !== "html" &&
+                token.name !== "br") ||
+                (token.type === "start" && token.name === "head"))
+        ) {
+            // PARSE ERROR
+            return;
+        } else {
+            this.insertHTMLElement({
+                kind: "tag",
+                name: "body",
+                attributes: [],
+                type: "start",
+                isSelfClosing: false,
+                selfClosingAcknowledged: false,
+            });
+            this.insertionMode = "in body";
+            this.useRulesFor("in body", tkr, token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody
+    #imodeInBody(tkr: Tokenizer, token: Token) {
+        if (token.kind === "character" && token.data === "\0") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            this.reconstructActiveFormattingElements();
+            this.insertCharacter(token);
+        } else if (token.kind === "character") {
+            this.reconstructActiveFormattingElements();
+            this.insertCharacter(token);
+            this.framesetOKFlag = "not ok";
+        } else if (token.kind === "comment") {
+            this.insertComment(token, null);
+        } else if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            // PARSE ERROR
+            if (this.stackOfOpenElementsContainsHTMLElement("template")) {
+                return;
+            } else {
+                throw new Error("not yet implemented");
+            }
+        } else if (
+            token.kind === "tag" &&
+            ((token.type === "start" &&
+                (token.name === "base" ||
+                    token.name === "basefont" ||
+                    token.name === "bgsound" ||
+                    token.name === "link" ||
+                    token.name === "meta" ||
+                    token.name === "noframes" ||
+                    token.name === "script" ||
+                    token.name === "style" ||
+                    token.name === "template" ||
+                    token.name === "title")) ||
+                (token.type === "end" && token.name === "template"))
+        ) {
+            this.useRulesFor("in head", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "body"
+        ) {
+            // PARSE ERROR
+            if (
+                this.stackOfOpenElements.length === 1 ||
+                !this.stackOfOpenElementsNodeAt(1).isElement(
+                    HTML_NAMESPACE,
+                    "body",
+                ) ||
+                this.stackOfOpenElementsContainsHTMLElement("template")
+            ) {
+                return;
+            } else {
+                this.framesetOKFlag = "not ok";
+                throw new Error("not yet implemented");
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "frameset"
+        ) {
+            // PARSE ERROR
+            if (
+                this.stackOfOpenElements.length === 1 ||
+                !this.stackOfOpenElementsNodeAt(1).isElement(
+                    HTML_NAMESPACE,
+                    "body",
+                )
+            ) {
+                return;
+            } else if (this.framesetOKFlag === "not ok") {
+                return;
+            } else {
+                throw new Error("not yet implemented");
+            }
+        } else if (token.kind === "eof") {
+            if (this.stackOfTemplateInsertionModes.length !== 0) {
+                this.useRulesFor("in template", tkr, token);
+            } else {
+                if (
+                    this.stackOfOpenElementsContainsHTMLElement("dd") ||
+                    this.stackOfOpenElementsContainsHTMLElement("dt") ||
+                    this.stackOfOpenElementsContainsHTMLElement("li") ||
+                    this.stackOfOpenElementsContainsHTMLElement("optgroup") ||
+                    this.stackOfOpenElementsContainsHTMLElement("option") ||
+                    this.stackOfOpenElementsContainsHTMLElement("p") ||
+                    this.stackOfOpenElementsContainsHTMLElement("rb") ||
+                    this.stackOfOpenElementsContainsHTMLElement("rp") ||
+                    this.stackOfOpenElementsContainsHTMLElement("rt") ||
+                    this.stackOfOpenElementsContainsHTMLElement("rtc") ||
+                    this.stackOfOpenElementsContainsHTMLElement("tbody") ||
+                    this.stackOfOpenElementsContainsHTMLElement("td") ||
+                    this.stackOfOpenElementsContainsHTMLElement("tfoot") ||
+                    this.stackOfOpenElementsContainsHTMLElement("th") ||
+                    this.stackOfOpenElementsContainsHTMLElement("thead") ||
+                    this.stackOfOpenElementsContainsHTMLElement("tr") ||
+                    this.stackOfOpenElementsContainsHTMLElement("body") ||
+                    this.stackOfOpenElementsContainsHTMLElement("html")
+                ) {
+                    // PARSE ERROR
+                }
+                this.stopParsing();
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "body"
+        ) {
+            if (
+                !this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "body"),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            } else if (
+                this.stackOfOpenElementsContainsHTMLElement("dd") ||
+                this.stackOfOpenElementsContainsHTMLElement("dt") ||
+                this.stackOfOpenElementsContainsHTMLElement("li") ||
+                this.stackOfOpenElementsContainsHTMLElement("optgroup") ||
+                this.stackOfOpenElementsContainsHTMLElement("option") ||
+                this.stackOfOpenElementsContainsHTMLElement("p") ||
+                this.stackOfOpenElementsContainsHTMLElement("rb") ||
+                this.stackOfOpenElementsContainsHTMLElement("rp") ||
+                this.stackOfOpenElementsContainsHTMLElement("rt") ||
+                this.stackOfOpenElementsContainsHTMLElement("rtc") ||
+                this.stackOfOpenElementsContainsHTMLElement("tbody") ||
+                this.stackOfOpenElementsContainsHTMLElement("td") ||
+                this.stackOfOpenElementsContainsHTMLElement("tfoot") ||
+                this.stackOfOpenElementsContainsHTMLElement("th") ||
+                this.stackOfOpenElementsContainsHTMLElement("thead") ||
+                this.stackOfOpenElementsContainsHTMLElement("tr") ||
+                this.stackOfOpenElementsContainsHTMLElement("body") ||
+                this.stackOfOpenElementsContainsHTMLElement("html")
+            ) {
+                // PARSE ERROR
+            }
+            this.insertionMode = "after body";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "html"
+        ) {
+            if (
+                !this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "body"),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            } else if (
+                this.stackOfOpenElementsContainsHTMLElement("dd") ||
+                this.stackOfOpenElementsContainsHTMLElement("dt") ||
+                this.stackOfOpenElementsContainsHTMLElement("li") ||
+                this.stackOfOpenElementsContainsHTMLElement("optgroup") ||
+                this.stackOfOpenElementsContainsHTMLElement("option") ||
+                this.stackOfOpenElementsContainsHTMLElement("p") ||
+                this.stackOfOpenElementsContainsHTMLElement("rb") ||
+                this.stackOfOpenElementsContainsHTMLElement("rp") ||
+                this.stackOfOpenElementsContainsHTMLElement("rt") ||
+                this.stackOfOpenElementsContainsHTMLElement("rtc") ||
+                this.stackOfOpenElementsContainsHTMLElement("tbody") ||
+                this.stackOfOpenElementsContainsHTMLElement("td") ||
+                this.stackOfOpenElementsContainsHTMLElement("tfoot") ||
+                this.stackOfOpenElementsContainsHTMLElement("th") ||
+                this.stackOfOpenElementsContainsHTMLElement("thead") ||
+                this.stackOfOpenElementsContainsHTMLElement("tr") ||
+                this.stackOfOpenElementsContainsHTMLElement("body") ||
+                this.stackOfOpenElementsContainsHTMLElement("html")
+            ) {
+                // PARSE ERROR
+            }
+            this.insertionMode = "after body";
+            this.reprocessToken(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "address" ||
+                token.name === "article" ||
+                token.name === "aside" ||
+                token.name === "blockquote" ||
+                token.name === "center" ||
+                token.name === "details" ||
+                token.name === "dialog" ||
+                token.name === "dir" ||
+                token.name === "div" ||
+                token.name === "dl" ||
+                token.name === "fieldset" ||
+                token.name === "figcaption" ||
+                token.name === "figure" ||
+                token.name === "footer" ||
+                token.name === "header" ||
+                token.name === "hgroup" ||
+                token.name === "main" ||
+                token.name === "menu" ||
+                token.name === "nav" ||
+                token.name === "ol" ||
+                token.name === "p" ||
+                token.name === "search" ||
+                token.name === "section" ||
+                token.name === "summary" ||
+                token.name === "ul")
+        ) {
+            if (
+                this.hasElementInButtonScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "p"),
+                )
+            ) {
+                this.#closePElement();
+            }
+            this.insertHTMLElement(token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "h1" ||
+                token.name === "h2" ||
+                token.name === "h3" ||
+                token.name === "h4" ||
+                token.name === "h5" ||
+                token.name === "h6")
+        ) {
+            if (
+                this.hasElementInButtonScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "p"),
+                )
+            ) {
+                this.#closePElement();
+            }
+            if (
+                this.currentNode().isElement(HTML_NAMESPACE, "h1") ||
+                this.currentNode().isElement(HTML_NAMESPACE, "h2") ||
+                this.currentNode().isElement(HTML_NAMESPACE, "h3") ||
+                this.currentNode().isElement(HTML_NAMESPACE, "h4") ||
+                this.currentNode().isElement(HTML_NAMESPACE, "h5") ||
+                this.currentNode().isElement(HTML_NAMESPACE, "h6")
+            ) {
+                // PARSE ERROR
+                this.popFromStackOfOpenElements();
+            }
+            this.insertHTMLElement(token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "pre" || token.name === "listing")
+        ) {
+            if (
+                this.hasElementInButtonScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "p"),
+                )
+            ) {
+                this.#closePElement();
+            }
+            this.insertHTMLElement(token);
+            this.ignoreNextNewline = true;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "form"
+        ) {
+            if (
+                this.formElementPointer !== null &&
+                !this.stackOfOpenElementsContainsHTMLElement("template")
+            ) {
+                // PARSE ERROR
+                return;
+            } else {
+                if (
+                    this.hasElementInButtonScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "p"),
+                    )
+                ) {
+                    this.#closePElement();
+                }
+                const element = this.insertHTMLElement(token);
+                if (!this.stackOfOpenElementsContainsHTMLElement("template")) {
+                    this.formElementPointer = element;
+                }
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "li"
+        ) {
+            this.framesetOKFlag = "not ok";
+            let node = this.currentNode();
+            while (true) {
+                if (node.isElement(HTML_NAMESPACE, "li")) {
+                    this.generateImpliedEndTags(["li"]);
+                    if (!this.currentNode().isElement(HTML_NAMESPACE, "li")) {
+                        // PARSE ERROR
+                    }
+                    while (true) {
+                        const poppedElem = this.popFromStackOfOpenElements();
+                        if (poppedElem.isElement(HTML_NAMESPACE, "li")) {
+                            break;
+                        }
+                    }
+                    break;
+                }
+                if (
+                    this.isSpecialElement(node) &&
+                    !(
+                        this.currentNode().isElement(
+                            HTML_NAMESPACE,
+                            "address",
+                        ) ||
+                        this.currentNode().isElement(HTML_NAMESPACE, "div") ||
+                        this.currentNode().isElement(HTML_NAMESPACE, "p")
+                    )
+                ) {
+                    break;
+                } else {
+                    const nodeIdx = this.stackOfOpenElements.indexOf(node) - 1;
+                    node = this.stackOfOpenElementsNodeAt(nodeIdx);
+                }
+            }
+            if (
+                this.hasElementInButtonScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "p"),
+                )
+            ) {
+                this.#closePElement();
+            }
+            this.insertHTMLElement(token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "dt" || token.name === "dd")
+        ) {
+            this.framesetOKFlag = "not ok";
+            let node = this.currentNode();
+            while (true) {
+                if (node.isElement(HTML_NAMESPACE, "dd")) {
+                    this.generateImpliedEndTags(["dd"]);
+                    if (!this.currentNode().isElement(HTML_NAMESPACE, "dd")) {
+                        // PARSE ERROR
+                    }
+                    while (true) {
+                        const poppedElem = this.popFromStackOfOpenElements();
+                        if (poppedElem.isElement(HTML_NAMESPACE, "dd")) {
+                            break;
+                        }
+                    }
+                    break;
+                } else if (node.isElement(HTML_NAMESPACE, "dt")) {
+                    this.generateImpliedEndTags(["dt"]);
+                    if (!this.currentNode().isElement(HTML_NAMESPACE, "dt")) {
+                        // PARSE ERROR
+                    }
+                    while (true) {
+                        const poppedElem = this.popFromStackOfOpenElements();
+                        if (poppedElem.isElement(HTML_NAMESPACE, "dt")) {
+                            break;
+                        }
+                    }
+                    break;
+                }
+                if (
+                    this.isSpecialElement(node) &&
+                    !(
+                        this.currentNode().isElement(
+                            HTML_NAMESPACE,
+                            "address",
+                        ) ||
+                        this.currentNode().isElement(HTML_NAMESPACE, "div") ||
+                        this.currentNode().isElement(HTML_NAMESPACE, "p")
+                    )
+                ) {
+                    break;
+                } else {
+                    const nodeIdx = this.stackOfOpenElements.indexOf(node) - 1;
+                    node = this.stackOfOpenElementsNodeAt(nodeIdx);
+                }
+            }
+            if (
+                this.hasElementInButtonScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "p"),
+                )
+            ) {
+                this.#closePElement();
+            }
+            this.insertHTMLElement(token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "plaintext"
+        ) {
+            if (
+                this.hasElementInButtonScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "p"),
+                )
+            ) {
+                this.#closePElement();
+            }
+            this.insertHTMLElement(token);
+            tkr.state = "PLAINTEXT";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "button"
+        ) {
+            if (
+                !this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "button"),
+                )
+            ) {
+                // PARSE ERROR
+                this.generateImpliedEndTags([]);
+                while (true) {
+                    const poppedElem = this.popFromStackOfOpenElements();
+                    if (poppedElem.isElement(HTML_NAMESPACE, "button")) {
+                        break;
+                    }
+                }
+            }
+            this.reconstructActiveFormattingElements();
+            this.insertHTMLElement(token);
+            this.framesetOKFlag = "not ok";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "address" ||
+                token.name === "article" ||
+                token.name === "aside" ||
+                token.name === "blockquote" ||
+                token.name === "button" ||
+                token.name === "center" ||
+                token.name === "details" ||
+                token.name === "dialog" ||
+                token.name === "dir" ||
+                token.name === "dl" ||
+                token.name === "fieldset" ||
+                token.name === "figcaption" ||
+                token.name === "figure" ||
+                token.name === "footer" ||
+                token.name === "header" ||
+                token.name === "hgroup" ||
+                token.name === "listing" ||
+                token.name === "main" ||
+                token.name === "menu" ||
+                token.name === "nav" ||
+                token.name === "ol" ||
+                token.name === "pre" ||
+                token.name === "search" ||
+                token.name === "section" ||
+                token.name === "select" ||
+                token.name === "summary" ||
+                token.name === "ul")
+        ) {
+            if (
+                !this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, token.name),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            } else {
+                this.generateImpliedEndTags([]);
+                if (!this.currentNode().isElement(HTML_NAMESPACE, token.name)) {
+                    // PARSE ERROR
+                }
+                while (true) {
+                    const poppedElem = this.popFromStackOfOpenElements();
+                    if (poppedElem.isElement(HTML_NAMESPACE, token.name)) {
+                        break;
+                    }
+                }
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "form"
+        ) {
+            if (this.stackOfOpenElementsContainsHTMLElement("template")) {
+                const node = this.formElementPointer;
+                if (
+                    node === null ||
+                    !this.hasElementInScope((e) => e === node)
+                ) {
+                    // PARSE ERROR
+                    return;
+                }
+                this.generateImpliedEndTags([]);
+                if (this.currentNode() !== node) {
+                    // PARSE ERROR
+                }
+                const removeIdx = this.stackOfOpenElements.indexOf(node);
+                this.removeFromStackOfOpenElements(removeIdx);
+            } else {
+                if (
+                    this.hasElementInScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "form"),
+                    )
+                ) {
+                    // PARSE ERROR
+                    return;
+                }
+                this.generateImpliedEndTags([]);
+                if (!this.currentNode().isElement(HTML_NAMESPACE, "form")) {
+                    // PARSE ERROR
+                }
+                while (true) {
+                    const poppedElem = this.popFromStackOfOpenElements();
+                    if (poppedElem.isElement(HTML_NAMESPACE, "form")) {
+                        break;
+                    }
+                }
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "p"
+        ) {
+            if (
+                !this.hasElementInButtonScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "p"),
+                )
+            ) {
+                // PARSE ERROR
+                this.insertHTMLElement({
+                    kind: "tag",
+                    name: "p",
+                    attributes: [],
+                    type: "start",
+                    isSelfClosing: false,
+                    selfClosingAcknowledged: false,
+                });
+            }
+            this.#closePElement();
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "li"
+        ) {
+            if (
+                !this.hasElementInListItemScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "li"),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.generateImpliedEndTags(["li"]);
+            if (!this.currentNode().isElement(HTML_NAMESPACE, "li")) {
+                // PARSE ERROR
+            }
+            while (true) {
+                const poppedElem = this.popFromStackOfOpenElements();
+                if (poppedElem.isElement(HTML_NAMESPACE, "li")) {
+                    break;
+                }
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "dt" || token.name === "dd")
+        ) {
+            if (
+                !this.hasElementInListItemScope((e) =>
+                    e.isElement(HTML_NAMESPACE, token.name),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+
+            let except;
+            if (token.name === "dt") {
+                except = ["dt"];
+            } else if (token.name === "dd") {
+                except = ["dd"];
+            } else {
+                throw new Error("unreachable");
+            }
+            this.generateImpliedEndTags(except);
+            if (!this.currentNode().isElement(HTML_NAMESPACE, token.name)) {
+                // PARSE ERROR
+            }
+            while (true) {
+                const poppedElem = this.popFromStackOfOpenElements();
+                if (poppedElem.isElement(HTML_NAMESPACE, token.name)) {
+                    break;
+                }
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "h1" ||
+                token.name === "h2" ||
+                token.name === "h3" ||
+                token.name === "h4" ||
+                token.name === "h5" ||
+                token.name === "h6")
+        ) {
+            if (
+                !this.hasElementInListItemScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "h1"),
+                ) ||
+                !this.hasElementInListItemScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "h2"),
+                ) ||
+                !this.hasElementInListItemScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "h3"),
+                ) ||
+                !this.hasElementInListItemScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "h4"),
+                ) ||
+                !this.hasElementInListItemScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "h5"),
+                ) ||
+                !this.hasElementInListItemScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "h6"),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.generateImpliedEndTags([]);
+            if (!this.currentNode().isElement(HTML_NAMESPACE, token.name)) {
+                // PARSE ERROR
+            }
+            while (true) {
+                const poppedElem = this.popFromStackOfOpenElements();
+                if (
+                    poppedElem.isElement(HTML_NAMESPACE, "h1") ||
+                    poppedElem.isElement(HTML_NAMESPACE, "h2") ||
+                    poppedElem.isElement(HTML_NAMESPACE, "h3") ||
+                    poppedElem.isElement(HTML_NAMESPACE, "h4") ||
+                    poppedElem.isElement(HTML_NAMESPACE, "h5") ||
+                    poppedElem.isElement(HTML_NAMESPACE, "h6")
+                ) {
+                    break;
+                }
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "a"
+        ) {
+            {
+                const lastMarkerIdx =
+                    this.listOfActiveFormattingElements.lastIndexOf("marker");
+                let checkStartIdx = 0;
+                if (0 <= lastMarkerIdx) {
+                    checkStartIdx = lastMarkerIdx + 1;
+                }
+                let aElem;
+                for (
+                    let i = checkStartIdx;
+                    i < this.listOfActiveFormattingElements.length;
+                    i++
+                ) {
+                    const elem = this.listOfActiveFormattingElements[i];
+                    if (!(elem instanceof Element)) {
+                        throw Error(`expected element, got ${elem}`);
+                    }
+                    if (elem.isElement(HTML_NAMESPACE, "a")) {
+                        aElem = elem;
+                    }
+                }
+                if (aElem !== undefined) {
+                    // PARSE ERROR
+                    this.#adoptionAgencyAlgorithm(token);
+                    let removeIdx = -1;
+                    for (
+                        let i = 0;
+                        i < this.listOfActiveFormattingElements.length;
+                        i++
+                    ) {
+                        if (this.listOfActiveFormattingElements[i] === aElem) {
+                            removeIdx = i;
+                        }
+                    }
+                    this.removeFromActiveFormattingElementsList(removeIdx);
+                    removeIdx = this.stackOfOpenElements.indexOf(aElem);
+                    this.removeFromStackOfOpenElements(removeIdx);
+                }
+            }
+            this.reconstructActiveFormattingElements();
+            const element = this.insertHTMLElement(token);
+            this.pushOntoListOfActiveFormattingElements(element);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "b" ||
+                token.name === "big" ||
+                token.name === "code" ||
+                token.name === "em" ||
+                token.name === "font" ||
+                token.name === "i" ||
+                token.name === "s" ||
+                token.name === "small" ||
+                token.name === "strike" ||
+                token.name === "strong" ||
+                token.name === "tt" ||
+                token.name === "u")
+        ) {
+            this.reconstructActiveFormattingElements();
+            const element = this.insertHTMLElement(token);
+            this.pushOntoListOfActiveFormattingElements(element);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "nobr"
+        ) {
+            this.reconstructActiveFormattingElements();
+            if (
+                this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "nobr"),
+                )
+            ) {
+                // PARSE ERROR
+                this.#adoptionAgencyAlgorithm(token);
+                this.reconstructActiveFormattingElements();
+            }
+            const element = this.insertHTMLElement(token);
+            this.pushOntoListOfActiveFormattingElements(element);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "a" ||
+                token.name === "b" ||
+                token.name === "big" ||
+                token.name === "code" ||
+                token.name === "em" ||
+                token.name === "font" ||
+                token.name === "i" ||
+                token.name === "nobr" ||
+                token.name === "s" ||
+                token.name === "small" ||
+                token.name === "strike" ||
+                token.name === "strong" ||
+                token.name === "tt" ||
+                token.name === "u")
+        ) {
+            this.#adoptionAgencyAlgorithm(token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "applet" ||
+                token.name === "marquee" ||
+                token.name === "object")
+        ) {
+            this.reconstructActiveFormattingElements();
+            this.insertHTMLElement(token);
+
+            this.listOfActiveFormattingElements.push("marker");
+            this.framesetOKFlag = "not ok";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "applet" ||
+                token.name === "marquee" ||
+                token.name === "object")
+        ) {
+            if (!this.currentNode().isElement(HTML_NAMESPACE, token.name)) {
+                // PARSE ERROR
+                return;
+            }
+            this.generateImpliedEndTags([]);
+            if (!this.currentNode().isElement(HTML_NAMESPACE, token.name)) {
+                // PARSE ERROR
+            }
+            while (true) {
+                const poppedElem = this.popFromStackOfOpenElements();
+                if (poppedElem.isElement(HTML_NAMESPACE, token.name)) {
+                    break;
+                }
+            }
+            this.clearListOfActiveFormattingElementsUpToLastMarker();
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "table"
+        ) {
+            if (
+                this.document.mode !== "quirks" &&
+                this.hasElementInButtonScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "p"),
+                )
+            ) {
+                this.#closePElement();
+            }
+            this.insertHTMLElement(token);
+            this.framesetOKFlag = "not ok";
+            this.insertionMode = "in table";
+        } else if (
+            (token.kind === "tag" &&
+                token.type === "end" &&
+                token.name === "br") ||
+            (token.type === "start" &&
+                (token.name === "area" ||
+                    token.name === "br" ||
+                    token.name === "embed" ||
+                    token.name === "img" ||
+                    token.name === "keygen"))
+        ) {
+            if (token.type === "end" && token.name === "br") {
+                // PARSE ERROR
+                token.attributes = [];
+                token.type = "start";
+            }
+            this.reconstructActiveFormattingElements();
+            this.insertHTMLElement(token);
+            this.popFromStackOfOpenElements();
+            token.selfClosingAcknowledged = true;
+            this.framesetOKFlag = "not ok";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "input"
+        ) {
+            if (this.isFragmentParsing) {
+                throw new Error("not yet implemented");
+            }
+            if (
+                this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "select"),
+                )
+            ) {
+                // PARSE ERROR
+                while (true) {
+                    const poppedElem = this.popFromStackOfOpenElements();
+                    if (poppedElem.isElement(HTML_NAMESPACE, "select")) {
+                        break;
+                    }
+                }
+            }
+            this.reconstructActiveFormattingElements();
+            this.insertHTMLElement(token);
+            this.popFromStackOfOpenElements();
+            token.selfClosingAcknowledged = true;
+            if (!tagAttributeEquals(token, "type", "hidden")) {
+                this.framesetOKFlag = "not ok";
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "hr"
+        ) {
+            if (
+                this.hasElementInButtonScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "p"),
+                )
+            ) {
+                this.#closePElement();
+            }
+            if (
+                this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "select"),
+                )
+            ) {
+                this.generateImpliedEndTags([]);
+                if (
+                    this.hasElementInScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "option"),
+                    ) ||
+                    this.hasElementInScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "optgroup"),
+                    )
+                ) {
+                    // PARSE ERROR
+                }
+            }
+            this.insertHTMLElement(token);
+            this.popFromStackOfOpenElements();
+            token.selfClosingAcknowledged = true;
+            this.framesetOKFlag = "not ok";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "image"
+        ) {
+            // PARSE ERROR
+            token.name = "img";
+            this.reprocessToken(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "textarea"
+        ) {
+            this.insertHTMLElement(token);
+            this.ignoreNextNewline = true;
+            tkr.state = "RCDATA";
+            this.originalInsertionMode = this.insertionMode;
+            this.framesetOKFlag = "not ok";
+            this.insertionMode = "text";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "xmp"
+        ) {
+            if (
+                this.hasElementInButtonScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "p"),
+                )
+            ) {
+                this.#closePElement();
+            }
+            this.reconstructActiveFormattingElements();
+            this.framesetOKFlag = "not ok";
+            this.parseGenericRawTextElement(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "iframe"
+        ) {
+            this.framesetOKFlag = "not ok";
+            this.parseGenericRawTextElement(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            ((token.type === "start" && token.name === "noembed") ||
+                (token.type === "start" &&
+                    token.name === "noscript" &&
+                    this.scriptingMode !== "Disabled"))
+        ) {
+            this.parseGenericRawTextElement(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "select"
+        ) {
+            if (this.isFragmentParsing) {
+                throw new Error("not yet implemented");
+            }
+            if (
+                this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "select"),
+                )
+            ) {
+                // PARSE ERROR
+                while (true) {
+                    const poppedElem = this.popFromStackOfOpenElements();
+                    if (poppedElem.isElement(HTML_NAMESPACE, "select")) {
+                        break;
+                    }
+                }
+                return;
+            }
+            this.reconstructActiveFormattingElements();
+            this.insertHTMLElement(token);
+            this.framesetOKFlag = "not ok";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "option"
+        ) {
+            if (
+                this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "select"),
+                )
+            ) {
+                this.generateImpliedEndTags(["optgroup"]);
+                if (
+                    this.hasElementInScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "option"),
+                    )
+                ) {
+                    // PARSE ERROR
+                }
+            } else {
+                if (this.currentNode().isElement(HTML_NAMESPACE, "option")) {
+                    this.popFromStackOfOpenElements();
+                }
+            }
+            this.reconstructActiveFormattingElements();
+            this.insertHTMLElement(token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "optgroup"
+        ) {
+            if (
+                this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "select"),
+                )
+            ) {
+                this.generateImpliedEndTags([]);
+                if (
+                    this.hasElementInScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "option"),
+                    ) ||
+                    this.hasElementInScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "optgroup"),
+                    )
+                ) {
+                    // PARSE ERROR
+                }
+            } else {
+                if (this.currentNode().isElement(HTML_NAMESPACE, "option")) {
+                    this.popFromStackOfOpenElements();
+                }
+            }
+            this.reconstructActiveFormattingElements();
+            this.insertHTMLElement(token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "rb" || token.name === "rtc")
+        ) {
+            if (
+                this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "ruby"),
+                )
+            ) {
+                this.generateImpliedEndTags([]);
+                if (!this.currentNode().isElement(HTML_NAMESPACE, "ruby")) {
+                    // PARSE ERROR
+                }
+            }
+            this.insertHTMLElement(token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "rp" || token.name === "rt")
+        ) {
+            if (
+                this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "ruby"),
+                )
+            ) {
+                this.generateImpliedEndTags(["rtc"]);
+                if (
+                    !this.currentNode().isElement(HTML_NAMESPACE, "rtc") &&
+                    !this.currentNode().isElement(HTML_NAMESPACE, "ruby")
+                ) {
+                    // PARSE ERROR
+                }
+            }
+            this.insertHTMLElement(token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "math"
+        ) {
+            this.reconstructActiveFormattingElements();
+            this.adjustMathmlAttributes(token);
+            this.adjustForeignAttributes(token);
+            this.insertForeignElement(token, MATHML_NAMESPACE, false);
+            if (token.isSelfClosing) {
+                this.popFromStackOfOpenElements();
+                token.selfClosingAcknowledged = true;
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "svg"
+        ) {
+            this.reconstructActiveFormattingElements();
+            this.adjustSVGAttributes(token);
+            this.adjustForeignAttributes(token);
+            this.insertForeignElement(token, SVG_NAMESPACE, false);
+            if (token.isSelfClosing) {
+                this.popFromStackOfOpenElements();
+                token.selfClosingAcknowledged = true;
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "caption" ||
+                token.name === "col" ||
+                token.name === "colgroup" ||
+                token.name === "frame" ||
+                token.name === "head" ||
+                token.name === "tbody" ||
+                token.name === "td" ||
+                token.name === "tfoot" ||
+                token.name === "th" ||
+                token.name === "thead" ||
+                token.name === "tr")
+        ) {
+            // PARSE ERROR
+            return;
+        } else if (token.kind === "tag" && token.type !== "end") {
+            this.reconstructActiveFormattingElements();
+            this.insertHTMLElement(token);
+        } else if (token.kind === "tag" && token.type === "end") {
+            let nodeIdx = this.stackOfOpenElements.length - 1;
+            while (true) {
+                const node = this.stackOfOpenElementsNodeAt(nodeIdx);
+                if (node.isElement(HTML_NAMESPACE, token.name)) {
+                    this.generateImpliedEndTags([token.name]);
+                    if (node !== this.currentNode()) {
+                        // PARSE ERROR
+                    }
+                    const targetNode = node;
+                    while (true) {
+                        const element = this.popFromStackOfOpenElements();
+                        const found = element === targetNode;
+                        if (found) {
+                            break;
+                        }
+                    }
+                    return;
+                }
+                if (this.isSpecialElement(node)) {
+                    // PARSE ERROR
+                    return;
+                }
+                nodeIdx--;
+            }
+        } else {
+            unexpectedToken(token);
+        }
+    }
+
     // https://html.spec.whatwg.org/multipage/parsing.html#close-a-p-element
-    closePElement() {
+    #closePElement() {
         this.generateImpliedEndTags(["p"]);
         if (!this.currentNode().isElement(HTML_NAMESPACE, "p")) {
             // PARSE ERROR
@@ -4729,7 +3573,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
-    adoptionAgencyAlgorithm(token: TokenFor<"tag">) {
+    #adoptionAgencyAlgorithm(token: TokenFor<"tag">) {
         const subject = token.name;
         if (this.currentNode().isElement(HTML_NAMESPACE, subject)) {
             for (const element of this.listOfActiveFormattingElements) {
@@ -4742,8 +3586,238 @@ class Parser {
         throw new Error("not yet implemented");
     }
 
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-incdata
+    #imodeText(tkr: Tokenizer, token: Token) {
+        if (token.kind === "character") {
+            this.insertCharacter(token);
+        } else if (token.kind === "eof") {
+            // PARSE ERROR
+            if (this.currentNode().isElement(HTML_NAMESPACE, "script")) {
+                // TODO: Set script element's "already started" to true.
+            }
+            this.popFromStackOfOpenElements();
+            this.insertionMode = this.originalInsertionMode;
+            this.reprocessToken(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "script"
+        ) {
+            // STUB.
+        } else if (token.kind === "tag" && token.type === "end") {
+            this.popFromStackOfOpenElements();
+            this.insertionMode = this.originalInsertionMode;
+        } else {
+            unexpectedToken(token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#concept-pending-table-char-tokens
+    #pendingTableCharacterTokens: TokenFor<"character">[] = [];
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intable
+    #imodeInTable(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "character" &&
+            (this.currentNode().isElement(HTML_NAMESPACE, "table") ||
+                this.currentNode().isElement(HTML_NAMESPACE, "tbody") ||
+                this.currentNode().isElement(HTML_NAMESPACE, "template") ||
+                this.currentNode().isElement(HTML_NAMESPACE, "tfoot") ||
+                this.currentNode().isElement(HTML_NAMESPACE, "thead") ||
+                this.currentNode().isElement(HTML_NAMESPACE, "tr"))
+        ) {
+            this.originalInsertionMode = this.insertionMode;
+            this.insertionMode = "in table text";
+            this.reprocessToken(tkr, token);
+        } else if (token.kind === "comment") {
+            this.insertComment(token, null);
+        } else if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "caption"
+        ) {
+            this.#clearStackBackToTableContext();
+            this.listOfActiveFormattingElements.push("marker");
+            this.insertHTMLElement(token);
+            this.insertionMode = "in caption";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "colgroup"
+        ) {
+            this.#clearStackBackToTableContext();
+            this.insertHTMLElement(token);
+            this.insertionMode = "in column group";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "col"
+        ) {
+            this.#clearStackBackToTableContext();
+            this.insertHTMLElement({
+                kind: "tag",
+                name: "colgroup",
+                attributes: [],
+                type: "start",
+                isSelfClosing: false,
+                selfClosingAcknowledged: false,
+            });
+            this.insertionMode = "in column group";
+            this.reprocessToken(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "tbody" ||
+                token.name === "tfoot" ||
+                token.name === "thead" ||
+                token.name === "thead" ||
+                token.name === "tr")
+        ) {
+            this.#clearStackBackToTableContext();
+            this.insertionMode = "in table body";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "td" || token.name === "th" || token.name === "tr")
+        ) {
+            this.#clearStackBackToTableContext();
+            this.insertHTMLElement({
+                kind: "tag",
+                name: "tbody",
+                attributes: [],
+                type: "start",
+                isSelfClosing: false,
+                selfClosingAcknowledged: false,
+            });
+            this.useRulesFor("in table body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "table"
+        ) {
+            // PARSE ERROR
+            if (
+                !this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "table"),
+                )
+            ) {
+                return;
+            } else {
+                while (true) {
+                    const poppedElem = this.popFromStackOfOpenElements();
+                    if (poppedElem.isElement(HTML_NAMESPACE, "table")) {
+                        break;
+                    }
+                }
+                this.resetInsertionModeAppropriately();
+                this.reprocessToken(tkr, token);
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "table"
+        ) {
+            if (
+                !this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "table"),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            while (true) {
+                const poppedElem = this.popFromStackOfOpenElements();
+                if (poppedElem.isElement(HTML_NAMESPACE, "table")) {
+                    break;
+                }
+            }
+            this.resetInsertionModeAppropriately();
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "body" ||
+                token.name === "caption" ||
+                token.name === "col" ||
+                token.name === "colgroup" ||
+                token.name === "html" ||
+                token.name === "tbody" ||
+                token.name === "td" ||
+                token.name === "tfoot" ||
+                token.name === "th" ||
+                token.name === "thead" ||
+                token.name === "tr")
+        ) {
+            // PARSE ERROR
+            return;
+        } else if (
+            (token.kind === "tag" &&
+                token.type === "start" &&
+                (token.name === "style" ||
+                    token.name === "script" ||
+                    token.name === "template")) ||
+            (token.kind === "tag" &&
+                token.type === "end" &&
+                token.name === "template")
+        ) {
+            this.useRulesFor("in head", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "input" &&
+            tagAttributeEquals(token, "type", "hidden")
+        ) {
+            // PARSE ERROR
+            this.insertHTMLElement(token);
+            this.popFromStackOfOpenElements();
+            token.selfClosingAcknowledged = true;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "form"
+        ) {
+            if (this.stackOfOpenElementsContainsHTMLElement("template")) {
+                const node = this.formElementPointer;
+                if (
+                    node === null ||
+                    !this.hasElementInScope((e) => e === node)
+                ) {
+                    // PARSE ERROR
+                    return;
+                }
+                this.generateImpliedEndTags([]);
+                if (this.currentNode() !== node) {
+                    // PARSE ERROR
+                }
+                const removeIdx = this.stackOfOpenElements.indexOf(node);
+                this.removeFromStackOfOpenElements(removeIdx);
+            } else {
+                // PARSE ERROR
+                if (
+                    this.hasElementInScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "form"),
+                    ) ||
+                    this.formElementPointer !== null
+                ) {
+                    return;
+                }
+                this.insertHTMLElement(token);
+                this.popFromStackOfOpenElements();
+            }
+        } else if (token.kind === "eof") {
+            this.useRulesFor("in body", tkr, token);
+        } else {
+            // PARSE ERROR
+            this.enableFosterParenting = true;
+            this.useRulesFor("in body", tkr, token);
+            this.enableFosterParenting = false;
+        }
+    }
+
     // https://html.spec.whatwg.org/multipage/parsing.html#clear-the-stack-back-to-a-table-context
-    clearStackBackToTableContext() {
+    #clearStackBackToTableContext() {
         while (
             !(
                 this.currentNode().isElement(HTML_NAMESPACE, "table") ||
@@ -4755,11 +3829,293 @@ class Parser {
         }
     }
 
-    // https://html.spec.whatwg.org/multipage/parsing.html#concept-pending-table-char-tokens
-    pendingTableCharacterTokens: TokenFor<"character">[] = [];
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intabletext
+    #imodeInTableText(tkr: Tokenizer, token: Token) {
+        if (token.kind === "character" && token.data === "\u0000") {
+            // PARSE ERROR
+            return;
+        } else if (token.kind === "character") {
+            this.#pendingTableCharacterTokens.push(token);
+        } else {
+            let containsNonWhitespace = false;
+            for (const token of this.#pendingTableCharacterTokens) {
+                if (!isASCIIWhitespace(toCodePoint(token.data))) {
+                    containsNonWhitespace = true;
+                }
+            }
+            if (containsNonWhitespace) {
+                // PARSE ERROR
+                // Below do the same thing as "else" in "in table" insertion mode.
+                this.enableFosterParenting = true;
+                for (const token of this.#pendingTableCharacterTokens) {
+                    this.useRulesFor("in body", tkr, token);
+                }
+                this.enableFosterParenting = false;
+            } else {
+                for (const token of this.#pendingTableCharacterTokens) {
+                    this.insertCharacter(token);
+                }
+            }
+            this.insertionMode = this.originalInsertionMode;
+            this.reprocessToken(tkr, token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-incaption
+    #imodeInCaption(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "caption"
+        ) {
+            if (
+                !this.hasElementInTableScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "caption"),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.generateImpliedEndTags([]);
+            if (!this.currentNode().isElement(HTML_NAMESPACE, "caption")) {
+                // PARSE ERROR
+            }
+            while (true) {
+                const poppedElem = this.popFromStackOfOpenElements();
+                if (poppedElem.isElement(HTML_NAMESPACE, "caption")) {
+                    break;
+                }
+            }
+            this.clearListOfActiveFormattingElementsUpToLastMarker();
+            this.insertionMode = "in table";
+        } else if (
+            (token.kind === "tag" &&
+                token.type === "start" &&
+                (token.name === "caption" ||
+                    token.name === "col" ||
+                    token.name === "colgroup" ||
+                    token.name === "tbody" ||
+                    token.name === "td" ||
+                    token.name === "tfoot" ||
+                    token.name === "th" ||
+                    token.name === "thead" ||
+                    token.name === "tr")) ||
+            (token.kind === "tag" &&
+                token.type === "end" &&
+                token.name === "table")
+        ) {
+            if (
+                !this.hasElementInTableScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "caption"),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.generateImpliedEndTags([]);
+            if (!this.currentNode().isElement(HTML_NAMESPACE, "caption")) {
+                // PARSE ERROR
+            }
+            while (true) {
+                const poppedElem = this.popFromStackOfOpenElements();
+                if (poppedElem.isElement(HTML_NAMESPACE, "caption")) {
+                    break;
+                }
+            }
+            this.clearListOfActiveFormattingElementsUpToLastMarker();
+            this.insertionMode = "in table";
+            this.reprocessToken(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "body" ||
+                token.name === "col" ||
+                token.name === "colgroup" ||
+                token.name === "html" ||
+                token.name === "tbody" ||
+                token.name === "td" ||
+                token.name === "tfoot" ||
+                token.name === "th" ||
+                token.name === "thead" ||
+                token.name === "tr")
+        ) {
+            // PARSE ERROR
+            return;
+        } else {
+            this.useRulesFor("in body", tkr, token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-incolgroup
+    #imodeInColumnGroup(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            this.insertCharacter(token);
+        } else if (token.kind === "comment") {
+            this.insertComment(token, null);
+        } else if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "col"
+        ) {
+            this.insertHTMLElement(token);
+            this.popFromStackOfOpenElements();
+            if (token.isSelfClosing) {
+                token.selfClosingAcknowledged = true;
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "colgroup"
+        ) {
+            if (!this.currentNode().isElement(HTML_NAMESPACE, "colgroup")) {
+                // PARSE ERROR
+                return;
+            }
+            this.popFromStackOfOpenElements();
+            this.insertionMode = "in table";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "col"
+        ) {
+            // PARSE ERROR
+            return;
+        } else if (
+            (token.kind === "tag" &&
+                token.type === "start" &&
+                token.name === "template") ||
+            (token.kind === "tag" &&
+                token.type === "end" &&
+                token.name === "template")
+        ) {
+            this.useRulesFor("in head", tkr, token);
+        } else if (token.kind === "eof") {
+            this.useRulesFor("in body", tkr, token);
+        } else {
+            if (!this.currentNode().isElement(HTML_NAMESPACE, "colgroup")) {
+                // PARSE ERROR
+                return;
+            }
+            this.popFromStackOfOpenElements();
+            this.insertionMode = "in table";
+            this.reprocessToken(tkr, token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intbody
+    #imodeInTableBody(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "tr"
+        ) {
+            this.#clearStackBackToTableBodyContext();
+            this.insertHTMLElement(token);
+            this.insertionMode = "in row";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "th" || token.name === "td")
+        ) {
+            // PARSE ERROR
+            this.#clearStackBackToTableBodyContext();
+            this.insertHTMLElement({
+                kind: "tag",
+                name: "tr",
+                attributes: [],
+                type: "start",
+                isSelfClosing: false,
+                selfClosingAcknowledged: false,
+            });
+            this.insertionMode = "in row";
+            this.useRulesFor("in row", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "tbody" ||
+                token.name === "tfoot" ||
+                token.name === "thead")
+        ) {
+            if (
+                !this.hasElementInTableScope((e) =>
+                    e.isElement(HTML_NAMESPACE, token.name),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.#clearStackBackToTableBodyContext();
+            this.popFromStackOfOpenElements();
+            this.insertionMode = "in table";
+        } else if (
+            (token.kind === "tag" &&
+                token.type === "start" &&
+                (token.name === "caption" ||
+                    token.name === "col" ||
+                    token.name === "colgroup" ||
+                    token.name === "tbody" ||
+                    token.name === "tfoot" ||
+                    token.name === "thead")) ||
+            (token.kind === "tag" &&
+                token.type === "end" &&
+                token.name === "table")
+        ) {
+            if (
+                !(
+                    this.hasElementInTableScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "tbody"),
+                    ) ||
+                    this.hasElementInTableScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "thead"),
+                    ) ||
+                    this.hasElementInTableScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "tfoot"),
+                    )
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.#clearStackBackToTableBodyContext();
+            this.popFromStackOfOpenElements();
+            this.insertionMode = "in table";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "body" ||
+                token.name === "caption" ||
+                token.name === "col" ||
+                token.name === "colgroup" ||
+                token.name === "html" ||
+                token.name === "td" ||
+                token.name === "th" ||
+                token.name === "tr")
+        ) {
+            // PARSE ERROR
+            return;
+        } else {
+            this.useRulesFor("in table", tkr, token);
+        }
+    }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#clear-the-stack-back-to-a-table-body-context
-    clearStackBackToTableBodyContext() {
+    #clearStackBackToTableBodyContext() {
         while (
             !(
                 this.currentNode().isElement(HTML_NAMESPACE, "tbody") ||
@@ -4773,8 +4129,105 @@ class Parser {
         }
     }
 
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intr
+    #imodeInRow(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "th" || token.name === "td")
+        ) {
+            this.#clearStackBackToTableRowContext();
+            this.insertHTMLElement(token);
+            this.insertionMode = "in cell";
+            this.listOfActiveFormattingElements.push("marker");
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "tr"
+        ) {
+            if (
+                !this.hasElementInTableScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "tr"),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.#clearStackBackToTableRowContext();
+            this.popFromStackOfOpenElements();
+            this.insertionMode = "in table body";
+        } else if (
+            (token.kind === "tag" &&
+                token.type === "start" &&
+                (token.name === "caption" ||
+                    token.name === "col" ||
+                    token.name === "colgroup" ||
+                    token.name === "tbody" ||
+                    token.name === "tfoot" ||
+                    token.name === "thead" ||
+                    token.name === "tr")) ||
+            (token.kind === "tag" &&
+                token.type === "end" &&
+                token.name === "table")
+        ) {
+            if (
+                !this.hasElementInTableScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "tr"),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.#clearStackBackToTableRowContext();
+            this.popFromStackOfOpenElements();
+            this.insertionMode = "in table body";
+            this.reprocessToken(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "tbody" ||
+                token.name === "tfoot" ||
+                token.name === "thead")
+        ) {
+            if (
+                !this.hasElementInTableScope((e) =>
+                    e.isElement(HTML_NAMESPACE, token.name),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            if (
+                !this.hasElementInTableScope((e) =>
+                    e.isElement(HTML_NAMESPACE, "tr"),
+                )
+            ) {
+                return;
+            } else {
+                this.#clearStackBackToTableRowContext();
+                this.popFromStackOfOpenElements();
+                this.insertionMode = "in table body";
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "body" ||
+                token.name === "caption" ||
+                token.name === "col" ||
+                token.name === "colgroup" ||
+                token.name === "html" ||
+                token.name === "td" ||
+                token.name === "th")
+        ) {
+            // PARSE ERROR
+            return;
+        } else {
+            this.useRulesFor("in table", tkr, token);
+        }
+    }
+
     // https://html.spec.whatwg.org/multipage/parsing.html#clear-the-stack-back-to-a-table-row-context
-    clearStackBackToTableRowContext() {
+    #clearStackBackToTableRowContext() {
         while (
             !(
                 this.currentNode().isElement(HTML_NAMESPACE, "tr") ||
@@ -4786,8 +4239,97 @@ class Parser {
         }
     }
 
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intd
+    #imodeInCell(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "th" || token.name === "td")
+        ) {
+            if (
+                !this.hasElementInTableScope((e) =>
+                    e.isElement(HTML_NAMESPACE, token.name),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.generateImpliedEndTags([]);
+            if (!this.currentNode().isElement(HTML_NAMESPACE, token.name)) {
+                // PARSE ERROR
+            }
+            while (true) {
+                const poppedElem = this.popFromStackOfOpenElements();
+                if (poppedElem.isElement(HTML_NAMESPACE, token.name)) {
+                    break;
+                }
+            }
+            this.clearListOfActiveFormattingElementsUpToLastMarker();
+            this.insertionMode = "in row";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "caption" ||
+                token.name === "col" ||
+                token.name === "colgroup" ||
+                token.name === "tbody" ||
+                token.name === "td" ||
+                token.name === "tfoot" ||
+                token.name === "th" ||
+                token.name === "thead" ||
+                token.name === "tr")
+        ) {
+            if (
+                !(
+                    this.hasElementInTableScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "td"),
+                    ) ||
+                    this.hasElementInTableScope((e) =>
+                        e.isElement(HTML_NAMESPACE, "th"),
+                    )
+                )
+            ) {
+                throw new Error("we should have td or th in SOE at this point");
+            }
+            this.#closeCell();
+            this.useRulesFor("in row", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "body" ||
+                token.name === "caption" ||
+                token.name === "col" ||
+                token.name === "colgroup" ||
+                token.name === "html")
+        ) {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            (token.name === "table" ||
+                token.name === "tbody" ||
+                token.name === "tfoot" ||
+                token.name === "thead" ||
+                token.name === "tr")
+        ) {
+            if (
+                !this.hasElementInScope((e) =>
+                    e.isElement(HTML_NAMESPACE, token.name),
+                )
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.#closeCell();
+            this.useRulesFor("in row", tkr, token);
+        } else {
+            this.useRulesFor("in body", tkr, token);
+        }
+    }
+
     // https://html.spec.whatwg.org/multipage/parsing.html#close-the-cell
-    closeCell() {
+    #closeCell() {
         this.generateImpliedEndTags([]);
 
         if (
@@ -4809,6 +4351,336 @@ class Parser {
         }
         this.clearListOfActiveFormattingElementsUpToLastMarker();
         this.insertionMode = "in row";
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intemplate
+    #imodeInTemplate(tkr: Tokenizer, token: Token) {
+        if (token.kind === "character") {
+            this.useRulesFor("in body", tkr, token);
+        } else if (token.kind === "comment") {
+            this.useRulesFor("in body", tkr, token);
+        } else if (token.kind === "doctype") {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            (token.kind === "tag" &&
+                token.type === "start" &&
+                (token.name === "base" ||
+                    token.name === "basefont" ||
+                    token.name === "bgsound" ||
+                    token.name === "link" ||
+                    token.name === "meta" ||
+                    token.name === "noframes" ||
+                    token.name === "script" ||
+                    token.name === "script" ||
+                    token.name === "style" ||
+                    token.name === "template" ||
+                    token.name === "title")) ||
+            (token.kind === "tag" &&
+                token.type === "end" &&
+                token.name === "template")
+        ) {
+            this.useRulesFor("in head", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "caption" ||
+                token.name === "colgroup" ||
+                token.name === "tbody" ||
+                token.name === "tfoot" ||
+                token.name === "thead")
+        ) {
+            this.stackOfTemplateInsertionModes.pop();
+            this.stackOfTemplateInsertionModes.push("in table");
+            this.insertionMode = "in table";
+            this.reprocessToken(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "col"
+        ) {
+            this.stackOfTemplateInsertionModes.pop();
+            this.stackOfTemplateInsertionModes.push("in column group");
+            this.insertionMode = "in column group";
+            this.reprocessToken(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "tr"
+        ) {
+            this.stackOfTemplateInsertionModes.pop();
+            this.stackOfTemplateInsertionModes.push("in table body");
+            this.insertionMode = "in table body";
+            this.reprocessToken(tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "th" || token.name === "td")
+        ) {
+            this.stackOfTemplateInsertionModes.pop();
+            this.stackOfTemplateInsertionModes.push("in row");
+            this.insertionMode = "in row";
+            this.reprocessToken(tkr, token);
+        } else if (token.kind === "tag" && token.type === "start") {
+            this.stackOfTemplateInsertionModes.pop();
+            this.stackOfTemplateInsertionModes.push("in body");
+            this.insertionMode = "in body";
+            this.reprocessToken(tkr, token);
+        } else if (token.kind === "tag" && token.type === "end") {
+            // PARSE ERROR
+            return;
+        } else if (token.kind === "eof") {
+            if (!this.stackOfOpenElementsContainsHTMLElement("template")) {
+                this.stopParsing();
+            } else {
+                // PARSE ERROR
+            }
+            while (true) {
+                const poppedElem = this.popFromStackOfOpenElements();
+                if (poppedElem.isElement(HTML_NAMESPACE, "template")) {
+                    break;
+                }
+            }
+            this.clearListOfActiveFormattingElementsUpToLastMarker();
+            this.stackOfTemplateInsertionModes.pop();
+            this.resetInsertionModeAppropriately();
+            this.reprocessToken(tkr, token);
+        } else {
+            unexpectedToken(token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-afterbody
+    #imodeAfterBody(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (token.kind === "comment") {
+            this.insertComment(token, {
+                rel: "after last child",
+                parentNode: this.stackOfOpenElementsNodeAt(0),
+            });
+        } else if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "html"
+        ) {
+            if (this.isFragmentParsing) {
+                // PARSE ERROR
+                return;
+            }
+            this.insertionMode = "after after body";
+        } else if (token.kind === "eof") {
+            this.stopParsing();
+        } else {
+            // PARSE ERROR
+            this.insertionMode = "in body";
+            this.useRulesFor("in body", tkr, token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inframeset
+    #imodeInFrameset(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            this.insertCharacter(token);
+        } else if (token.kind === "comment") {
+            this.insertComment(token, null);
+        } else if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "frameset"
+        ) {
+            this.insertHTMLElement(token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "framesets"
+        ) {
+            if (
+                this.currentNode().isElement(HTML_NAMESPACE, "html") &&
+                this.currentNode().parent !== null
+            ) {
+                // PARSE ERROR
+                return;
+            }
+            this.popFromStackOfOpenElements();
+            if (
+                !this.isFragmentParsing &&
+                !this.currentNode().isElement(HTML_NAMESPACE, "frameset")
+            ) {
+                this.insertionMode = "after frameset";
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "frame"
+        ) {
+            this.insertHTMLElement(token);
+            this.popFromStackOfOpenElements();
+            if (token.isSelfClosing) {
+                token.selfClosingAcknowledged = true;
+            }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "noframes"
+        ) {
+            this.useRulesFor("in head", tkr, token);
+        } else if (token.kind === "eof") {
+            if (
+                !this.currentNode().isElement(HTML_NAMESPACE, "html") ||
+                this.currentNode().parent !== null
+            ) {
+                // PARSE ERROR
+            }
+            this.stopParsing();
+        } else {
+            // PARSE ERROR
+            return;
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-afterframeset
+    #imodeAfterFrameset(tkr: Tokenizer, token: Token) {
+        if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            this.insertCharacter(token);
+        } else if (token.kind === "comment") {
+            this.insertComment(token, null);
+        } else if (token.kind === "doctype") {
+            // PARSE ERROR
+            return;
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "end" &&
+            token.name === "html"
+        ) {
+            this.insertionMode = "after after frameset";
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "noframes"
+        ) {
+            this.useRulesFor("in head", tkr, token);
+        } else if (token.kind === "eof") {
+            this.stopParsing();
+        } else {
+            // PARSE ERROR
+            return;
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#the-after-after-body-insertion-mode
+    #imodeAfterAfterBody(tkr: Tokenizer, token: Token) {
+        if (token.kind === "comment") {
+            this.insertComment(token, {
+                rel: "after last child",
+                parentNode: this.document,
+            });
+        } else if (token.kind === "doctype") {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (token.kind === "eof") {
+            this.stopParsing();
+        } else {
+            // PARSE ERROR
+            this.insertionMode = "in body";
+            this.useRulesFor("in body", tkr, token);
+        }
+    }
+
+    // https://html.spec.whatwg.org/multipage/parsing.html#the-after-after-frameset-insertion-mode
+    #imodeAfterAfterFrameset(tkr: Tokenizer, token: Token) {
+        if (token.kind === "comment") {
+            this.insertComment(token, {
+                rel: "after last child",
+                parentNode: this.document,
+            });
+        } else if (token.kind === "doctype") {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "character" &&
+            (token.data === "\t" ||
+                token.data === "\n" ||
+                token.data === "\f" ||
+                token.data === "\r" ||
+                token.data === " ")
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "html"
+        ) {
+            this.useRulesFor("in body", tkr, token);
+        } else if (token.kind === "eof") {
+            this.stopParsing();
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            token.name === "noframes"
+        ) {
+            this.useRulesFor("in head", tkr, token);
+        } else {
+            // PARSE ERROR
+            return;
+        }
     }
 
     //==========================================================================
