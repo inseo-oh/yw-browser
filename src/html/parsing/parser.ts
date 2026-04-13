@@ -228,6 +228,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#special
+    // TODO: Move this to outside of this class
     isSpecialElement(element: Element): boolean {
         const SPECIAL_ELEMENTS = [
             { namespace: HTML_NAMESPACE, localName: "address" },
@@ -3596,7 +3597,12 @@ class Parser {
 
     // https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
     #adoptionAgencyAlgorithm(token: TokenFor<"tag">) {
+        // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.13.)
+
+        // S1.
         const subject = token.name;
+
+        // S2.
         if (this.currentNode().isElement(HTML_NAMESPACE, subject)) {
             for (const element of this.listOfActiveFormattingElements) {
                 if (element === this.currentNode()) {
@@ -3605,7 +3611,202 @@ class Parser {
                 }
             }
         }
-        throw new Error("not yet implemented");
+
+        // S3.
+        let outerLoopCounter = 0;
+
+        // S4.
+        while (true) {
+            // S4-1.
+            if (8 <= outerLoopCounter) {
+                return;
+            }
+
+            // S4-2.
+            outerLoopCounter++;
+
+            // S4-3.
+            let formattingElement: Element | undefined = undefined;
+            for (
+                let i =
+                    this.listOfActiveFormattingElements.lastIndexOf("marker") ??
+                    0;
+                i < this.listOfActiveFormattingElements.length;
+                i++
+            ) {
+                const elem = this.listOfActiveFormattingElements[i];
+                if (
+                    typeof elem !== "string" &&
+                    elem?.tagToken.name === subject
+                ) {
+                    formattingElement = elem;
+                }
+            }
+            if (formattingElement === undefined) {
+                // PARSE ERROR
+                throw new Error("not yet implemented");
+            }
+
+            // S4-4.
+            if (this.stackOfOpenElements.indexOf(formattingElement) < 0) {
+                this.listOfActiveFormattingElements.splice(
+                    this.listOfActiveFormattingElements.indexOf(
+                        formattingElement,
+                    ),
+                    1,
+                );
+            }
+
+            // S4-5.
+            if (!this.hasElementInScope((e) => e === formattingElement)) {
+                // PARSE ERROR
+                return;
+            }
+
+            // S4-6.
+            if (formattingElement !== this.currentNode()) {
+                // PARSE ERROR
+            }
+
+            // S4-7.
+            let furthestBlock: Element | undefined = undefined;
+            for (
+                let i = this.stackOfOpenElements.indexOf(formattingElement) + 1;
+                i < this.stackOfOpenElements.length;
+                i++
+            ) {
+                if (this.isSpecialElement(formattingElement)) {
+                    furthestBlock = this.stackOfOpenElements[i];
+                }
+            }
+
+            // S4-8.
+            if (furthestBlock === undefined) {
+                while (true) {
+                    if (
+                        this.popFromStackOfOpenElements() === formattingElement
+                    ) {
+                        break;
+                    }
+                }
+
+                this.listOfActiveFormattingElements.splice(
+                    this.listOfActiveFormattingElements.indexOf(
+                        formattingElement,
+                    ),
+                    1,
+                );
+                return;
+            }
+
+            // S4-9.
+            const commonAncestor = this.stackOfOpenElementsNodeAt(
+                this.stackOfOpenElements.indexOf(formattingElement) - 1,
+            );
+
+            // S4-10.
+            let bookmark =
+                this.listOfActiveFormattingElements.indexOf(formattingElement);
+
+            // S4-11.
+            let node: Element;
+            let nodeIdx = this.stackOfOpenElements.indexOf(furthestBlock);
+            let lastNode = furthestBlock;
+
+            // S4-12.
+            let innerLoopCounter = 0;
+
+            // S4-13.
+            while (true) {
+                // S4-13-1.
+                innerLoopCounter++;
+
+                // S4-13-2.
+                nodeIdx--;
+                node = this.stackOfOpenElementsNodeAt(nodeIdx);
+
+                // S4-13-3.
+                if (node === formattingElement) {
+                    break;
+                }
+
+                // S4-13-4.
+                if (
+                    3 <= innerLoopCounter &&
+                    0 <= this.listOfActiveFormattingElements.indexOf(node)
+                ) {
+                    this.listOfActiveFormattingElements.splice(
+                        this.listOfActiveFormattingElements.indexOf(node),
+                        1,
+                    );
+                }
+
+                // S4-13-5.
+                if (this.listOfActiveFormattingElements.indexOf(node) < 0) {
+                    continue;
+                }
+
+                // S4-13-6.
+                const newNode = this.createElementForToken(
+                    node.tagToken,
+                    HTML_NAMESPACE,
+                    commonAncestor,
+                );
+                this.listOfActiveFormattingElements[
+                    this.listOfActiveFormattingElements.indexOf(node)
+                ] = newNode;
+                node = newNode;
+
+                // S4-13-7.
+                if (lastNode === furthestBlock) {
+                    bookmark =
+                        this.listOfActiveFormattingElements.indexOf(node) + 1;
+                }
+
+                // S4-13-8.
+                node.appendChild(lastNode);
+
+                // S4-13-9.
+                lastNode = node;
+            }
+
+            // S4-14.
+            const location =
+                this.appropriatePlaceForInsertingNode(commonAncestor);
+            insertAtLocation(lastNode, location);
+
+            // S4-15.
+            const element = this.createElementForToken(
+                formattingElement.tagToken,
+                HTML_NAMESPACE,
+                furthestBlock,
+            );
+
+            // S4-16.
+            element.children = furthestBlock.children;
+            furthestBlock.children = [];
+
+            // S4-17.
+            furthestBlock.appendChild(element);
+
+            // S4-18.
+            this.listOfActiveFormattingElements.splice(
+                this.listOfActiveFormattingElements.indexOf(formattingElement),
+                1,
+            );
+            this.listOfActiveFormattingElements.splice(bookmark, 0, element);
+
+            // S4-19.
+            this.stackOfOpenElements.splice(
+                this.stackOfOpenElements.indexOf(formattingElement),
+                1,
+            );
+            this.stackOfOpenElements.splice(
+                this.stackOfOpenElements.indexOf(furthestBlock),
+                0,
+                element,
+            );
+        }
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-incdata
