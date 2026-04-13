@@ -2278,13 +2278,15 @@ class Parser {
             token.type === "start" &&
             token.name === "template"
         ) {
-            throw new Error("not yet implemented");
+            // STUB
+            this.insertHTMLElement(token);
         } else if (
             token.kind === "tag" &&
             token.type === "end" &&
             token.name === "template"
         ) {
-            throw new Error("not yet implemented");
+            // STUB
+            this.popFromStackOfOpenElements();
         } else if (
             token.kind === "tag" &&
             ((token.type === "end" &&
