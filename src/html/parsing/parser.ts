@@ -1640,7 +1640,7 @@ class Parser {
                     found = true;
                 }
             }
-            if (found) {
+            if (!found) {
                 this.popFromStackOfOpenElements();
             } else {
                 break;
