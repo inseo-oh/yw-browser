@@ -9,6 +9,8 @@ import {
     type ShadowRoot,
     Attr,
     Text,
+    Comment,
+    DocumentType,
 } from "../../dom.js";
 import {
     HTML_NAMESPACE,
