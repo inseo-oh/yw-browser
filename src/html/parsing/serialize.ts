@@ -20,10 +20,12 @@ import {
     XML_NAMESPACE,
     XMLNS_NAMESPACE,
 } from "../../infra.js";
+import { isVoidElement } from "../elements.js";
 
 // https://html.spec.whatwg.org/multipage/parsing.html#serializes-as-void
 function serializesToVoid(element: Element) {
     return (
+        isVoidElement(element) ||
         element.isElement(HTML_NAMESPACE, "basefont") ||
         element.isElement(HTML_NAMESPACE, "bgsound") ||
         element.isElement(HTML_NAMESPACE, "frame") ||
