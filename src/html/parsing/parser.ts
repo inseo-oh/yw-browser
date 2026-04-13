@@ -3604,11 +3604,16 @@ class Parser {
 
         // S2.
         if (this.currentNode().isElement(HTML_NAMESPACE, subject)) {
+            let notInAfe = true;
             for (const element of this.listOfActiveFormattingElements) {
                 if (element === this.currentNode()) {
-                    this.popFromStackOfOpenElements();
-                    return;
+                    notInAfe = false;
+                    break;
                 }
+            }
+            if (notInAfe) {
+                this.popFromStackOfOpenElements();
+                return;
             }
         }
 
