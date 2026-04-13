@@ -2506,7 +2506,14 @@ class Parser {
                 return;
             } else {
                 this.framesetOKFlag = "not ok";
-                throw new Error("not yet implemented");
+                const bodyElem = this.stackOfOpenElementsNodeAt(1);
+                for (const attr of token.attributes) {
+                    if (
+                        bodyElem.attribute(null, attr.localName) === undefined
+                    ) {
+                        bodyElem.appendAttr(attr);
+                    }
+                }
             }
         } else if (
             token.kind === "tag" &&
