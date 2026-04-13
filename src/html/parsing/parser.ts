@@ -3604,6 +3604,8 @@ class Parser {
             token.name === "script"
         ) {
             // STUB.
+            this.popFromStackOfOpenElements();
+            this.insertionMode = this.originalInsertionMode;
         } else if (token.kind === "tag" && token.type === "end") {
             this.popFromStackOfOpenElements();
             this.insertionMode = this.originalInsertionMode;
