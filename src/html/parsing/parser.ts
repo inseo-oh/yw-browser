@@ -3070,22 +3070,22 @@ class Parser {
                 token.name === "h6")
         ) {
             if (
-                !this.hasElementInListItemScope((e) =>
+                !this.hasElementInScope((e) =>
                     e.isElement(HTML_NAMESPACE, "h1"),
-                ) ||
-                !this.hasElementInListItemScope((e) =>
+                ) &&
+                !this.hasElementInScope((e) =>
                     e.isElement(HTML_NAMESPACE, "h2"),
-                ) ||
-                !this.hasElementInListItemScope((e) =>
+                ) &&
+                !this.hasElementInScope((e) =>
                     e.isElement(HTML_NAMESPACE, "h3"),
-                ) ||
-                !this.hasElementInListItemScope((e) =>
+                ) &&
+                !this.hasElementInScope((e) =>
                     e.isElement(HTML_NAMESPACE, "h4"),
-                ) ||
-                !this.hasElementInListItemScope((e) =>
+                ) &&
+                !this.hasElementInScope((e) =>
                     e.isElement(HTML_NAMESPACE, "h5"),
-                ) ||
-                !this.hasElementInListItemScope((e) =>
+                ) &&
+                !this.hasElementInScope((e) =>
                     e.isElement(HTML_NAMESPACE, "h6"),
                 )
             ) {
@@ -3310,6 +3310,16 @@ class Parser {
             if (!tagAttributeEquals(token, "type", "hidden")) {
                 this.framesetOKFlag = "not ok";
             }
+        } else if (
+            token.kind === "tag" &&
+            token.type === "start" &&
+            (token.name === "param" ||
+                token.name === "source" ||
+                token.name === "track")
+        ) {
+            this.insertHTMLElement(token);
+            this.popFromStackOfOpenElements();
+            token.selfClosingAcknowledged = true;
         } else if (
             token.kind === "tag" &&
             token.type === "start" &&
