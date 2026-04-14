@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* eslint-disable @typescript-eslint/no-this-alias */
 
+import type { PseudoElementKind, SelectableElement } from "./css/selector.js";
 import { UTF8_ENCODING, type Encoding } from "./encoding.js";
 import {
     CustomElementRegistry,
@@ -695,12 +696,129 @@ export type ElementConstructionArgs = {
 };
 
 // https://dom.spec.whatwg.org/#concept-element
-export class Element extends Node {
+export class Element extends Node implements SelectableElement {
     tagToken: TokenFor<"tag">; // STUB
     cssPropertySet: null = null; // STUB
 
+    parentSelectableElement(): SelectableElement | null {
+        if (!(this.parent instanceof Element)) {
+            return null;
+        }
+        return this.parent;
+    }
+    prevSiblingSelectableElement(): SelectableElement | null {
+        const sibl = this.prevSibling();
+        if (!(sibl instanceof Element)) {
+            return null;
+        }
+        return sibl;
+    }
+
+    shouldLowercaseTypeSelector(): boolean {
+        if (
+            this.namespace === HTML_NAMESPACE &&
+            this.nodeDocument.type === "html"
+        ) {
+            // https://html.spec.whatwg.org/multipage/semantics-other.html#case-sensitivity-of-selectors
+            return true;
+        }
+        return false;
+    }
+    shouldLowercaseAttributeSelectorName(): boolean {
+        if (
+            this.namespace === HTML_NAMESPACE &&
+            this.nodeDocument.type === "html"
+        ) {
+            // https://html.spec.whatwg.org/multipage/semantics-other.html#case-sensitivity-of-selectors
+            return true;
+        }
+        return false;
+    }
+
+    isAttributeValueCaseInsensitive(
+        namespace: string | undefined,
+        attributeName: string,
+    ): boolean {
+        if (
+            this.namespace === HTML_NAMESPACE &&
+            this.nodeDocument.type === "html"
+        ) {
+            // https://html.spec.whatwg.org/multipage/semantics-other.html#case-sensitivity-of-selectors
+            return (
+                namespace === undefined &&
+                (attributeName === "accept" ||
+                    attributeName === "accept-charset" ||
+                    attributeName === "align" ||
+                    attributeName === "alink" ||
+                    attributeName === "axis" ||
+                    attributeName === "bgcolor" ||
+                    attributeName === "charset" ||
+                    attributeName === "checked" ||
+                    attributeName === "clear" ||
+                    attributeName === "codetype" ||
+                    attributeName === "color" ||
+                    attributeName === "compact" ||
+                    attributeName === "declare" ||
+                    attributeName === "defer" ||
+                    attributeName === "dir" ||
+                    attributeName === "direction" ||
+                    attributeName === "disabled" ||
+                    attributeName === "enctype" ||
+                    attributeName === "face" ||
+                    attributeName === "frame" ||
+                    attributeName === "hreflang" ||
+                    attributeName === "http-equiv" ||
+                    attributeName === "lang" ||
+                    attributeName === "language" ||
+                    attributeName === "link" ||
+                    attributeName === "media" ||
+                    attributeName === "method" ||
+                    attributeName === "multiple" ||
+                    attributeName === "nohref" ||
+                    attributeName === "noresize" ||
+                    attributeName === "noshade" ||
+                    attributeName === "nowrap" ||
+                    attributeName === "readonly" ||
+                    attributeName === "rel" ||
+                    attributeName === "rev" ||
+                    attributeName === "rules" ||
+                    attributeName === "scope" ||
+                    attributeName === "scrolling" ||
+                    attributeName === "selected" ||
+                    attributeName === "shape" ||
+                    attributeName === "target" ||
+                    attributeName === "text" ||
+                    attributeName === "type" ||
+                    attributeName === "valign" ||
+                    attributeName === "valuetype" ||
+                    attributeName === "vlink")
+            );
+        }
+        return false;
+    }
+
+    isIDCaseInsensitive(): boolean {
+        return this.nodeDocument.mode === "quirks";
+    }
+
+    isClassCaseInsensitive(): boolean {
+        return this.nodeDocument.mode === "quirks";
+    }
+
+    pseudoElementKind(): PseudoElementKind | undefined {
+        return undefined;
+    }
+
     onPoppedFromStackOfOpenElements() {}
     onRunResetAlgorithm() {}
+    pseudoClassList(): string[] {
+        // STUB
+        return [];
+    }
+    language(): string {
+        // STUB
+        return "en-US";
+    }
 
     /**
      * Do NOT use this constructor unless you need to.
