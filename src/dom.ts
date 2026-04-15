@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* eslint-disable @typescript-eslint/no-this-alias */
 
-import type { PseudoElementKind, SelectableElement } from "./css/selector.js";
+import type { PseudoElementKind } from "./css/selector.js";
 import { UTF8_ENCODING, type Encoding } from "./encoding.js";
 import {
     CustomElementRegistry,
@@ -694,17 +694,17 @@ export type ElementConstructionArgs = {
 };
 
 // https://dom.spec.whatwg.org/#concept-element
-export class Element extends Node implements SelectableElement {
+export class Element extends Node {
     tagToken: TokenFor<"tag">; // STUB
     cssPropertySet: null = null; // STUB
 
-    parentSelectableElement(): SelectableElement | null {
+    parentSelectableElement(): Element | null {
         if (!(this.parent instanceof Element)) {
             return null;
         }
         return this.parent;
     }
-    prevSiblingSelectableElement(): SelectableElement | null {
+    prevSiblingSelectableElement(): Element | null {
         const sibl = this.prevSibling();
         if (!(sibl instanceof Element)) {
             return null;

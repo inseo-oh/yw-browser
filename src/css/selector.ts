@@ -1,30 +1,14 @@
 // This file is part of YW. Copyright (c) 2026 Oh Inseo.
 // SPDX-License-Identifier: BSD-3-Clause
 
+import { Element } from "../dom.js";
 import { toASCIILowercase } from "../infra.js";
-import type { CSSDOMElement } from "./dom.js";
 import {
     parseCSSQualifiedName,
     serializeCSSQualifiedName,
     type CSSQualifiedName,
 } from "./namespace.js";
 import { TokenStream } from "./syntax.js";
-
-export interface SelectableElement extends CSSDOMElement {
-    pseudoClassList(): string[];
-    language(): string;
-    parentSelectableElement(): SelectableElement | null;
-    prevSiblingSelectableElement(): SelectableElement | null;
-    pseudoElementKind(): PseudoElementKind | undefined;
-    shouldLowercaseTypeSelector(): boolean;
-    shouldLowercaseAttributeSelectorName(): boolean;
-    isAttributeValueCaseInsensitive(
-        namespace: string | undefined,
-        attributeName: string,
-    ): boolean;
-    isIDCaseInsensitive(): boolean;
-    isClassCaseInsensitive(): boolean;
-}
 
 //==============================================================================
 // Selectors Level 3 - 4.
@@ -93,7 +77,7 @@ export function serializeSelector(selector: Selector): string {
         })
         .join("");
 }
-export function matchSelector(selector: Selector, element: SelectableElement) {
+export function matchSelector(selector: Selector, element: Element) {
     for (let i = selector.items.length - 1; 0 <= i; i--) {
         const rhs = selector.items[i]!;
         for (const sel of rhs.simpleSelector) {
@@ -181,7 +165,7 @@ function parseSimpleSelector(ts: TokenStream): SimpleSelector | undefined {
 }
 function matchSimpleSelector(
     selector: SimpleSelector,
-    element: SelectableElement,
+    element: Element,
 ): boolean {
     switch (selector.kind) {
         case "type":
@@ -230,7 +214,7 @@ function parseTypeSelector(ts: TokenStream): TypeSelector | undefined {
     }
     return { kind: "type", name: value };
 }
-function matchTypeSelector(selector: TypeSelector, element: SelectableElement) {
+function matchTypeSelector(selector: TypeSelector, element: Element) {
     if (selector.name.namespace !== undefined) {
         throw new Error("Not implemented yet");
     }
@@ -266,7 +250,7 @@ function parseUniversalSelector(
 function matchUniversalSelector(
     selector: UniversalSelector,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    element: SelectableElement,
+    element: Element,
 ) {
     if (selector.namespace !== undefined) {
         throw new Error("Not implemented yet");
@@ -360,10 +344,7 @@ function parseAttributeSelector(
     }
 }
 
-function matchAttributeSelector(
-    selector: AttributeSelector,
-    element: SelectableElement,
-) {
+function matchAttributeSelector(selector: AttributeSelector, element: Element) {
     if (selector.name.namespace !== undefined) {
         throw new Error("Not implemented yet");
     }
@@ -421,10 +402,7 @@ function parseClassSelector(ts: TokenStream): ClassSelector | undefined {
     }
     return { kind: "class", name: ident.value };
 }
-function matchClassSelector(
-    selector: ClassSelector,
-    element: SelectableElement,
-) {
+function matchClassSelector(selector: ClassSelector, element: Element) {
     let attrVal = element.attribute(null, "class");
     if (attrVal === undefined || attrVal === "") {
         return false;
@@ -454,7 +432,7 @@ function parseIDSelector(ts: TokenStream): IDSelector | undefined {
     }
     return { kind: "id", name: hash.value };
 }
-function matchIDSelector(selector: IDSelector, element: SelectableElement) {
+function matchIDSelector(selector: IDSelector, element: Element) {
     let attrVal = element.attribute(null, "id");
     if (attrVal === undefined) {
         return false;
@@ -555,10 +533,7 @@ function parsePseudoClass(ts: TokenStream): PseudoClass | undefined {
     return undefined;
 }
 
-function matchPseudoClass(
-    selector: PseudoClass,
-    element: SelectableElement,
-): boolean {
+function matchPseudoClass(selector: PseudoClass, element: Element): boolean {
     switch (selector.name) {
         case ":first-child":
             return element.index() === 0;
