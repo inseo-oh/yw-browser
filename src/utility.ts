@@ -82,9 +82,6 @@ export class TextReader {
     }
 
     reconsumeChar() {
-        if (this.isEnd()) {
-            return;
-        }
         const c = this.str.codePointAt(this.cursor - 1);
         if (c === undefined) {
             throw new Error("must be called after consuming something");
