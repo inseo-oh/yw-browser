@@ -9,7 +9,7 @@ import { HTML_NAMESPACE } from "../infra.js";
 //==============================================================================
 
 // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#matches-about:blank
-function matchesAboutBlank(url: URL) {
+function matchesAboutBlank(url: URL): boolean {
     return (
         url.protocol === "about:" &&
         url.pathname === "blank" &&
