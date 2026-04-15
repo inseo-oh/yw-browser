@@ -811,6 +811,10 @@ export class Element extends Node {
 
     onPoppedFromStackOfOpenElements() {}
     onRunResetAlgorithm() {}
+    onGetPresentationalHints(): StyleRule[] {
+        return [];
+    }
+
     pseudoClassList(): string[] {
         // STUB
         return [];
