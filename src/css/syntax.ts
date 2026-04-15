@@ -332,6 +332,7 @@ class Tokenizer {
 
     // https://www.w3.org/TR/css-syntax-3/#consume-token
     consumeToken(): Token | undefined {
+        const oldCursor = this.tr.cursor;
         this.consumeComments();
         while (true) {
             const chr = this.tr.consumeChar();
@@ -372,7 +373,7 @@ class Tokenizer {
                 return { kind: ")" };
             } else if (chr === "+") {
                 if (this.startsWithNumber()) {
-                    this.tr.reconsumeChar();
+                    this.tr.cursor = oldCursor;
                     return this.consumeNumericToken();
                 } else {
                     return {
@@ -384,12 +385,12 @@ class Tokenizer {
                 return { kind: "comma" };
             } else if (chr === "-") {
                 if (this.startsWithNumber()) {
-                    this.tr.reconsumeChar();
+                    this.tr.cursor = oldCursor;
                     return this.consumeNumericToken();
                 } else if (this.tr.startsWith("->")) {
                     return { kind: "CDC" };
                 } else if (this.startsWithIdentSequence()) {
-                    this.tr.reconsumeChar();
+                    this.tr.cursor = oldCursor;
                     return this.consumeIdentLikeToken();
                 } else {
                     return {
@@ -399,7 +400,7 @@ class Tokenizer {
                 }
             } else if (chr === ".") {
                 if (this.startsWithNumber()) {
-                    this.tr.reconsumeChar();
+                    this.tr.cursor = oldCursor;
                     return this.consumeNumericToken();
                 } else {
                     return {
@@ -434,7 +435,7 @@ class Tokenizer {
                 return { kind: "[" };
             } else if (chr === "\\") {
                 if (this.startsWithValidEscape()) {
-                    this.tr.reconsumeChar();
+                    this.tr.cursor = oldCursor;
                     return this.consumeIdentLikeToken();
                 } else {
                     // PARSE ERROR
@@ -450,10 +451,10 @@ class Tokenizer {
             } else if (chr === "}") {
                 return { kind: "}" };
             } else if (isDigit(toCodePoint(chr))) {
-                this.tr.reconsumeChar();
+                this.tr.cursor = oldCursor;
                 return this.consumeNumericToken();
             } else if (isIdentStartCodePoint(toCodePoint(chr))) {
-                this.tr.reconsumeChar();
+                this.tr.cursor = oldCursor;
                 return this.consumeIdentLikeToken();
             } else if (chr === "") {
                 return undefined;
@@ -562,6 +563,7 @@ class Tokenizer {
     consumeStringToken(endingChar: string): Token {
         let value = "";
         while (!this.tr.isEnd()) {
+            const oldCursor = this.tr.cursor;
             const chr = this.tr.consumeChar();
             if (chr === endingChar) {
                 break;
@@ -570,7 +572,7 @@ class Tokenizer {
                 break;
             } else if (isNewline(toCodePoint(chr))) {
                 // PARSE ERROR: Unexpected newline
-                this.tr.reconsumeChar();
+                this.tr.cursor = oldCursor;
                 return { kind: "bad-string" };
             } else if (toCodePoint(chr) === 0x005c) {
                 if (this.tr.getNextChar() !== undefined) {
@@ -741,13 +743,14 @@ class Tokenizer {
     consumeIdentSequence() {
         let result = "";
         while (true) {
+            const oldCursor = this.tr.cursor;
             const chr = this.tr.consumeChar();
             if (chr !== undefined && isIdentCodePoint(toCodePoint(chr))) {
                 result += chr;
             } else if (this.startsWithValidEscape()) {
                 result += String.fromCodePoint(this.consumeEscapedCodePoint()!);
             } else {
-                this.tr.reconsumeChar();
+                this.tr.cursor = oldCursor;
                 return result;
             }
         }
