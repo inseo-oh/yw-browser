@@ -415,8 +415,6 @@ export class Node {
         const oldDocument = this.nodeDocument;
         // S2.
         if (this.parent !== null) {
-            console.log(this.parent);
-            console.trace("what");
             // TODO: remove node
             throw new Error(
                 "TODO[https://dom.spec.whatwg.org/#concept-node-adopt]",
