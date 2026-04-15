@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 /* eslint-disable @typescript-eslint/no-this-alias */
 
+import type { CSSStyleSheet, StyleRule } from "./css/om.js";
+import type { PropertySet } from "./css/properties.js";
 import type { PseudoElementKind } from "./css/selector.js";
 import { UTF8_ENCODING, type Encoding } from "./encoding.js";
 import {
@@ -86,7 +88,7 @@ export function isValidElementLocalName(name: string) {
 
 // https://dom.spec.whatwg.org/#concept-node
 export class Node {
-    styleSheets = [];
+    styleSheets: CSSStyleSheet[] = [];
 
     constructor(nodeDocument: Document) {
         this.nodeDocument = nodeDocument;
