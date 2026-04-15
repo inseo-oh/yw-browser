@@ -698,7 +698,7 @@ export type ElementConstructionArgs = {
 // https://dom.spec.whatwg.org/#concept-element
 export class Element extends Node {
     tagToken: TokenFor<"tag">; // STUB
-    cssPropertySet: null = null; // STUB
+    cssPropertySet: PropertySet | null = null;
 
     parentSelectableElement(): Element | null {
         if (!(this.parent instanceof Element)) {
