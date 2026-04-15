@@ -526,8 +526,6 @@ function parsePseudoClass(ts: TokenStream): PseudoClass | undefined {
         ts.cursor = oldCursor;
         return undefined;
     }
-    console.log("found parsePseudoClass");
-    console.log(ts);
     if (ts.expectIdent("link")) {
         return { kind: "pseudo-class", name: ":link" };
     }
