@@ -144,6 +144,14 @@ export function matchSelector(selector: Selector, element: Element) {
         }
     }
 }
+export function matchSelectorAgainstTree(selector: Selector, root: Element) {
+    return root
+        .inclusiveDescendants()
+        .filter((e) =>
+            e instanceof Element ? matchSelector(selector, e) : false,
+        )
+        .map((e) => e as Element);
+}
 
 type SimpleSelector =
     | TypeSelector
