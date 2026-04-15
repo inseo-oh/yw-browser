@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 import { toASCIILowercase } from "../infra.js";
+import type { CSSDOMElement } from "./dom.js";
 import {
     parseCSSQualifiedName,
     serializeCSSQualifiedName,
@@ -9,11 +10,7 @@ import {
 } from "./namespace.js";
 import { TokenStream } from "./syntax.js";
 
-export interface SelectableElement {
-    localName: string;
-
-    attribute(namespace: string | null, localName: string): string | undefined;
-    index(): number;
+export interface SelectableElement extends CSSDOMElement {
     pseudoClassList(): string[];
     language(): string;
     parentSelectableElement(): SelectableElement | null;
