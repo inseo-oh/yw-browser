@@ -10,7 +10,7 @@ import { HTML_NAMESPACE, isASCIICaseInsensitiveMatch } from "../infra.js";
 import { isFormAssociatedCustomElement } from "./custom_elements.js";
 
 // https://html.spec.whatwg.org/multipage/forms.html#form-associated-element
-export function isFormAssociatedElement(element: Element) {
+export function isFormAssociatedElement(element: Element): boolean {
     return (
         isFormAssociatedCustomElement(element) ||
         element.isElement(HTML_NAMESPACE, "button") ||
@@ -25,7 +25,7 @@ export function isFormAssociatedElement(element: Element) {
 }
 
 // https://html.spec.whatwg.org/multipage/forms.html#category-listed
-export function isListedElement(element: Element) {
+export function isListedElement(element: Element): boolean {
     return (
         isFormAssociatedCustomElement(element) ||
         element.isElement(HTML_NAMESPACE, "button") ||
@@ -39,7 +39,7 @@ export function isListedElement(element: Element) {
 }
 
 // https://html.spec.whatwg.org/multipage/forms.html#category-submit
-export function isSubmittableElement(element: Element) {
+export function isSubmittableElement(element: Element): boolean {
     return (
         isFormAssociatedCustomElement(element) ||
         element.isElement(HTML_NAMESPACE, "button") ||
@@ -50,7 +50,7 @@ export function isSubmittableElement(element: Element) {
 }
 
 // https://html.spec.whatwg.org/multipage/forms.html#category-reset
-export function isResettableElement(element: Element) {
+export function isResettableElement(element: Element): boolean {
     return (
         isFormAssociatedCustomElement(element) ||
         element.isElement(HTML_NAMESPACE, "input") ||
@@ -63,7 +63,7 @@ export function isResettableElement(element: Element) {
 // https://html.spec.whatwg.org/multipage/forms.html#category-autocapitalize
 export function isAutocapitalizeAndAutocorrectInheritingElement(
     element: Element,
-) {
+): boolean {
     return (
         isFormAssociatedCustomElement(element) ||
         element.isElement(HTML_NAMESPACE, "button") ||
@@ -76,7 +76,7 @@ export function isAutocapitalizeAndAutocorrectInheritingElement(
 }
 
 // https://html.spec.whatwg.org/multipage/forms.html#category-label
-export function isLabelableElement(element: Element) {
+export function isLabelableElement(element: Element): boolean {
     if (
         isFormAssociatedCustomElement(element) ||
         element.isElement(HTML_NAMESPACE, "button") ||

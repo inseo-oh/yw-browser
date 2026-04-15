@@ -8,7 +8,7 @@ import {
     toASCIILowercase,
 } from "./infra.js";
 
-export function removeLeadingWhitespace(s: string) {
+export function removeLeadingWhitespace(s: string): string {
     for (let i = 0; ; i++) {
         const cp = s.codePointAt(i);
         if (cp === undefined) {
@@ -19,7 +19,7 @@ export function removeLeadingWhitespace(s: string) {
         }
     }
 }
-export function removeTrailingWhitespace(s: string) {
+export function removeTrailingWhitespace(s: string): string {
     for (let i = s.length - 1; ; i--) {
         const cp = s.codePointAt(i);
         if (cp === undefined) {
@@ -30,16 +30,19 @@ export function removeTrailingWhitespace(s: string) {
         }
     }
 }
-export function removeLeadingAndTrailingWhitespace(s: string) {
+export function removeLeadingAndTrailingWhitespace(s: string): string {
     return removeTrailingWhitespace(removeLeadingWhitespace(s));
 }
-export function toASCIIUppercaseCodePoint(codePoint: number) {
+export function toASCIIUppercaseCodePoint(codePoint: number): number {
     return !isASCIILowerAlpha(codePoint) ? codePoint : codePoint - 0x61 + 0x41;
 }
-export function toASCIILowercaseCodePoint(codePoint: number) {
+export function toASCIILowercaseCodePoint(codePoint: number): number {
     return !isASCIIUpperAlpha(codePoint) ? codePoint : codePoint - 0x41 + 0x61;
 }
-export function hasPrefixASCIICaseInsensitive(s: string, prefix: string) {
+export function hasPrefixASCIICaseInsensitive(
+    s: string,
+    prefix: string,
+): boolean {
     return toASCIILowercase(s).startsWith(toASCIILowercase(prefix));
 }
 export function toCodePoint(v: string | number): number | undefined {
@@ -58,11 +61,11 @@ export class TextReader {
         this.str = str;
     }
 
-    isEnd() {
+    isEnd(): boolean {
         return this.str.length <= this.cursor;
     }
 
-    getNextChar(offset: number = 0) {
+    getNextChar(offset: number = 0): string {
         const c = this.str.codePointAt(this.cursor + offset);
         if (c === undefined) {
             return "";
@@ -70,7 +73,7 @@ export class TextReader {
         return String.fromCodePoint(c)!;
     }
 
-    getCurrentChar() {
+    getCurrentChar(): string {
         if (this.cursor === 0) {
             throw new Error("must be called after consuming something");
         }
@@ -81,15 +84,15 @@ export class TextReader {
         return String.fromCodePoint(c);
     }
 
-    test(tester: (s: string) => boolean) {
+    test(tester: (s: string) => boolean): boolean {
         return tester(this.str.substring(this.cursor));
     }
 
-    startsWith(prefix: string) {
+    startsWith(prefix: string): boolean {
         return this.test((s) => s.startsWith(prefix));
     }
 
-    consumeChars(maxCount: number) {
+    consumeChars(maxCount: number): string {
         const startIdx = this.cursor;
         let len = 0;
         while (len < maxCount) {
@@ -105,14 +108,14 @@ export class TextReader {
         return this.str.substring(startIdx, endIdx);
     }
 
-    consumeChar() {
+    consumeChar(): string {
         return this.consumeChars(1);
     }
 
     static NO_MATCH_FLAGS = 0;
     static ASCII_CASE_INSENSITIVE = 1;
 
-    consumeString(str: string, matchFlags: number) {
+    consumeString(str: string, matchFlags: number): boolean {
         for (let i = 0; i < str.length; i++) {
             let srcChr = str.codePointAt(i);
             let gotChr = this.str.codePointAt(this.cursor + i);

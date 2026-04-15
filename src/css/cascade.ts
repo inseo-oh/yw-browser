@@ -30,7 +30,7 @@ class PropertySetFinalizer {
         this.input = input;
     }
 
-    finalizeForElement(element: Element) {
+    finalizeForElement(element: Element): PropertySet {
         const propertySet = this.output.get(element);
         if (propertySet !== undefined) {
             return propertySet;
@@ -44,14 +44,14 @@ class PropertySetFinalizer {
         return result;
     }
 
-    run() {
+    run(): void {
         for (const entry of this.input.keys()) {
             this.finalizeForElement(entry);
         }
     }
 }
 
-export function runCascade(uaStyleSheet: CSSStyleSheet, rootNode: Element) {
+export function runCascade(uaStyleSheet: CSSStyleSheet, rootNode: Element): void {
     const declGroups: DeclarationEntry[][] = [
         // Higher priority first, lower priority last
         [], // Transition declarations

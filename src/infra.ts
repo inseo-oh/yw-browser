@@ -11,31 +11,31 @@ import {
 //==========================================================================
 
 // https://infra.spec.whatwg.org/#leading-surrogate
-export function isLeadingSurrogate(codePoint: number | undefined) {
+export function isLeadingSurrogate(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0xd800 <= codePoint && codePoint <= 0xdbff
     );
 }
 
 // https://infra.spec.whatwg.org/#trailing-surrogate
-export function isTrailingSurrogate(codePoint: number | undefined) {
+export function isTrailingSurrogate(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0xdc00 <= codePoint && codePoint <= 0xdfff
     );
 }
 
 // https://infra.spec.whatwg.org/#surrogate
-export function isSurrogate(codePoint: number | undefined) {
+export function isSurrogate(codePoint: number | undefined): boolean {
     return isLeadingSurrogate(codePoint) || isTrailingSurrogate(codePoint);
 }
 
 // https://infra.spec.whatwg.org/#scalar-value
-export function is_scalar(codePoint: number | undefined) {
+export function is_scalar(codePoint: number | undefined): boolean {
     return !isSurrogate(codePoint);
 }
 
 // https://infra.spec.whatwg.org/#noncharacter
-export function isNoncharacter(codePoint: number | undefined) {
+export function isNoncharacter(codePoint: number | undefined): boolean {
     switch (codePoint) {
         case 0xfffe:
         case 0xffff:
@@ -77,14 +77,14 @@ export function isNoncharacter(codePoint: number | undefined) {
 }
 
 // https://infra.spec.whatwg.org/#ascii-code-point
-export function isASCIICodePoint(codePoint: number | undefined) {
+export function isASCIICodePoint(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0x0000 <= codePoint && codePoint <= 0x007f
     );
 }
 
 // https://infra.spec.whatwg.org/#ascii-tab-or-newline
-export function isASCIITabOrNewline(codePoint: number | undefined) {
+export function isASCIITabOrNewline(codePoint: number | undefined): boolean {
     switch (codePoint) {
         case 0x0009:
         case 0x000a:
@@ -95,7 +95,7 @@ export function isASCIITabOrNewline(codePoint: number | undefined) {
 }
 
 // https://infra.spec.whatwg.org/#ascii-whitespace
-export function isASCIIWhitespace(codePoint: number | undefined) {
+export function isASCIIWhitespace(codePoint: number | undefined): boolean {
     switch (codePoint) {
         case 0x0009:
         case 0x000a:
@@ -108,19 +108,19 @@ export function isASCIIWhitespace(codePoint: number | undefined) {
 }
 
 // https://infra.spec.whatwg.org/#c0-control
-export function isC0Control(codePoint: number | undefined) {
+export function isC0Control(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0x0000 <= codePoint && codePoint <= 0x001f
     );
 }
 
 // https://infra.spec.whatwg.org/#c0-control-or-space
-export function isC0ControlOrSpace(codePoint: number | undefined) {
+export function isC0ControlOrSpace(codePoint: number | undefined): boolean {
     return isC0Control(codePoint) || codePoint === 0x0020;
 }
 
 // https://infra.spec.whatwg.org/#control
-export function isControl(codePoint: number | undefined) {
+export function isControl(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined &&
         (isC0Control(codePoint) || (0x007f <= codePoint && codePoint <= 0x009f))
@@ -128,52 +128,52 @@ export function isControl(codePoint: number | undefined) {
 }
 
 // https://infra.spec.whatwg.org/#ascii-digit
-export function isASCIIDigit(codePoint: number | undefined) {
+export function isASCIIDigit(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0x0030 <= codePoint && codePoint <= 0x0039
     );
 }
 
 // https://infra.spec.whatwg.org/#ascii-upper-hex-digit
-export function isASCIIUpperHexDigit(codePoint: number | undefined) {
+export function isASCIIUpperHexDigit(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0x0041 <= codePoint && codePoint <= 0x0046
     );
 }
 
 // https://infra.spec.whatwg.org/#ascii-lower-hex-digit
-export function isASCIILowerHexDigit(codePoint: number | undefined) {
+export function isASCIILowerHexDigit(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0x0061 <= codePoint && codePoint <= 0x0066
     );
 }
 
 // https://infra.spec.whatwg.org/#ascii-hex-digit
-export function isASCIIHexDigit(codePoint: number | undefined) {
+export function isASCIIHexDigit(codePoint: number | undefined): boolean {
     return isASCIIUpperHexDigit(codePoint) || isASCIILowerHexDigit(codePoint);
 }
 
 // https://infra.spec.whatwg.org/#ascii-upper-alpha
-export function isASCIIUpperAlpha(codePoint: number | undefined) {
+export function isASCIIUpperAlpha(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0x0041 <= codePoint && codePoint <= 0x005a
     );
 }
 
 // https://infra.spec.whatwg.org/#ascii-lower-alpha
-export function isASCIILowerAlpha(codePoint: number | undefined) {
+export function isASCIILowerAlpha(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0x0061 <= codePoint && codePoint <= 0x007a
     );
 }
 
 // https://infra.spec.whatwg.org/#ascii-alpha
-export function isASCIIAlpha(codePoint: number | undefined) {
+export function isASCIIAlpha(codePoint: number | undefined): boolean {
     return isASCIIUpperAlpha(codePoint) || isASCIILowerAlpha(codePoint);
 }
 
 // https://infra.spec.whatwg.org/#ascii-alphanumeric
-export function isASCIIAlphanumeric(codePoint: number | undefined) {
+export function isASCIIAlphanumeric(codePoint: number | undefined): boolean {
     return isASCIIDigit(codePoint) || isASCIIAlpha(codePoint);
 }
 
@@ -182,7 +182,7 @@ export function isASCIIAlphanumeric(codePoint: number | undefined) {
 //==========================================================================
 
 // https://infra.spec.whatwg.org/#ascii-lowercase
-export function toASCIILowercase(s: string) {
+export function toASCIILowercase(s: string): string {
     let result = "";
     for (const c of s) {
         result += String.fromCodePoint(
@@ -193,7 +193,7 @@ export function toASCIILowercase(s: string) {
 }
 
 // https://infra.spec.whatwg.org/#ascii-uppercase
-export function toASCIIUppercase(s: string) {
+export function toASCIIUppercase(s: string): string {
     let result = "";
     for (const c of s) {
         result += String.fromCodePoint(
@@ -204,7 +204,7 @@ export function toASCIIUppercase(s: string) {
 }
 
 // https://infra.spec.whatwg.org/#ascii-case-insensitive
-export function isASCIICaseInsensitiveMatch(a: string, b: string) {
+export function isASCIICaseInsensitiveMatch(a: string, b: string): boolean {
     return toASCIILowercase(a) === toASCIILowercase(b);
 }
 

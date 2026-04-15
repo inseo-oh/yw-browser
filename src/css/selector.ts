@@ -77,7 +77,7 @@ export function serializeSelector(selector: Selector): string {
         })
         .join("");
 }
-export function matchSelector(selector: Selector, element: Element) {
+export function matchSelector(selector: Selector, element: Element): boolean | undefined {
     for (let i = selector.items.length - 1; 0 <= i; i--) {
         const rhs = selector.items[i]!;
         for (const sel of rhs.simpleSelector) {
@@ -144,7 +144,7 @@ export function matchSelector(selector: Selector, element: Element) {
         }
     }
 }
-export function matchSelectorAgainstTree(selector: Selector, root: Element) {
+export function matchSelectorAgainstTree(selector: Selector, root: Element): Element[] {
     return root
         .inclusiveDescendants()
         .filter((e) =>
@@ -222,7 +222,7 @@ function parseTypeSelector(ts: TokenStream): TypeSelector | undefined {
     }
     return { kind: "type", name: value };
 }
-function matchTypeSelector(selector: TypeSelector, element: Element) {
+function matchTypeSelector(selector: TypeSelector, element: Element): boolean {
     if (selector.name.namespace !== undefined) {
         throw new Error("Not implemented yet");
     }
@@ -231,7 +231,7 @@ function matchTypeSelector(selector: TypeSelector, element: Element) {
     }
     return element.localName === selector.name.localName;
 }
-function serializeTypeSelector(selector: TypeSelector) {
+function serializeTypeSelector(selector: TypeSelector): string {
     return serializeCSSQualifiedName(selector.name);
 }
 
@@ -259,13 +259,13 @@ function matchUniversalSelector(
     selector: UniversalSelector,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     element: Element,
-) {
+): boolean {
     if (selector.namespace !== undefined) {
         throw new Error("Not implemented yet");
     }
     return true;
 }
-function serializeUniversalSelector(selector: UniversalSelector) {
+function serializeUniversalSelector(selector: UniversalSelector): string {
     if (selector.namespace !== undefined) {
         return `${selector.namespace}|*`;
     }
@@ -352,7 +352,7 @@ function parseAttributeSelector(
     }
 }
 
-function matchAttributeSelector(selector: AttributeSelector, element: Element) {
+function matchAttributeSelector(selector: AttributeSelector, element: Element): boolean {
     if (selector.name.namespace !== undefined) {
         throw new Error("Not implemented yet");
     }
@@ -385,7 +385,7 @@ function matchAttributeSelector(selector: AttributeSelector, element: Element) {
             return val === selectorValue || val.startsWith(`${selectorValue}-`);
     }
 }
-function serializeAttributeSelector(selector: AttributeSelector) {
+function serializeAttributeSelector(selector: AttributeSelector): string {
     if (selector.op === undefined) {
         return `[${serializeCSSQualifiedName(selector.name)}]`;
     }
@@ -410,7 +410,7 @@ function parseClassSelector(ts: TokenStream): ClassSelector | undefined {
     }
     return { kind: "class", name: ident.value };
 }
-function matchClassSelector(selector: ClassSelector, element: Element) {
+function matchClassSelector(selector: ClassSelector, element: Element): boolean {
     let attrVal = element.attribute(null, "class");
     if (attrVal === undefined || attrVal === "") {
         return false;
@@ -422,7 +422,7 @@ function matchClassSelector(selector: ClassSelector, element: Element) {
     }
     return 0 <= attrVal.split(" ").indexOf(className);
 }
-function serializeClassSelector(selector: ClassSelector) {
+function serializeClassSelector(selector: ClassSelector): string {
     return `.${selector.name}`;
 }
 
@@ -440,7 +440,7 @@ function parseIDSelector(ts: TokenStream): IDSelector | undefined {
     }
     return { kind: "id", name: hash.value };
 }
-function matchIDSelector(selector: IDSelector, element: Element) {
+function matchIDSelector(selector: IDSelector, element: Element): boolean {
     let attrVal = element.attribute(null, "id");
     if (attrVal === undefined) {
         return false;
@@ -452,7 +452,7 @@ function matchIDSelector(selector: IDSelector, element: Element) {
     }
     return attrVal === id;
 }
-function serializeIDSelector(selector: IDSelector) {
+function serializeIDSelector(selector: IDSelector): string {
     return `#${selector.name}`;
 }
 
@@ -651,7 +651,7 @@ function parseCombinator(ts: TokenStream): Combinator | undefined {
 // Selectors Level 3 - 9.
 //==============================================================================
 
-export function caluclateSelectorSpecificity(selector: Selector) {
+export function caluclateSelectorSpecificity(selector: Selector): number {
     const items = selector.items;
 
     let a = 0;

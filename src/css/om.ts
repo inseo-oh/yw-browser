@@ -98,7 +98,7 @@ function cssStyleSheetSets(
 }
 
 // https://www.w3.org/TR/cssom-1/#enable-a-css-style-sheet-set
-function enableCSSStyleSheetSet(name: string) {
+function enableCSSStyleSheetSet(name: string): void {
     for (const set of cssStyleSheetSets()) {
         for (const sheet of set.list) {
             sheet.disabledFlag = true;
@@ -116,7 +116,7 @@ function enableCSSStyleSheetSet(name: string) {
 
 export class StyleSheetSetManager {
     // https://www.w3.org/TR/cssom-1/#remove-a-css-style-sheet
-    static removeCSSStyleSheet(sheet: CSSStyleSheet) {
+    static removeCSSStyleSheet(sheet: CSSStyleSheet): void {
         if (sheet.ownerNode === null) {
             throw new Error("ownerNode must not be null");
         }
@@ -134,7 +134,7 @@ export class StyleSheetSetManager {
     }
 
     // https://www.w3.org/TR/cssom-1/#add-a-css-style-sheet
-    addCSSStyleSheet(sheet: CSSStyleSheet) {
+    addCSSStyleSheet(sheet: CSSStyleSheet): void {
         if (sheet.ownerNode === null) {
             throw new Error("ownerNode must not be null");
         }
@@ -175,7 +175,7 @@ export class StyleSheetSetManager {
     preferredCSSStyleSheetSetName: string = "";
 
     // https://www.w3.org/TR/cssom-1/#change-the-preferred-css-style-sheet-set-name
-    changePreferredStylesheetSetName(name: string) {
+    changePreferredStylesheetSetName(name: string): void {
         const current = this.preferredCSSStyleSheetSetName;
         this.preferredCSSStyleSheetSetName = name;
         if (name !== current && this.lastCSSStylesheetSetName == null) {
@@ -188,7 +188,7 @@ export class StyleSheetSetManager {
 class CSSStyleSheetSet {
     list: CSSStyleSheet[] = [];
 
-    name() {
+    name(): string {
         const sheet = this.list[0];
         if (sheet === undefined) {
             throw Error("The set is empty");
@@ -244,7 +244,7 @@ export class StyleDeclaration {
         this.important = important;
     }
 
-    applyStyleRule(propertySet: UnfinalizedPropertySet) {
+    applyStyleRule(propertySet: UnfinalizedPropertySet): void {
         const prop = propertySet.list.get(this.name);
         if (prop !== undefined) {
             prop.value = this.value;

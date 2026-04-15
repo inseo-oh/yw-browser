@@ -14,13 +14,13 @@ import { isASCIILowerAlpha } from "../infra.js";
 
 // https://html.spec.whatwg.org/multipage/custom-elements.html#form-associated-custom-element
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function isFormAssociatedCustomElement(_element: Element) {
+export function isFormAssociatedCustomElement(_element: Element): boolean {
     // STUB
     return false;
 }
 
 // https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name
-export function isValidCustomElementName(name: string) {
+export function isValidCustomElementName(name: string): boolean {
     return (
         isValidElementLocalName(name) &&
         isASCIILowerAlpha(name.codePointAt(0)) &&
@@ -85,7 +85,7 @@ export class CustomElementRegistry {
 //==============================================================================
 
 // https://html.spec.whatwg.org/multipage/custom-elements.html#concept-try-upgrade
-export function tryUpgradeElement(element: Element) {
+export function tryUpgradeElement(element: Element): void {
     const definition = lookupCustomElementDefinition(
         element.customElementRegistry,
         element.namespace,

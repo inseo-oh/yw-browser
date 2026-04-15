@@ -35,7 +35,7 @@ export function parseCSSQualifiedName(
     }
     return { namespace: undefined, localName: name };
 }
-export function serializeCSSQualifiedName(qname: CSSQualifiedName) {
+export function serializeCSSQualifiedName(qname: CSSQualifiedName): string {
     if (qname.namespace !== undefined) {
         return `${qname.namespace}|${qname.localName}`;
     }

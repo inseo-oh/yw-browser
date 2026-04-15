@@ -11,21 +11,21 @@ export default class IOQueue {
 
     items: number[] = [];
 
-    static fromArray(items: number[]) {
+    static fromArray(items: number[]): IOQueue {
         const queue = new IOQueue();
         for (const item of items) {
             queue.items.push(item);
         }
         return queue;
     }
-    toArray() {
+    toArray(): number[] {
         const result = [];
         for (const item of this.items) {
             result.push(item);
         }
         return result;
     }
-    toString() {
+    toString(): string {
         const result = [];
         for (const item of this.items) {
             result.push(String.fromCodePoint(item));
@@ -34,7 +34,7 @@ export default class IOQueue {
     }
 
     // https://encoding.spec.whatwg.org/#concept-stream-read
-    readOne() {
+    readOne(): number | undefined {
         if (this.items.length === 0) {
             return undefined;
         }
@@ -42,7 +42,7 @@ export default class IOQueue {
     }
 
     // https://encoding.spec.whatwg.org/#concept-stream-read
-    read(count: number) {
+    read(count: number): number[] {
         const result = [];
         for (let i = 0; i < count; i++) {
             const item = this.readOne();
@@ -55,7 +55,7 @@ export default class IOQueue {
     }
 
     // https://encoding.spec.whatwg.org/#concept-stream-read
-    peek(count: number) {
+    peek(count: number): number[] {
         const result = [];
         for (let i = 0; i < count; i++) {
             const item = this.items[i];
@@ -68,24 +68,24 @@ export default class IOQueue {
     }
 
     // https://encoding.spec.whatwg.org/#concept-stream-push
-    pushOne(item: number) {
+    pushOne(item: number): void {
         this.items.push(item);
     }
 
     // https://encoding.spec.whatwg.org/#concept-stream-push
-    push(items: number[]) {
+    push(items: number[]): void {
         for (const item of items) {
             this.pushOne(item);
         }
     }
 
     // https://encoding.spec.whatwg.org/#concept-stream-prepend
-    restoreOne(item: number) {
+    restoreOne(item: number): void {
         this.items.unshift(item);
     }
 
     // https://encoding.spec.whatwg.org/#concept-stream-prepend
-    restore(items: number[]) {
+    restore(items: number[]): void {
         for (const item of items) {
             this.restoreOne(item);
         }
@@ -232,7 +232,7 @@ export function processItem(
 const LABELS = new Map<string, Encoding>();
 
 // https://encoding.spec.whatwg.org/#concept-encoding-get
-export function getEncodingFromLabel(label: string) {
+export function getEncodingFromLabel(label: string): Encoding | undefined {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.03.29.)
 
     // S1.
@@ -242,7 +242,7 @@ export function getEncodingFromLabel(label: string) {
     return LABELS.get(label);
 }
 
-function initLabels() {
+function initLabels(): void {
     // The encoding ============================================================
     LABELS.set("unicode-1-1-utf-8", UTF8_ENCODING);
     LABELS.set("unicode11utf8", UTF8_ENCODING);
@@ -524,7 +524,7 @@ function initLabels() {
 //==============================================================================
 
 // https://encoding.spec.whatwg.org/#get-an-output-encoding
-export function getOutputEncoding(encoding: Encoding) {
+export function getOutputEncoding(encoding: Encoding): Encoding {
     switch (encoding) {
         case REPLACEMENT_ENCODING:
         case UTF16_BE_ENCODING:
@@ -544,7 +544,7 @@ export function decode(
     inputQueue: IOQueue,
     encoding: Encoding,
     output: IOQueue = new IOQueue(),
-) {
+): IOQueue {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.03.29.)
 
     // S1.
@@ -578,7 +578,7 @@ export function decode(
 }
 
 // https://encoding.spec.whatwg.org/#bom-sniff
-export function bomSniff(queue: IOQueue) {
+export function bomSniff(queue: IOQueue): Encoding | null {
     const bytes = queue.peek(3);
     if (
         3 <= bytes.length &&
@@ -600,7 +600,7 @@ export function encode(
     ioQueue: IOQueue,
     encoding: Encoding,
     output: IOQueue = new IOQueue(),
-) {
+): IOQueue {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.03.11.)
 
     // S1.
@@ -614,7 +614,7 @@ export function encode(
 }
 
 // https://encoding.spec.whatwg.org/#get-an-encoder
-export function getEncoder(encoding: Encoding) {
+export function getEncoder(encoding: Encoding): Handler {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.03.10.)
 
     // S1.
@@ -641,7 +641,7 @@ export function encodeOrFail(
     ioQueue: IOQueue,
     encoder: Handler,
     output: IOQueue,
-) {
+): number | null {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.03.10.)
 
     // S1.
@@ -652,6 +652,9 @@ export function encodeOrFail(
 
     // S3.
     if (potentialError.type === "error") {
+        if (potentialError.codepoint === undefined) {
+            throw new Error("code point should not be undefined")
+        }
         return potentialError.codepoint;
     }
 

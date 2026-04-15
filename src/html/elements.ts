@@ -123,7 +123,7 @@ export class HTMLPreElement extends HTMLElement {}
 //==========================================================================
 
 // https://html.spec.whatwg.org/multipage/syntax.html#void-elements
-export function isVoidElement(element: Element) {
+export function isVoidElement(element: Element): boolean {
     return (
         element.isElement(HTML_NAMESPACE, "area") ||
         element.isElement(HTML_NAMESPACE, "base") ||

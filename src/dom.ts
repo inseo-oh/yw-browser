@@ -25,7 +25,7 @@ import {
 //==============================================================================
 
 // https://dom.spec.whatwg.org/#valid-element-local-name
-export function isValidElementLocalName(name: string) {
+export function isValidElementLocalName(name: string): boolean {
     // S1.
     if (name.length === 0) {
         return false;
@@ -246,13 +246,17 @@ export class Node {
     //==========================================================================
 
     // https://dom.spec.whatwg.org/#concept-node-post-connection-ext
-    onRunPostConnectionSteps() {}
+    onRunPostConnectionSteps(): void {}
 
     // https://dom.spec.whatwg.org/#concept-node-children-changed-ext
-    onRunChildrenChangedSteps() {}
+    onRunChildrenChangedSteps(): void {}
 
     // https://dom.spec.whatwg.org/#concept-node-insert
-    insert(parent: Node, beforeChild: Node | null, suppressObservers: boolean) {
+    insert(
+        parent: Node,
+        beforeChild: Node | null,
+        suppressObservers: boolean,
+    ): void {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2025.11.13)
 
         // S1.
@@ -388,12 +392,12 @@ export class Node {
     }
 
     // TODO: Replace with https://dom.spec.whatwg.org/#concept-node-append
-    appendChild(child: Node) {
+    appendChild(child: Node): void {
         child.insert(this, null, false);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onRunInsertionSteps(_insertedNode: Node) {}
+    onRunInsertionSteps(_insertedNode: Node): void {}
 
     //==========================================================================
     // DOM Standard - 4.4.
@@ -407,10 +411,10 @@ export class Node {
     //==========================================================================
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    onRunAdoptingSteps(_oldDocument: Document) {}
+    onRunAdoptingSteps(_oldDocument: Document): void {}
 
     // https://dom.spec.whatwg.org/#concept-node-adopt
-    adoptNodeInto(document: Document) {
+    adoptNodeInto(document: Document): void {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2025.11.13)
 
         // S1.
@@ -615,7 +619,7 @@ export type ElementInterface = (
 // https://dom.spec.whatwg.org/#is-a-global-custom-element-registry
 export function isGlobalCustomElementRegistry(
     registry: CustomElementRegistry | null,
-) {
+): boolean {
     return registry != null && !registry.isScoped;
 }
 
@@ -809,8 +813,8 @@ export class Element extends Node {
         return undefined;
     }
 
-    onPoppedFromStackOfOpenElements() {}
-    onRunResetAlgorithm() {}
+    onPoppedFromStackOfOpenElements(): void {}
+    onRunResetAlgorithm(): void {}
     onGetPresentationalHints(): StyleRule[] {
         return [];
     }
@@ -839,7 +843,7 @@ export class Element extends Node {
         this.tagToken = args.tagToken;
     }
 
-    isInside(namespace: string, localName: string) {
+    isInside(namespace: string, localName: string): boolean {
         let current = this.parent;
         while (current !== null) {
             if (!(current instanceof Element)) {
@@ -853,7 +857,7 @@ export class Element extends Node {
         return false;
     }
 
-    isElement(namespace: string, localName: string) {
+    isElement(namespace: string, localName: string): boolean {
         return (
             this.namespace !== null &&
             this.namespace === namespace &&
@@ -871,7 +875,7 @@ export class Element extends Node {
         value: string;
         namespace: string | null;
         namespacePrefix: string | null;
-    }) {
+    }): void {
         const attr = new Attr(this.nodeDocument, localName);
         attr.value = value;
         attr.namespace = namespace;
@@ -932,7 +936,7 @@ export class Element extends Node {
     isValue: string | null;
 
     // https://dom.spec.whatwg.org/#concept-element-defined
-    isDefined() {
+    isDefined(): boolean {
         return (
             this.customElementState === "uncustomized" ||
             this.customElementState === "custom"
@@ -940,7 +944,7 @@ export class Element extends Node {
     }
 
     // https://dom.spec.whatwg.org/#concept-element-custom
-    isCustom() {
+    isCustom(): boolean {
         return this.customElementState === "custom";
     }
 
@@ -948,12 +952,12 @@ export class Element extends Node {
     shadowRoot: ShadowRoot | null = null;
 
     // https://dom.spec.whatwg.org/#element-shadow-host
-    isShadowHost() {
+    isShadowHost(): boolean {
         return this.shadowRoot !== null;
     }
 
     // https://dom.spec.whatwg.org/#concept-element-qualified-name
-    qualifiedName() {
+    qualifiedName(): string {
         return this.namespacePrefix === null
             ? this.localName
             : `${this.namespacePrefix}:${this.localName}`;
@@ -983,7 +987,7 @@ export class Element extends Node {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         _synchronousCustomElements: boolean = false,
         registry: "default" | null | CustomElementRegistry = "default",
-    ) {
+    ): Element {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.04.)
 
         // S1.
@@ -1056,7 +1060,7 @@ export class Element extends Node {
         is: string | null,
         registry: null | CustomElementRegistry,
         tagToken: TokenFor<"tag">,
-    ) {
+    ): Element {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.04.)
 
         // S1.
@@ -1114,7 +1118,7 @@ export class Attr extends Node {
     element: Element | null = null;
 
     // https://dom.spec.whatwg.org/#concept-attribute-qualified-name
-    qualifiedName() {
+    qualifiedName(): string {
         return this.namespacePrefix === null
             ? this.localName
             : `${this.namespacePrefix}:${this.localName}`;

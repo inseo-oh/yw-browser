@@ -7,6 +7,7 @@ import IOQueue, {
     UTF16_LE_ENCODING,
     UTF8_ENCODING,
     decode as encodingDecode,
+    type Encoding,
 } from "../encoding.js";
 import { isSurrogate, isASCIICaseInsensitiveMatch } from "../infra.js";
 import { TextReader, toCodePoint } from "../utility.js";
@@ -16,7 +17,7 @@ import { TextReader, toCodePoint } from "../utility.js";
 //==============================================================================
 
 // https://www.w3.org/TR/css-syntax-3/#css-decode-bytes
-function decode(bytes: Uint8Array) {
+function decode(bytes: Uint8Array): string {
     const fallback = determineFallbackEncoding(bytes);
     const input = new IOQueue();
     for (const aByte of bytes) {
@@ -27,7 +28,7 @@ function decode(bytes: Uint8Array) {
 }
 
 // https://www.w3.org/TR/css-syntax-3/#determine-the-fallback-encoding
-function determineFallbackEncoding(bytes: Uint8Array) {
+function determineFallbackEncoding(bytes: Uint8Array): Encoding {
     // S1.
     // TODO
 
@@ -76,7 +77,7 @@ function determineFallbackEncoding(bytes: Uint8Array) {
 }
 
 // https://www.w3.org/TR/css-syntax-3/#css-filter-code-points
-function filterCodepoints(input: string) {
+function filterCodepoints(input: string): string {
     let res = "";
     let remaining = input;
     while (remaining.length !== 0) {
@@ -231,14 +232,14 @@ export function serializeToken(token: Token | ASTObject): string {
 //==============================================================================
 
 // https://www.w3.org/TR/css-syntax-3/#digit
-function isDigit(codePoint: number | undefined) {
+function isDigit(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0x0030 <= codePoint && codePoint <= 0x0039
     );
 }
 
 // https://www.w3.org/TR/css-syntax-3/#hex-digit
-function isHexDigit(codePoint: number | undefined) {
+function isHexDigit(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined &&
         (isDigit(codePoint) ||
@@ -248,31 +249,31 @@ function isHexDigit(codePoint: number | undefined) {
 }
 
 // https://www.w3.org/TR/css-syntax-3/#uppercase-letter
-function isUppercaseLetter(codePoint: number | undefined) {
+function isUppercaseLetter(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0x0041 <= codePoint && codePoint <= 0x005a
     );
 }
 
 // https://www.w3.org/TR/css-syntax-3/#lowercase-letter
-function isLowercaseLetter(codePoint: number | undefined) {
+function isLowercaseLetter(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined && 0x0061 <= codePoint && codePoint <= 0x007a
     );
 }
 
 // https://www.w3.org/TR/css-syntax-3/#letter
-function isLetter(codePoint: number | undefined) {
+function isLetter(codePoint: number | undefined): boolean {
     return isUppercaseLetter(codePoint) || isLowercaseLetter(codePoint);
 }
 
 // https://www.w3.org/TR/css-syntax-3/#non-ascii-code-point
-function isNonASCIICodePoint(codePoint: number | undefined) {
+function isNonASCIICodePoint(codePoint: number | undefined): boolean {
     return codePoint !== undefined && 0x80 <= codePoint;
 }
 
 // https://www.w3.org/TR/css-syntax-3/#ident-start-code-point
-function isIdentStartCodePoint(codePoint: number | undefined) {
+function isIdentStartCodePoint(codePoint: number | undefined): boolean {
     return (
         isLetter(codePoint) ||
         isNonASCIICodePoint(codePoint) ||
@@ -281,7 +282,7 @@ function isIdentStartCodePoint(codePoint: number | undefined) {
 }
 
 // https://www.w3.org/TR/css-syntax-3/#ident-code-point
-function isIdentCodePoint(codePoint: number | undefined) {
+function isIdentCodePoint(codePoint: number | undefined): boolean {
     return (
         isIdentStartCodePoint(codePoint) ||
         isDigit(codePoint) ||
@@ -290,7 +291,7 @@ function isIdentCodePoint(codePoint: number | undefined) {
 }
 
 // https://www.w3.org/TR/css-syntax-3/#non-printable-code-point
-function isNonPrintableCodePoint(codePoint: number | undefined) {
+function isNonPrintableCodePoint(codePoint: number | undefined): boolean {
     return (
         codePoint !== undefined &&
         ((0x0000 <= codePoint && codePoint <= 0x0008) ||
@@ -301,12 +302,12 @@ function isNonPrintableCodePoint(codePoint: number | undefined) {
 }
 
 // https://www.w3.org/TR/css-syntax-3/#newline
-function isNewline(codePoint: number | undefined) {
+function isNewline(codePoint: number | undefined): boolean {
     return codePoint === 0x000a;
 }
 
 // https://www.w3.org/TR/css-syntax-3/#whitespace
-function isWhitespace(codePoint: number | undefined) {
+function isWhitespace(codePoint: number | undefined): boolean {
     return isNewline(codePoint) || codePoint === 0x0020 || codePoint === 0x0009;
 }
 
@@ -317,7 +318,7 @@ class Tokenizer {
         this.tr = new TextReader(str);
     }
 
-    consumeWhitespaces() {
+    consumeWhitespaces(): void {
         while (!this.tr.isEnd()) {
             if (!isWhitespace(toCodePoint(this.tr.getNextChar()))) {
                 break;
@@ -472,7 +473,7 @@ class Tokenizer {
     //==========================================================================
 
     // https://www.w3.org/TR/css-syntax-3/#consume-comments
-    consumeComments() {
+    consumeComments(): void {
         let endFound = false;
         while (!this.tr.isEnd()) {
             if (!this.tr.consumeString("/*", TextReader.NO_MATCH_FLAGS)) {
@@ -704,7 +705,7 @@ class Tokenizer {
     //==========================================================================
 
     // https://www.w3.org/TR/css-syntax-3/#check-if-two-code-points-are-a-valid-escape
-    startsWithValidEscape() {
+    startsWithValidEscape(): boolean {
         const oldCursor = this.tr.cursor;
         const s = this.tr.consumeChars(2);
         this.tr.cursor = oldCursor;
@@ -716,7 +717,7 @@ class Tokenizer {
     //==========================================================================
 
     // https://www.w3.org/TR/css-syntax-3/#check-if-three-code-points-would-start-an-ident-sequence
-    startsWithIdentSequence() {
+    startsWithIdentSequence(): boolean {
         const oldCursor = this.tr.cursor;
         const s = this.tr.consumeChars(3);
         this.tr.cursor = oldCursor;
@@ -728,7 +729,7 @@ class Tokenizer {
     //==========================================================================
 
     // https://www.w3.org/TR/css-syntax-3/#check-if-three-code-points-would-start-a-number
-    startsWithNumber() {
+    startsWithNumber(): boolean {
         const oldCursor = this.tr.cursor;
         const s = this.tr.consumeChars(3);
         this.tr.cursor = oldCursor;
@@ -740,7 +741,7 @@ class Tokenizer {
     //==========================================================================
 
     // https://www.w3.org/TR/css-syntax-3/#consume-an-ident-sequence
-    consumeIdentSequence() {
+    consumeIdentSequence(): string {
         let result = "";
         while (true) {
             const oldCursor = this.tr.cursor;
@@ -838,7 +839,7 @@ class Tokenizer {
     //==========================================================================
 
     // https://www.w3.org/TR/css-syntax-3/#consume-the-remnants-of-a-bad-url
-    consumeRemnantsOfBadUrl() {
+    consumeRemnantsOfBadUrl(): void {
         while (true) {
             const chr = this.tr.consumeChar();
             if (chr === ")" || chr === "") {
@@ -855,7 +856,7 @@ class Tokenizer {
 //==============================================================================
 
 // https://www.w3.org/TR/css-syntax-3/#check-if-two-code-points-are-a-valid-escape
-function twoCodePointsAreValidEscape(s: string) {
+function twoCodePointsAreValidEscape(s: string): boolean {
     if (s.length === 0 || s.charAt(0) !== "\\") {
         return false;
     }
@@ -867,7 +868,7 @@ function twoCodePointsAreValidEscape(s: string) {
 //==============================================================================
 
 // https://www.w3.org/TR/css-syntax-3/#check-if-three-code-points-would-start-an-ident-sequence
-function threeCodePointsWouldStartIdentSequence(s: string) {
+function threeCodePointsWouldStartIdentSequence(s: string): boolean {
     if (s.length !== 0 && s.charAt(0) === "-") {
         return (
             (2 <= s.length && isIdentCodePoint(s.codePointAt(1))) ||
@@ -887,7 +888,7 @@ function threeCodePointsWouldStartIdentSequence(s: string) {
 //==============================================================================
 
 // https://www.w3.org/TR/css-syntax-3/#check-if-three-code-points-would-start-a-number
-function threeCodePointsWouldStartNumber(s: string) {
+function threeCodePointsWouldStartNumber(s: string): boolean {
     if (s.length !== 0 && (s.charAt(0) === "+" || s.charAt(0) === "-")) {
         return (
             (2 <= s.length && isDigit(s.codePointAt(1))) ||
@@ -1060,7 +1061,9 @@ export function parseStylesheet(
 //==============================================================================
 
 // https://www.w3.org/TR/css-syntax-3/#parse-a-list-of-rules
-export function parseListOfRules(input: TokenStreamInput) {
+export function parseListOfRules(
+    input: TokenStreamInput,
+): (ASTAtRule | ASTQualifiedRule)[] {
     // S1.
     const nInput = normalizeIntoTokenStream(input);
 
@@ -1264,7 +1267,7 @@ export class TokenStream {
         this.tokens = tokens;
     }
 
-    isEnd() {
+    isEnd(): boolean {
         return this.tokens.length <= this.cursor;
     }
 
@@ -1280,7 +1283,7 @@ export class TokenStream {
         return tk as Extract<Token | ASTObject, { kind: K }>;
     }
 
-    expectDelim(d: string) {
+    expectDelim(d: string): boolean {
         const oldCursor = this.cursor;
         const token = this.expectToken("delim");
         if (token === undefined || token.value !== d) {
@@ -1290,7 +1293,7 @@ export class TokenStream {
         return true;
     }
 
-    expectIdent(i: string) {
+    expectIdent(i: string): boolean {
         const oldCursor = this.cursor;
         const token = this.expectToken("ident");
         if (token === undefined || token.value !== i) {
@@ -1325,7 +1328,7 @@ export class TokenStream {
         return token;
     }
 
-    skipWhitespaces() {
+    skipWhitespaces(): void {
         while (true) {
             const oldCursor = this.cursor;
             if (this.expectToken("whitespace") === undefined) {
@@ -1368,7 +1371,7 @@ export class TokenStream {
     }
 
     // https://www.w3.org/TR/css-syntax-3/#reconsume-the-current-input-token
-    reconsumeCurrentInputToken() {
+    reconsumeCurrentInputToken(): void {
         this.cursor--;
     }
 

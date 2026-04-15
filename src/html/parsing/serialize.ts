@@ -23,7 +23,7 @@ import {
 import { isVoidElement } from "../elements.js";
 
 // https://html.spec.whatwg.org/multipage/parsing.html#serializes-as-void
-function serializesToVoid(element: Element) {
+function serializesToVoid(element: Element): boolean {
     return (
         isVoidElement(element) ||
         element.isElement(HTML_NAMESPACE, "basefont") ||
@@ -39,7 +39,7 @@ export default function serializeHTMLFragment(
     node: Element | Document | DocumentFragment,
     serializableShadowRoots: boolean,
     shadowRoots: ShadowRoot[],
-) {
+): string {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.10.)
 
     // S1.
@@ -126,7 +126,7 @@ export default function serializeHTMLFragment(
 }
 
 // https://html.spec.whatwg.org/multipage/parsing.html#attribute's-serialised-name
-function serializedNameOfAttribute(attr: Attr) {
+function serializedNameOfAttribute(attr: Attr): string {
     switch (attr.namespace) {
         case null:
             return attr.localName;
@@ -146,7 +146,7 @@ function serializedNameOfAttribute(attr: Attr) {
 }
 
 // https://html.spec.whatwg.org/multipage/parsing.html#escapingString
-function escapeString(s: string, isAttributeMode: boolean = false) {
+function escapeString(s: string, isAttributeMode: boolean = false): string {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.10.)
 
     // S1.

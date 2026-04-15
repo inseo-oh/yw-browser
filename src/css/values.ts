@@ -11,7 +11,7 @@ import type { TokenStream } from "./syntax.js";
 // https://www.w3.org/TR/css-values-3/#integer-value
 export type Integer = number;
 
-export function parseInteger(ts: TokenStream) {
+export function parseInteger(ts: TokenStream): Integer | undefined {
     const oldCursor = ts.cursor;
     const num = ts.expectToken("number");
     if (num?.type !== "integer") {
@@ -28,7 +28,7 @@ export function parseInteger(ts: TokenStream) {
 // https://www.w3.org/TR/css-values-3/#number-value
 export type Number = number;
 
-export function parseNumber(ts: TokenStream) {
+export function parseNumber(ts: TokenStream): number | undefined {
     const oldCursor = ts.cursor;
     const num = ts.expectToken("number");
     if (num === undefined) {
@@ -84,7 +84,7 @@ export function parseLengthOrPercentage(
         minValue?: number;
         maxValue?: number;
     },
-) {
+): Percentage | Length | undefined {
     const len = parseLength(ts, options);
     if (len !== undefined) {
         return len;

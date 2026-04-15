@@ -92,7 +92,7 @@ function tagAttribute(
     return undefined;
 }
 
-function insertAtLocation(node: Node, location: InsertionLocation) {
+function insertAtLocation(node: Node, location: InsertionLocation): void {
     switch (location.rel) {
         case "after last child":
             location.parentNode.appendChild(node);
@@ -102,7 +102,7 @@ function insertAtLocation(node: Node, location: InsertionLocation) {
     }
 }
 
-function unexpectedToken(token: Token) {
+function unexpectedToken(token: Token): void {
     console.trace("WARNING: potential bug: unexpected token:", token);
 }
 
@@ -114,7 +114,7 @@ class Parser {
     // We don't have speculative parsing support, so this is mostly just a placeholder, just in case decide to we support it later.
     hasActiveSpeculativeParser = false;
 
-    reprocessToken(tkr: Tokenizer, token: Token) {
+    reprocessToken(tkr: Tokenizer, token: Token): void {
         this.useRulesFor(this.insertionMode, tkr, token);
     }
 
@@ -126,7 +126,7 @@ class Parser {
     insertionMode: InsertionMode = "initial";
 
     // https://html.spec.whatwg.org/multipage/parsing.html#using-the-rules-for
-    useRulesFor(mode: InsertionMode, tkr: Tokenizer, token: Token) {
+    useRulesFor(mode: InsertionMode, tkr: Tokenizer, token: Token): void {
         switch (mode) {
             case "initial":
                 this.#imodeInitial(tkr, token);
@@ -203,7 +203,7 @@ class Parser {
     stackOfTemplateInsertionModes: InsertionMode[] = [];
 
     // https://html.spec.whatwg.org/multipage/parsing.html#reset-the-insertion-mode-appropriately
-    resetInsertionModeAppropriately() {
+    resetInsertionModeAppropriately(): void {
         throw new Error("not yet implemented");
     }
 
@@ -502,7 +502,7 @@ class Parser {
         return res;
     }
 
-    pushToStackOfOpenElements(element: Element) {
+    pushToStackOfOpenElements(element: Element): void {
         this.stackOfOpenElements.push(element);
     }
 
@@ -551,7 +551,7 @@ class Parser {
     listOfActiveFormattingElements: ActiveFormattingElement[] = [];
 
     // https://html.spec.whatwg.org/multipage/parsing.html#push-onto-the-list-of-active-formatting-elements
-    pushOntoListOfActiveFormattingElements(element: Element) {
+    pushOntoListOfActiveFormattingElements(element: Element): void {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.03)
 
         // S1.
@@ -614,7 +614,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#reconstruct-the-active-formatting-elements
-    reconstructActiveFormattingElements() {
+    reconstructActiveFormattingElements(): void {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.03)
 
         // S1.
@@ -641,7 +641,7 @@ class Parser {
         if (entry === undefined) {
             throw Error(`invalid ActiveFormattingElements index ${entryIdx}`);
         }
-        const updateEntry = () => {
+        const updateEntry = (): void => {
             const e = this.listOfActiveFormattingElements[entryIdx];
             if (e === undefined) {
                 throw Error(
@@ -709,7 +709,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#clear-the-list-of-active-formatting-elements-up-to-the-last-marker
-    clearListOfActiveFormattingElementsUpToLastMarker() {
+    clearListOfActiveFormattingElementsUpToLastMarker(): void {
         while (true) {
             // S1.
             const afe =
@@ -732,7 +732,7 @@ class Parser {
         }
     }
 
-    removeFromActiveFormattingElementsList(idx: number) {
+    removeFromActiveFormattingElementsList(idx: number): void {
         this.listOfActiveFormattingElements.splice(idx, 1);
     }
 
@@ -760,7 +760,7 @@ class Parser {
     //==========================================================================
 
     // https://html.spec.whatwg.org/multipage/parsing.html#tree-construction-dispatcher
-    treeConstructionDispatcher(tkr: Tokenizer, token: Token) {
+    treeConstructionDispatcher(tkr: Tokenizer, token: Token): void {
         if (!this.runParser) {
             return;
         }
@@ -1262,7 +1262,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#insert-an-element-at-the-adjusted-insertion-location
-    insertElementAtAdjustedInsertionLocation(element: Element) {
+    insertElementAtAdjustedInsertionLocation(element: Element): void {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.02.12)
 
         // S1.
@@ -1323,7 +1323,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#adjust-mathml-attributes
-    adjustMathmlAttributes(token: TokenFor<"tag">) {
+    adjustMathmlAttributes(token: TokenFor<"tag">): void {
         const ADJUST_ATTRS = [
             { localName: "definitionurl", newLocalName: "definitionURL" },
         ];
@@ -1339,7 +1339,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#adjust-svg-attributes
-    adjustSVGAttributes(token: TokenFor<"tag">) {
+    adjustSVGAttributes(token: TokenFor<"tag">): void {
         const ADJUST_ATTRS = [
             { localName: "attributename", newLocalName: "attributeName" },
             { localName: "attributetype", newLocalName: "attributeType" },
@@ -1451,7 +1451,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#adjust-foreign-attributes
-    adjustForeignAttributes(token: TokenFor<"tag">) {
+    adjustForeignAttributes(token: TokenFor<"tag">): void {
         const ADJUST_ATTRS = [
             {
                 localName: "xlink:actuate",
@@ -1534,7 +1534,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#insert-a-character
-    insertCharacter(token: TokenFor<"character">) {
+    insertCharacter(token: TokenFor<"character">): void {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.02.12)
 
         // S1.
@@ -1575,7 +1575,7 @@ class Parser {
     insertComment(
         token: TokenFor<"comment">,
         location: InsertionLocation | null,
-    ) {
+    ): void {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.02.12)
 
         // S1.
@@ -1596,7 +1596,7 @@ class Parser {
     //==========================================================================
 
     // https://html.spec.whatwg.org/multipage/parsing.html#generic-raw-text-element-parsing-algorithm
-    parseGenericRawTextElement(tkr: Tokenizer, token: TokenFor<"tag">) {
+    parseGenericRawTextElement(tkr: Tokenizer, token: TokenFor<"tag">): void {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.02.12)
 
         // S1.
@@ -1613,7 +1613,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#generic-raw-text-element-parsing-algorithm
-    parseGenericRCDATAElement(tkr: Tokenizer, token: TokenFor<"tag">) {
+    parseGenericRCDATAElement(tkr: Tokenizer, token: TokenFor<"tag">): void {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.02.12)
 
         // S1.
@@ -1634,7 +1634,7 @@ class Parser {
     //==========================================================================
 
     // https://html.spec.whatwg.org/multipage/parsing.html#generate-implied-end-tags
-    generateImpliedEndTags(except: string[]) {
+    generateImpliedEndTags(except: string[]): void {
         while (true) {
             const element = this.currentNode();
             let found = false;
@@ -1663,7 +1663,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#generate-all-implied-end-tags-thoroughly
-    generateImpliedEndTagsThroughly() {
+    generateImpliedEndTagsThroughly(): void {
         while (true) {
             const element = this.currentNode();
             if (
@@ -1697,7 +1697,7 @@ class Parser {
     //==========================================================================
 
     // https://html.spec.whatwg.org/multipage/parsing.html#the-initial-insertion-mode
-    #imodeInitial(tkr: Tokenizer, token: Token) {
+    #imodeInitial(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "character" &&
             (token.data === "\t" ||
@@ -2073,8 +2073,8 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#the-before-html-insertion-mode
-    #imodeBeforeHtml(tkr: Tokenizer, token: Token) {
-        const anythingElse = () => {
+    #imodeBeforeHtml(tkr: Tokenizer, token: Token): void {
+        const anythingElse = (): void => {
             const element = Element.create(
                 this.document,
                 "html",
@@ -2135,7 +2135,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#the-before-head-insertion-mode
-    #imodeBeforeHead(tkr: Tokenizer, token: Token) {
+    #imodeBeforeHead(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "character" &&
             (token.data === "\t" ||
@@ -2190,7 +2190,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inhead
-    #imodeInHead(tkr: Tokenizer, token: Token) {
+    #imodeInHead(tkr: Tokenizer, token: Token): void {
         if (token.kind === "character") {
             this.insertCharacter(token);
         } else if (token.kind === "comment") {
@@ -2306,7 +2306,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inheadnoscript
-    #imodeInHeadNoscript(tkr: Tokenizer, token: Token) {
+    #imodeInHeadNoscript(tkr: Tokenizer, token: Token): void {
         if (token.kind === "doctype") {
             // PARSE ERROR
             return;
@@ -2364,7 +2364,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#the-after-head-insertion-mode
-    #imodeAfterHead(tkr: Tokenizer, token: Token) {
+    #imodeAfterHead(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "character" &&
             (token.data === "\t" ||
@@ -2455,7 +2455,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inbody
-    #imodeInBody(tkr: Tokenizer, token: Token) {
+    #imodeInBody(tkr: Tokenizer, token: Token): void {
         if (token.kind === "character" && token.data === "\0") {
             // PARSE ERROR
             return;
@@ -3592,7 +3592,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#close-a-p-element
-    #closePElement() {
+    #closePElement(): void {
         this.generateImpliedEndTags(["p"]);
         if (!this.currentNode().isElement(HTML_NAMESPACE, "p")) {
             // PARSE ERROR
@@ -3606,7 +3606,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
-    #adoptionAgencyAlgorithm(token: TokenFor<"tag">) {
+    #adoptionAgencyAlgorithm(token: TokenFor<"tag">): void {
         // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.04.13.)
 
         // S1.
@@ -3825,7 +3825,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-incdata
-    #imodeText(tkr: Tokenizer, token: Token) {
+    #imodeText(tkr: Tokenizer, token: Token): void {
         if (token.kind === "character") {
             this.insertCharacter(token);
         } else if (token.kind === "eof") {
@@ -3856,7 +3856,7 @@ class Parser {
     #pendingTableCharacterTokens: TokenFor<"character">[] = [];
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intable
-    #imodeInTable(tkr: Tokenizer, token: Token) {
+    #imodeInTable(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "character" &&
             (this.currentNode().isElement(HTML_NAMESPACE, "table") ||
@@ -4057,7 +4057,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#clear-the-stack-back-to-a-table-context
-    #clearStackBackToTableContext() {
+    #clearStackBackToTableContext(): void {
         while (
             !(
                 this.currentNode().isElement(HTML_NAMESPACE, "table") ||
@@ -4070,7 +4070,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intabletext
-    #imodeInTableText(tkr: Tokenizer, token: Token) {
+    #imodeInTableText(tkr: Tokenizer, token: Token): void {
         if (token.kind === "character" && token.data === "\u0000") {
             // PARSE ERROR
             return;
@@ -4102,7 +4102,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-incaption
-    #imodeInCaption(tkr: Tokenizer, token: Token) {
+    #imodeInCaption(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "tag" &&
             token.type === "end" &&
@@ -4187,7 +4187,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-incolgroup
-    #imodeInColumnGroup(tkr: Tokenizer, token: Token) {
+    #imodeInColumnGroup(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "character" &&
             (token.data === "\t" ||
@@ -4259,7 +4259,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intbody
-    #imodeInTableBody(tkr: Tokenizer, token: Token) {
+    #imodeInTableBody(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "tag" &&
             token.type === "start" &&
@@ -4355,7 +4355,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#clear-the-stack-back-to-a-table-body-context
-    #clearStackBackToTableBodyContext() {
+    #clearStackBackToTableBodyContext(): void {
         while (
             !(
                 this.currentNode().isElement(HTML_NAMESPACE, "tbody") ||
@@ -4370,7 +4370,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intr
-    #imodeInRow(tkr: Tokenizer, token: Token) {
+    #imodeInRow(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "tag" &&
             token.type === "start" &&
@@ -4467,7 +4467,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#clear-the-stack-back-to-a-table-row-context
-    #clearStackBackToTableRowContext() {
+    #clearStackBackToTableRowContext(): void {
         while (
             !(
                 this.currentNode().isElement(HTML_NAMESPACE, "tr") ||
@@ -4480,7 +4480,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intd
-    #imodeInCell(tkr: Tokenizer, token: Token) {
+    #imodeInCell(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "tag" &&
             token.type === "end" &&
@@ -4569,7 +4569,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#close-the-cell
-    #closeCell() {
+    #closeCell(): void {
         this.generateImpliedEndTags([]);
 
         if (
@@ -4594,7 +4594,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-intemplate
-    #imodeInTemplate(tkr: Tokenizer, token: Token) {
+    #imodeInTemplate(tkr: Tokenizer, token: Token): void {
         if (token.kind === "character") {
             this.useRulesFor("in body", tkr, token);
         } else if (token.kind === "comment") {
@@ -4690,7 +4690,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-afterbody
-    #imodeAfterBody(tkr: Tokenizer, token: Token) {
+    #imodeAfterBody(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "character" &&
             (token.data === "\t" ||
@@ -4734,7 +4734,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-inframeset
-    #imodeInFrameset(tkr: Tokenizer, token: Token) {
+    #imodeInFrameset(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "character" &&
             (token.data === "\t" ||
@@ -4811,7 +4811,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#parsing-main-afterframeset
-    #imodeAfterFrameset(tkr: Tokenizer, token: Token) {
+    #imodeAfterFrameset(tkr: Tokenizer, token: Token): void {
         if (
             token.kind === "character" &&
             (token.data === "\t" ||
@@ -4853,7 +4853,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#the-after-after-body-insertion-mode
-    #imodeAfterAfterBody(tkr: Tokenizer, token: Token) {
+    #imodeAfterAfterBody(tkr: Tokenizer, token: Token): void {
         if (token.kind === "comment") {
             this.insertComment(token, {
                 rel: "after last child",
@@ -4886,7 +4886,7 @@ class Parser {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#the-after-after-frameset-insertion-mode
-    #imodeAfterAfterFrameset(tkr: Tokenizer, token: Token) {
+    #imodeAfterAfterFrameset(tkr: Tokenizer, token: Token): void {
         if (token.kind === "comment") {
             this.insertComment(token, {
                 rel: "after last child",
@@ -4928,13 +4928,13 @@ class Parser {
     //==========================================================================
 
     // https://html.spec.whatwg.org/multipage/parsing.html#stop-parsing
-    stopParsing() {
+    stopParsing(): void {
         this.runParser = false;
         // TODO
     }
 }
 
-export function parse(source: string) {
+export function parse(source: string): Document {
     const par = new Parser();
     tokenize(source, (tkr, token) =>
         par.treeConstructionDispatcher(tkr, token),

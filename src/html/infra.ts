@@ -24,7 +24,7 @@ function matchesAboutBlank(url: URL) {
 //==============================================================================
 
 // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url
-export function documentBaseURL(document: Document) {
+export function documentBaseURL(document: Document): URL | null {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.03.07.)
 
     // S1.
@@ -49,7 +49,7 @@ export function documentBaseURL(document: Document) {
 }
 
 // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#fallback-base-url
-function fallbackBaseURL(document: Document) {
+function fallbackBaseURL(document: Document): URL | null {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.03.07.)
 
     // S1.

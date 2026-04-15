@@ -232,7 +232,7 @@ export function serializeToken(token: Token): string {
 export function tokenize(
     source: string,
     emitCallback: (tokenizer: Tokenizer, token: Token) => void,
-) {
+): void {
     const tkr = new Tokenizer(source, emitCallback);
     while (!tkr.eofEmitted) {
         tkr.runTokenizer();
@@ -254,7 +254,7 @@ export class Tokenizer {
         this.emitCallback = emitCallback;
     }
 
-    emitToken(tkb: TokenBuilder) {
+    emitToken(tkb: TokenBuilder): void {
         if (tkb instanceof TagTokenBuilder) {
             if (tkb.type === "start") {
                 this.lastStartTagName = tkb.name;
@@ -265,7 +265,7 @@ export class Tokenizer {
         this.emitCallback(this, tkb.build());
     }
 
-    currentAttribute() {
+    currentAttribute(): { localName: string; value: string } {
         const tag = this.currentToken;
         if (!(tag instanceof TagTokenBuilder)) {
             throw new Error("current token is not tag token");
@@ -277,7 +277,7 @@ export class Tokenizer {
         return attr;
     }
 
-    addAttrToCurrentTag(name: string, value: string) {
+    addAttrToCurrentTag(name: string, value: string): void {
         const tag = this.currentToken;
         if (!(tag instanceof TagTokenBuilder)) {
             throw new Error("current token is not tag token");
@@ -332,7 +332,7 @@ export class Tokenizer {
     }
 
     // https://html.spec.whatwg.org/multipage/parsing.html#flush-code-points-consumed-as-a-character-reference
-    flushCodepointsConsumedAsCharReference() {
+    flushCodepointsConsumedAsCharReference(): void {
         if (this.isConsumedAsPartOfAttr()) {
             this.currentAttribute().value += this.tempBuf;
         } else {
@@ -350,7 +350,7 @@ export class Tokenizer {
     // https://html.spec.whatwg.org/multipage/parsing.html#character-reference-code
     characterReferenceCode = 0;
 
-    runTokenizer() {
+    runTokenizer(): void {
         if (this.parserPauseFlag) {
             throw new Error("TODO");
         }
@@ -561,7 +561,7 @@ export class Tokenizer {
                 }
                 const oldCursor = this.tr.cursor;
                 const nextChar = this.tr.consumeChar();
-                const anythingElse = () => {
+                const anythingElse = (): void => {
                     this.emitToken(new CharacterTokenBuilder("<"));
                     this.emitToken(new CharacterTokenBuilder("/"));
                     for (const c of this.tempBuf) {
@@ -649,7 +649,7 @@ export class Tokenizer {
                 const oldCursor = this.tr.cursor;
                 const nextChar = this.tr.consumeChar();
 
-                const anythingElse = () => {
+                const anythingElse = (): void => {
                     this.emitToken(new CharacterTokenBuilder("<"));
                     this.emitToken(new CharacterTokenBuilder("/"));
                     for (const c of this.tempBuf) {
@@ -739,10 +739,10 @@ export class Tokenizer {
                 }
                 const oldCursor = this.tr.cursor;
                 const nextChar = this.tr.consumeChar();
-                const anythingElse = () => {
+                const anythingElse = (): void => {
                     this.currentAttribute().localName += nextChar;
                 };
-                const checkDupliateAttrName = () => {
+                const checkDupliateAttrName = (): void => {
                     const tag = this.currentToken;
                     if (!(tag instanceof TagTokenBuilder)) {
                         throw new Error("current token is not tag token");
