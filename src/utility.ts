@@ -81,14 +81,6 @@ export class TextReader {
         return String.fromCodePoint(c);
     }
 
-    reconsumeChar() {
-        const c = this.str.codePointAt(this.cursor - 1);
-        if (c === undefined) {
-            throw new Error("must be called after consuming something");
-        }
-        this.cursor -= String.fromCodePoint(c).length;
-    }
-
     test(tester: (s: string) => boolean) {
         return tester(this.str.substring(this.cursor));
     }
