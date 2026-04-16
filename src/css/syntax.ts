@@ -12,7 +12,13 @@ import IOQueue, {
 import { isSurrogate, isASCIICaseInsensitiveMatch } from "../infra.js";
 import { TextReader, toCodePoint } from "../utility.js";
 import { CSSStyleSheet, StyleDeclaration, StyleRule } from "./om.js";
-import { PROPERTY_DESCRIPTORS } from "./properties.js";
+import {
+    Inherit,
+    Initial,
+    PROPERTY_DESCRIPTORS,
+    Unset,
+    type UnfinalizedPropertyValue,
+} from "./properties.js";
 import { parseSelector } from "./selector.js";
 
 //==============================================================================
@@ -1900,9 +1906,27 @@ function parseStyleRule(rule: ASTQualifiedRule): StyleRule | undefined {
                 console.warn(`Unrecognized property ${desc}`);
                 continue;
             }
-            const value = desc.parse(new TokenStream(tk.value));
+            const ts = new TokenStream(tk.value);
+            ts.skipWhitespaces();
+            let value: UnfinalizedPropertyValue | undefined;
+            if (ts.expectIdent("inherit")) {
+                value = new Inherit(tk.name);
+            } else if (ts.expectIdent("unset")) {
+                value = new Unset(tk.name);
+            } else if (ts.expectIdent("initial")) {
+                value = new Initial(tk.name);
+            } else {
+                value = desc.parse(ts);
+            }
             if (value === undefined) {
                 console.warn(`Illegal value for property ${tk.name}`);
+                continue;
+            }
+            ts.skipWhitespaces();
+            if (!ts.isEnd()) {
+                console.warn(
+                    `Illegal value for property ${tk.name} - Unexpected junk at the end`,
+                );
                 continue;
             }
             declarations.push(new StyleDeclaration(value, tk.important));
