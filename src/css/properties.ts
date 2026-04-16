@@ -23,32 +23,107 @@ export function registerPropertyDescriptor(
 
 export interface PropertyDescriptor {
     name: string;
-    valueParser(ts: TokenStream): unknown;
     inherited: boolean;
-    initial(): unknown;
-    computedValue(parent: unknown, value: unknown): unknown;
+    initialValue(): UnfinalizedPropertyValue;
+    computedValue(
+        parent: UnfinalizedPropertyValue,
+        value: UnfinalizedPropertyValue,
+    ): UnfinalizedPropertyValue;
+    parse(ts: TokenStream): UnfinalizedPropertyValue | undefined;
 }
-export class ShorthandPropertyValue {
-    values: Map<PropertyDescriptor, unknown>;
+export class SimplePropertyDescriptor<T> implements PropertyDescriptor {
+    name: string;
+    inherited: boolean;
+    valueParser: (ts: TokenStream) => T | undefined;
+    initial: () => T;
+    computed: (parent: T, value: T) => T;
 
-    constructor(values: Map<string, unknown>) {
-        const newValues = new Map();
-        values.forEach((value, property) => {
-            newValues.set(getPropertyDescriptor(property), value);
-        });
-        this.values = newValues;
+    constructor({
+        name,
+        inherited,
+        valueParser,
+        initial,
+        computed,
+    }: {
+        name: string;
+        inherited: boolean;
+        valueParser: (ts: TokenStream) => T | undefined;
+        initial: () => T;
+        computed: (parent: T, value: T) => T;
+    }) {
+        this.name = name;
+        this.inherited = inherited;
+        this.valueParser = valueParser;
+        this.initial = initial;
+        this.computed = computed;
+    }
+
+    initialValue(): UnfinalizedPropertyValue {
+        return new SimplePropertyValue(this.name, this.initial());
+    }
+    computedValue(
+        parent: UnfinalizedPropertyValue,
+        value: UnfinalizedPropertyValue,
+    ): UnfinalizedPropertyValue {
+        if (!(parent instanceof SimplePropertyValue)) {
+            throw new TypeError("parent must be SimplePropertyValue");
+        }
+        if (!(value instanceof SimplePropertyValue)) {
+            throw new TypeError("value must be SimplePropertyValue");
+        }
+        return new SimplePropertyValue(
+            this.name,
+            this.computed(parent.value, value.value),
+        );
+    }
+    parse(ts: TokenStream): UnfinalizedPropertyValue | undefined {
+        const v = this.valueParser(ts);
+        if (v === undefined) {
+            return undefined;
+        }
+        return new SimplePropertyValue(this.name, v);
+    }
+}
+export interface UnfinalizedPropertyValue {
+    apply(set: UnfinalizedPropertySet): void;
+}
+export class SimplePropertyValue<T> implements UnfinalizedPropertyValue {
+    descriptor: PropertyDescriptor;
+    value: T;
+
+    constructor(property: string, value: T) {
+        this.descriptor = getPropertyDescriptor(property);
+        this.value = value;
+    }
+
+    apply(set: UnfinalizedPropertySet): void {
+        set.list.set(this.descriptor, this);
+    }
+}
+export class GlobalKeywordPropertyValue implements UnfinalizedPropertyValue {
+    descriptor: PropertyDescriptor;
+
+    constructor(property: string) {
+        this.descriptor = getPropertyDescriptor(property);
+    }
+
+    apply(set: UnfinalizedPropertySet): void {
+        set.list.set(this.descriptor, this);
+    }
+}
+export class Inherit extends GlobalKeywordPropertyValue {}
+export class Unset extends GlobalKeywordPropertyValue {}
+export class Initial extends GlobalKeywordPropertyValue {}
+
+export class ShorthandPropertyValue implements UnfinalizedPropertyValue {
+    values: UnfinalizedPropertyValue[];
+
+    constructor(values: UnfinalizedPropertyValue[]) {
+        this.values = values;
     }
     apply(set: UnfinalizedPropertySet): void {
-        this.values.forEach((value, property) => {
-            if (value instanceof ShorthandPropertyValue) {
-                value.apply(set);
-            } else {
-                const prop = set.list.get(property.name);
-                if (prop === undefined) {
-                    throw new Error(`No such property named ${property}`);
-                }
-                prop.value = value;
-            }
+        this.values.forEach((value) => {
+            value.apply(set);
         });
     }
 }
@@ -59,21 +134,21 @@ export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
     bottomPropertyDescriptor: PropertyDescriptor;
     leftPropertyDescriptor: PropertyDescriptor;
     inherited: boolean;
-    #innerValueParser: PropertyDescriptor["valueParser"];
+    #innerValueParser: SimplePropertyDescriptor<unknown>["valueParser"];
 
     constructor({
         name,
-        topPropertyName,
-        rightPropertyName,
-        bottomPropertyName,
-        leftPropertyName,
+        topName: topPropertyName,
+        rightName: rightPropertyName,
+        bottomName: bottomPropertyName,
+        leftName: leftPropertyName,
         inherited,
     }: {
         name: string;
-        topPropertyName: string;
-        rightPropertyName: string;
-        bottomPropertyName: string;
-        leftPropertyName: string;
+        topName: string;
+        rightName: string;
+        bottomName: string;
+        leftName: string;
         inherited: boolean;
     }) {
         this.name = name;
@@ -83,19 +158,15 @@ export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
         this.bottomPropertyDescriptor =
             getPropertyDescriptor(bottomPropertyName);
         this.leftPropertyDescriptor = getPropertyDescriptor(leftPropertyName);
-        if (
-            this.topPropertyDescriptor.valueParser !=
-                this.rightPropertyDescriptor.valueParser ||
-            this.topPropertyDescriptor.valueParser !=
-                this.bottomPropertyDescriptor.valueParser ||
-            this.topPropertyDescriptor.valueParser !=
-                this.leftPropertyDescriptor.valueParser
-        ) {
-            throw new Error("All properties must share the same valueParser");
+        if (this.topPropertyDescriptor instanceof SimplePropertyDescriptor) {
+            this.#innerValueParser = this.topPropertyDescriptor.valueParser;
+        } else {
+            throw new TypeError(
+                "only properties described by a SimplePropertyDescriptor is allowed",
+            );
         }
-        this.#innerValueParser = this.topPropertyDescriptor.valueParser;
     }
-    valueParser(ts: TokenStream): unknown {
+    parse(ts: TokenStream): UnfinalizedPropertyValue | undefined {
         const values = commaSeparatedRepeation(
             ts,
             1,
@@ -105,127 +176,188 @@ export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
         if (values === undefined) {
             return undefined;
         }
-        const res = new Map();
+        let res: UnfinalizedPropertyValue[];
         switch (values.length) {
             case 1:
-                res.set(this.topPropertyDescriptor.name, values[0]!);
-                res.set(this.rightPropertyDescriptor.name, values[0]!);
-                res.set(this.bottomPropertyDescriptor.name, values[0]!);
-                res.set(this.leftPropertyDescriptor.name, values[0]!);
+                res = [
+                    new SimplePropertyValue(
+                        this.topPropertyDescriptor.name,
+                        values[0]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.rightPropertyDescriptor.name,
+                        values[0]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.bottomPropertyDescriptor.name,
+                        values[0]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.leftPropertyDescriptor.name,
+                        values[0]!,
+                    ),
+                ];
                 break;
             case 2:
-                res.set(this.topPropertyDescriptor.name, values[0]!);
-                res.set(this.rightPropertyDescriptor.name, values[1]!);
-                res.set(this.bottomPropertyDescriptor.name, values[0]!);
-                res.set(this.leftPropertyDescriptor.name, values[1]!);
+                res = [
+                    new SimplePropertyValue(
+                        this.topPropertyDescriptor.name,
+                        values[0]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.rightPropertyDescriptor.name,
+                        values[1]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.bottomPropertyDescriptor.name,
+                        values[0]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.leftPropertyDescriptor.name,
+                        values[1]!,
+                    ),
+                ];
                 break;
             case 3:
-                res.set(this.topPropertyDescriptor.name, values[0]!);
-                res.set(this.rightPropertyDescriptor.name, values[1]!);
-                res.set(this.bottomPropertyDescriptor.name, values[2]!);
-                res.set(this.leftPropertyDescriptor.name, values[1]!);
+                res = [
+                    new SimplePropertyValue(
+                        this.topPropertyDescriptor.name,
+                        values[0]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.rightPropertyDescriptor.name,
+                        values[1]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.bottomPropertyDescriptor.name,
+                        values[2]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.leftPropertyDescriptor.name,
+                        values[1]!,
+                    ),
+                ];
                 break;
             case 4:
-                res.set(this.topPropertyDescriptor.name, values[0]!);
-                res.set(this.rightPropertyDescriptor.name, values[1]!);
-                res.set(this.bottomPropertyDescriptor.name, values[2]!);
-                res.set(this.leftPropertyDescriptor.name, values[3]!);
+                res = [
+                    new SimplePropertyValue(
+                        this.topPropertyDescriptor.name,
+                        values[0]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.rightPropertyDescriptor.name,
+                        values[1]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.bottomPropertyDescriptor.name,
+                        values[2]!,
+                    ),
+                    new SimplePropertyValue(
+                        this.leftPropertyDescriptor.name,
+                        values[3]!,
+                    ),
+                ];
                 break;
+            default:
+                throw new Error("unreachable");
         }
         return new ShorthandPropertyValue(res);
     }
-    computedValue(parent: unknown, value: unknown): unknown {
+    computedValue(
+        parent: UnfinalizedPropertyValue,
+        value: UnfinalizedPropertyValue,
+    ): UnfinalizedPropertyValue {
         if (!(parent instanceof ShorthandPropertyValue)) {
-            throw new Error("parent must be ShorthandPropertyValue");
+            throw new TypeError("parent must be ShorthandPropertyValue");
         }
         if (!(value instanceof ShorthandPropertyValue)) {
-            throw new Error("parent must be ShorthandPropertyValue");
+            throw new TypeError("value must be ShorthandPropertyValue");
         }
-        const res = new Map();
-        value.values.forEach((value, propertyDescriptor) => {
-            const parentValue = parent.values.get(propertyDescriptor);
-            if (parentValue === undefined) {
-                throw new Error(
-                    `parent doesn't have value for property ${propertyDescriptor.name}`,
+        return new ShorthandPropertyValue(
+            value.values.map((propertyValue, i) => {
+                const parentValue = parent.values[i]!;
+                if (parentValue === undefined) {
+                    throw new TypeError(
+                        "parent and value must have same number of values",
+                    );
+                }
+                if (!(propertyValue instanceof SimplePropertyValue)) {
+                    throw new TypeError(
+                        "Only SimplePropertyValue is supported",
+                    );
+                }
+                return propertyValue.descriptor.computedValue(
+                    parentValue,
+                    propertyValue,
                 );
-            }
-            res.set(
-                propertyDescriptor,
-                propertyDescriptor.computedValue(parentValue, value),
-            );
-        });
-        return res;
+            }),
+        );
     }
-    initial(): unknown {
-        const res = new Map();
-        res.set(
-            this.topPropertyDescriptor.name,
-            this.topPropertyDescriptor.initial(),
-        );
-        res.set(
-            this.rightPropertyDescriptor.name,
-            this.rightPropertyDescriptor.initial(),
-        );
-        res.set(
-            this.bottomPropertyDescriptor.name,
-            this.bottomPropertyDescriptor.initial(),
-        );
-        res.set(
-            this.leftPropertyDescriptor.name,
-            this.leftPropertyDescriptor.initial(),
-        );
-        return new ShorthandPropertyValue(res);
-    }
-}
-
-export class UnfinalizedProperty {
-    value: unknown | "inherit" | "initial" | "unset" | undefined;
-    descriptor: PropertyDescriptor;
-
-    constructor(
-        value: unknown | "inherit" | "initial" | "unset" | undefined,
-        descriptor: PropertyDescriptor,
-    ) {
-        this.value = value;
-        this.descriptor = descriptor;
-    }
-
-    finalize(parent: unknown): unknown {
-        let finalValue = this.value;
-        parent = parent ?? this.descriptor.initial();
-        if (
-            this.value === "inherit" ||
-            (this.descriptor.inherited &&
-                (this.value === undefined || this.value === "unset"))
-        ) {
-            finalValue = parent;
-        } else if (
-            this.value === "initial" ||
-            this.value === undefined ||
-            this.value === "unset"
-        ) {
-            finalValue = this.descriptor.initial();
-        }
-        return this.descriptor.computedValue(parent, finalValue);
+    initialValue(): UnfinalizedPropertyValue {
+        return new ShorthandPropertyValue([
+            new SimplePropertyValue(
+                this.topPropertyDescriptor.name,
+                this.topPropertyDescriptor.initialValue(),
+            ),
+            new SimplePropertyValue(
+                this.rightPropertyDescriptor.name,
+                this.rightPropertyDescriptor.initialValue(),
+            ),
+            new SimplePropertyValue(
+                this.bottomPropertyDescriptor.name,
+                this.bottomPropertyDescriptor.initialValue(),
+            ),
+            new SimplePropertyValue(
+                this.leftPropertyDescriptor.name,
+                this.leftPropertyDescriptor.initialValue(),
+            ),
+        ]);
     }
 }
 
 export type PropertySet = Map<string, unknown>;
 
 export class UnfinalizedPropertySet {
-    list: Map<string, UnfinalizedProperty> = new Map();
+    list: Map<PropertyDescriptor, UnfinalizedPropertyValue | undefined> =
+        new Map();
 
     constructor() {
-        PROPERTY_DESCRIPTORS.forEach((descriptor, key) => {
-            this.list.set(key, new UnfinalizedProperty(undefined, descriptor));
+        PROPERTY_DESCRIPTORS.forEach((descriptor) => {
+            this.list.set(descriptor, undefined);
         });
     }
 
     finalize(parentSet: PropertySet | undefined): PropertySet {
         const res = new Map();
-        this.list.forEach((prop, key) => {
-            const parentValue = parentSet?.get(key);
-            res.set(key, prop.finalize(parentValue));
+        this.list.forEach((propValue, descriptor) => {
+            let specifiedValue: UnfinalizedPropertyValue;
+            const parentValueRaw = parentSet?.get(descriptor.name);
+            const parentValue =
+                parentValueRaw === undefined
+                    ? descriptor.initialValue()
+                    : new SimplePropertyValue(descriptor.name, parentValueRaw);
+            if (
+                propValue instanceof Inherit ||
+                (descriptor.inherited &&
+                    (propValue === undefined || propValue instanceof Unset))
+            ) {
+                specifiedValue = parentValue;
+            } else if (
+                propValue instanceof Initial ||
+                propValue === undefined ||
+                propValue instanceof Unset
+            ) {
+                specifiedValue = descriptor.initialValue();
+            } else if (propValue instanceof SimplePropertyValue) {
+                specifiedValue = propValue;
+            } else {
+                throw new Error(`unrecognized value ${propValue}`);
+            }
+            const computedValue = descriptor.computedValue(
+                parentValue,
+                specifiedValue,
+            );
+            res.set(descriptor, computedValue);
         });
         return res;
     }
