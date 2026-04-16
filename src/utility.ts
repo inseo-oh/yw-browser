@@ -53,6 +53,10 @@ export function toCodePoint(v: string | number): number | undefined {
     }
 }
 
+export function clamp(v: number, min: number, max: number): number {
+    return Math.min(Math.max(v, min), max);
+}
+
 export class TextReader {
     str: string;
     cursor = 0;
