@@ -1833,47 +1833,4 @@ export class TokenStream {
     consumeAnyValue(): (Token | ASTObject)[] | undefined {
         return this.consumeDeclarationValueImpl(true);
     }
-
-    // https://www.w3.org/TR/css-values-4/#mult-comma
-    parseCommaSeparatedRepeation<T>(
-        maxRepeats: number | undefined,
-        parser: () => T,
-    ): T[] {
-        const res = [];
-        while (true) {
-            const token = parser();
-            if (token === undefined) {
-                if (res.length !== 0) {
-                    throw new SyntaxError();
-                }
-                break;
-            }
-            res.push(token);
-            if (maxRepeats !== undefined && maxRepeats <= res.length) {
-                break;
-            }
-            this.skipWhitespaces();
-            if (this.expectToken("comma") === undefined) {
-                break;
-            }
-            this.skipWhitespaces();
-        }
-        return res;
-    }
-
-    parseRepeation<T>(maxRepeats: number | undefined, parser: () => T): T[] {
-        const res = [];
-        while (true) {
-            const token = parser();
-            if (token === undefined) {
-                break;
-            }
-            res.push(token);
-            if (maxRepeats !== undefined && maxRepeats <= res.length) {
-                break;
-            }
-            this.skipWhitespaces();
-        }
-        return res;
-    }
 }
