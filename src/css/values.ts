@@ -19,7 +19,7 @@ export function repeation<T>(
     const res = [];
     while (true) {
         const token = parser(ts);
-        if (token === null) {
+        if (token === undefined) {
             break;
         }
         res.push(token);
@@ -47,7 +47,7 @@ export function commaSeparatedRepeation<T>(
     while (true) {
         const oldCursorBeforeItem = ts.cursor;
         const token = parser(ts);
-        if (token === null) {
+        if (token === undefined) {
             if (res.length !== 0) {
                 ts.cursor = oldCursorBeforeItem;
                 return undefined;
