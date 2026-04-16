@@ -370,10 +370,13 @@ export class UnfinalizedPropertySet {
             if (descriptor instanceof SideShorthandPropertyDescriptor) {
                 return;
             }
-            res.set(
-                descriptor,
-                toComputedValue(parentSet, descriptor, propValue),
-            );
+            const computed = toComputedValue(parentSet, descriptor, propValue);
+            if (!(computed instanceof SimplePropertyValue)) {
+                throw new Error(
+                    "We should have SimplePropertyValue at this point",
+                );
+            }
+            res.set(descriptor.name, computed.value);
         });
         return res;
     }
