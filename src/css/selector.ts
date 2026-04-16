@@ -57,6 +57,10 @@ export function parseSelector(ts: TokenStream): Selector | undefined {
         }
         const item = parseSelectorItem(ts);
         if (item === undefined) {
+            if (combinator === " ") {
+                // The combinator was just whitespace at the end, not an actual combinator.
+                break;
+            }
             ts.cursor = oldCursor;
             return undefined;
         }
@@ -77,7 +81,10 @@ export function serializeSelector(selector: Selector): string {
         })
         .join("");
 }
-export function matchSelector(selector: Selector, element: Element): boolean | undefined {
+export function matchSelector(
+    selector: Selector,
+    element: Element,
+): boolean | undefined {
     for (let i = selector.items.length - 1; 0 <= i; i--) {
         const rhs = selector.items[i]!;
         for (const sel of rhs.simpleSelector) {
@@ -144,7 +151,10 @@ export function matchSelector(selector: Selector, element: Element): boolean | u
         }
     }
 }
-export function matchSelectorAgainstTree(selector: Selector, root: Element): Element[] {
+export function matchSelectorAgainstTree(
+    selector: Selector,
+    root: Element,
+): Element[] {
     return root
         .inclusiveDescendants()
         .filter((e) =>
@@ -352,7 +362,10 @@ function parseAttributeSelector(
     }
 }
 
-function matchAttributeSelector(selector: AttributeSelector, element: Element): boolean {
+function matchAttributeSelector(
+    selector: AttributeSelector,
+    element: Element,
+): boolean {
     if (selector.name.namespace !== undefined) {
         throw new Error("Not implemented yet");
     }
@@ -410,7 +423,10 @@ function parseClassSelector(ts: TokenStream): ClassSelector | undefined {
     }
     return { kind: "class", name: ident.value };
 }
-function matchClassSelector(selector: ClassSelector, element: Element): boolean {
+function matchClassSelector(
+    selector: ClassSelector,
+    element: Element,
+): boolean {
     let attrVal = element.attribute(null, "class");
     if (attrVal === undefined || attrVal === "") {
         return false;
