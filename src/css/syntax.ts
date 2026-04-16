@@ -11,6 +11,9 @@ import IOQueue, {
 } from "../encoding.js";
 import { isSurrogate, isASCIICaseInsensitiveMatch } from "../infra.js";
 import { TextReader, toCodePoint } from "../utility.js";
+import { CSSStyleSheet, StyleDeclaration, StyleRule } from "./om.js";
+import { PROPERTY_DESCRIPTORS } from "./properties.js";
+import { parseSelector } from "./selector.js";
 
 //==============================================================================
 // CSS Syntax Module Level 3 - 3.2.
@@ -1526,6 +1529,7 @@ export class TokenStream {
                     tokens.push(tempToken);
                 }
                 const innerTs = new TokenStream(tokens);
+                innerTs.consumeNextInputToken();
                 const decl = innerTs.consumeDeclaration();
                 if (decl !== undefined) {
                     decls.push(decl);
@@ -1587,6 +1591,7 @@ export class TokenStream {
                     tokens.push(tempToken);
                 }
                 const innerTs = new TokenStream(tokens);
+                innerTs.consumeNextInputToken();
                 const decl = innerTs.consumeDeclaration();
                 if (decl !== undefined) {
                     decls.push(decl);
@@ -1837,4 +1842,78 @@ export class TokenStream {
     consumeAnyValue(): (Token | ASTObject)[] | undefined {
         return this.#consumeDeclarationValue(true);
     }
+}
+
+//==============================================================================
+// CSS Syntax Module Level 3 - 9.
+//==============================================================================
+
+// https://www.w3.org/TR/css-syntax-3/#parse-a-css-stylesheet
+export function parseCSSStyleSheet(
+    input: Uint8Array | TokenStreamInput,
+    location?: string,
+): CSSStyleSheet {
+    const rawSheet = parseStylesheet(input, location);
+    const sheet = new CSSStyleSheet({ originCleanFlag: true });
+    sheet.location = rawSheet.location;
+    const styleRules = [];
+    for (const token of rawSheet.value) {
+        if (token.kind === "ast-qualified-rule") {
+            const rule = parseStyleRule(token);
+            if (rule !== undefined) {
+                styleRules.push(rule);
+            } else {
+                console.warn(
+                    "Ignoring this token because it cannot be parsed as style rule: ",
+                    token,
+                );
+            }
+        }
+    }
+    sheet.cssRules = styleRules;
+    return sheet;
+}
+
+//==============================================================================
+// CSS Syntax Module Level 3 - 9.1.
+//==============================================================================
+function parseStyleRule(rule: ASTQualifiedRule): StyleRule | undefined {
+    let selector;
+    {
+        const ts = new TokenStream(rule.prelude);
+        selector = parseSelector(ts);
+        if (selector === undefined) {
+            return undefined;
+        }
+        ts.skipWhitespaces();
+        if (!ts.isEnd()) {
+            return undefined;
+        }
+    }
+
+    const styleBlockContents = parseStyleBlockContents(rule.body);
+    const declarations = [];
+    for (const tk of styleBlockContents) {
+        if (tk.kind === "ast-declaration") {
+            const desc = PROPERTY_DESCRIPTORS.get(tk.name);
+            if (desc === undefined) {
+                console.warn(`Unrecognized property ${desc}`);
+                continue;
+            }
+            const value = desc.parse(new TokenStream(tk.value));
+            if (value === undefined) {
+                console.warn(`Illegal value for property ${tk.name}`);
+                continue;
+            }
+            declarations.push(new StyleDeclaration(value, tk.important));
+        } else if (tk.kind === "ast-at-rule") {
+            continue;
+        } else {
+            console.warn(
+                `Unrecognized token ${tk} encountered during style rule parsing`,
+            );
+        }
+    }
+
+    return new StyleRule(selector, declarations, []);
 }
