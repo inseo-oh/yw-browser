@@ -398,6 +398,9 @@ export class UnfinalizedPropertySet {
             if (!(descriptor instanceof SideShorthandPropertyDescriptor)) {
                 return;
             }
+            if (propValue === undefined) {
+                return;
+            }
             const computed = toComputedValue(parentSet, descriptor, propValue);
             computed.apply(this);
         });
