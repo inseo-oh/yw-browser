@@ -1768,8 +1768,12 @@ export class TokenStream {
         }
     }
 
+    //==========================================================================
+    // CSS Syntax Module Level 3 - 8.2.
+    //==========================================================================
+
     // https://www.w3.org/TR/css-syntax-3/#typedef-declaration-value
-    consumeDeclarationValueImpl(
+    #consumeDeclarationValue(
         isAnyValue: boolean,
     ): (Token | ASTObject)[] | undefined {
         const oldCursor = this.cursor;
@@ -1827,10 +1831,10 @@ export class TokenStream {
     }
 
     consumeDeclarationValue(): (Token | ASTObject)[] | undefined {
-        return this.consumeDeclarationValueImpl(false);
+        return this.#consumeDeclarationValue(false);
     }
 
     consumeAnyValue(): (Token | ASTObject)[] | undefined {
-        return this.consumeDeclarationValueImpl(true);
+        return this.#consumeDeclarationValue(true);
     }
 }
