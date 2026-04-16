@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 import type { Document, Node } from "../dom.js";
-import type { UnfinalizedPropertySet } from "./properties.js";
+import { ShorthandPropertyValue, type UnfinalizedPropertySet } from "./properties.js";
 import type { Selector } from "./selector.js";
 import type { Token } from "./syntax.js";
 
@@ -246,7 +246,9 @@ export class StyleDeclaration {
 
     applyStyleRule(propertySet: UnfinalizedPropertySet): void {
         const prop = propertySet.list.get(this.name);
-        if (prop !== undefined) {
+        if (this.value instanceof ShorthandPropertyValue) {
+            this.value.apply(propertySet);
+        } else if (prop !== undefined) {
             prop.value = this.value;
         }
     }
