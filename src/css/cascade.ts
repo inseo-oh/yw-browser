@@ -51,7 +51,10 @@ class PropertySetFinalizer {
     }
 }
 
-export function runCascade(uaStyleSheet: CSSStyleSheet, rootNode: Element): void {
+export function runCascade(
+    uaStyleSheet: CSSStyleSheet,
+    rootNode: Element,
+): void {
     const declGroups: DeclarationEntry[][] = [
         // Higher priority first, lower priority last
         [], // Transition declarations
