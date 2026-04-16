@@ -94,6 +94,14 @@ export class SimplePropertyValue<T> implements UnfinalizedPropertyValue {
     value: T;
 
     constructor(property: string, value: T) {
+        if (
+            value instanceof SimplePropertyValue ||
+            value instanceof ShorthandPropertyValue
+        ) {
+            throw new TypeError(
+                "attempted to put PropertyValue inside SimplePropertyValue",
+            );
+        }
         this.descriptor = getPropertyDescriptor(property);
         this.value = value;
     }
@@ -330,22 +338,10 @@ export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
     }
     initialValue(): UnfinalizedPropertyValue {
         return new ShorthandPropertyValue(this.name, [
-            new SimplePropertyValue(
-                this.topPropertyDescriptor.name,
-                this.topPropertyDescriptor.initialValue(),
-            ),
-            new SimplePropertyValue(
-                this.rightPropertyDescriptor.name,
-                this.rightPropertyDescriptor.initialValue(),
-            ),
-            new SimplePropertyValue(
-                this.bottomPropertyDescriptor.name,
-                this.bottomPropertyDescriptor.initialValue(),
-            ),
-            new SimplePropertyValue(
-                this.leftPropertyDescriptor.name,
-                this.leftPropertyDescriptor.initialValue(),
-            ),
+            this.topPropertyDescriptor.initialValue(),
+            this.rightPropertyDescriptor.initialValue(),
+            this.bottomPropertyDescriptor.initialValue(),
+            this.leftPropertyDescriptor.initialValue(),
         ]);
     }
 }
