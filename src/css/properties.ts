@@ -364,7 +364,25 @@ function toComputedValue(
         (descriptor.inherited &&
             (propValue === undefined || propValue instanceof Unset))
     ) {
-        specifiedValue = parentValue;
+        if (
+            parentValue instanceof ShorthandPropertyValue &&
+            parentSet !== undefined
+        ) {
+            specifiedValue = new ShorthandPropertyValue(
+                descriptor.name,
+                parentValue.values.map((v): UnfinalizedPropertyValue => {
+                    const prop = parentSet.get(v.propertyName());
+                    if (prop === undefined) {
+                        throw new Error(
+                            `parentSet should have property ${v.propertyName()}`,
+                        );
+                    }
+                    return new SimplePropertyValue(v.propertyName(), prop);
+                }),
+            );
+        } else {
+            specifiedValue = parentValue;
+        }
     } else if (
         propValue instanceof Initial ||
         propValue === undefined ||
