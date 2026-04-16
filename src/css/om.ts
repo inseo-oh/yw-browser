@@ -6,8 +6,8 @@ import {
     type UnfinalizedPropertySet,
     type UnfinalizedPropertyValue,
 } from "./properties.js";
-import type { Selector } from "./selector.js";
-import type { Token } from "./syntax.js";
+import { serializeSelector, type Selector } from "./selector.js";
+import { serializeTokens, type Token } from "./syntax.js";
 
 // NOTE: CSSOM is still in Working Draft stage!
 //       Any of links below may stop working in the future!
@@ -49,6 +49,10 @@ export class CSSStyleSheet {
 
     constructor({ originCleanFlag }: { originCleanFlag: boolean }) {
         this.originCleanFlag = originCleanFlag;
+    }
+
+    serialize(): string {
+        return this.cssRules.map((r) => r.serialize()).join("");
     }
 }
 
@@ -218,6 +222,11 @@ export class AtRule {
         this.prelude = prelude;
         this.value = value;
     }
+
+    serialize(): string {
+        // TODO: Handle At-rules without value.
+        return `@${this.name}${serializeTokens(this.prelude)}{${serializeTokens(this.value)}}`;
+    }
 }
 
 export class StyleRule {
@@ -234,6 +243,9 @@ export class StyleRule {
         this.declarations = declarations;
         this.atRules = atRules;
     }
+    serialize(): string {
+        return `${serializeSelector(this.selector)}{${this.declarations.map((d) => d.serialize()).join("")}${this.atRules}}`;
+    }
 }
 
 export class StyleDeclaration {
@@ -247,5 +259,14 @@ export class StyleDeclaration {
 
     applyStyleRule(propertySet: UnfinalizedPropertySet): void {
         this.value.apply(propertySet);
+    }
+
+    serialize(): string {
+        let res = `${this.value.propertyName()}:${this.value.serialize()}`;
+        if (this.important) {
+            res += "!important";
+        }
+        res += ";";
+        return res;
     }
 }
