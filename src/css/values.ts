@@ -5,6 +5,74 @@ import { toASCIILowercase } from "../infra.js";
 import type { TokenStream } from "./syntax.js";
 
 //==============================================================================
+// CSS Values and Units Module Level 3 - 2.3.
+//==============================================================================
+
+// https://www.w3.org/TR/css-values-3/#mult-num-range
+export function repeation<T>(
+    ts: TokenStream,
+    minRepeats: number,
+    maxRepeats: number | "unlimited",
+    parser: (ts: TokenStream) => T,
+): T[] | undefined {
+    const oldCursor = ts.cursor;
+    const res = [];
+    while (true) {
+        const token = parser(ts);
+        if (token === null) {
+            break;
+        }
+        res.push(token);
+        if (maxRepeats !== "unlimited" && maxRepeats <= res.length) {
+            break;
+        }
+        ts.skipWhitespaces();
+    }
+    if (res.length < minRepeats) {
+        ts.cursor = oldCursor;
+        return undefined;
+    }
+    return res;
+}
+
+// https://www.w3.org/TR/css-values-3/#mult-comma
+export function commaSeparatedRepeation<T>(
+    ts: TokenStream,
+    minRepeats: number,
+    maxRepeats: number | "unlimited",
+    parser: (ts: TokenStream) => T,
+): T[] | undefined {
+    const oldCursor = ts.cursor;
+    const res = [];
+    while (true) {
+        const oldCursorBeforeItem = ts.cursor;
+        const token = parser(ts);
+        if (token === null) {
+            if (res.length !== 0) {
+                ts.cursor = oldCursorBeforeItem;
+                return undefined;
+            } else {
+                break;
+            }
+        }
+        res.push(token);
+        if (maxRepeats !== "unlimited" && maxRepeats <= res.length) {
+            break;
+        }
+        ts.skipWhitespaces();
+        if (ts.expectToken("comma") == null) {
+            break;
+        }
+        ts.skipWhitespaces();
+    }
+    if (res.length < minRepeats) {
+        ts.cursor = oldCursor;
+        return undefined;
+    }
+    return res;
+}
+
+//==============================================================================
 // CSS Values and Units Module Level 3 - 4.2.
 //==============================================================================
 
