@@ -317,6 +317,36 @@ export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
 
 export type PropertySet = Map<string, unknown>;
 
+function toComputedValue(
+    parentSet: PropertySet | undefined,
+    descriptor: PropertyDescriptor,
+    propValue: UnfinalizedPropertyValue | undefined,
+): UnfinalizedPropertyValue {
+    let specifiedValue: UnfinalizedPropertyValue;
+    const parentValueRaw = parentSet?.get(descriptor.name);
+    const parentValue =
+        parentValueRaw === undefined
+            ? descriptor.initialValue()
+            : new SimplePropertyValue(descriptor.name, parentValueRaw);
+    if (
+        propValue instanceof Inherit ||
+        (descriptor.inherited &&
+            (propValue === undefined || propValue instanceof Unset))
+    ) {
+        specifiedValue = parentValue;
+    } else if (
+        propValue instanceof Initial ||
+        propValue === undefined ||
+        propValue instanceof Unset
+    ) {
+        specifiedValue = descriptor.initialValue();
+    } else if (propValue instanceof SimplePropertyValue) {
+        specifiedValue = propValue;
+    } else {
+        throw new Error(`unrecognized value ${propValue}`);
+    }
+    return descriptor.computedValue(parentValue, specifiedValue);
+}
 export class UnfinalizedPropertySet {
     list: Map<PropertyDescriptor, UnfinalizedPropertyValue | undefined> =
         new Map();
@@ -330,34 +360,20 @@ export class UnfinalizedPropertySet {
     finalize(parentSet: PropertySet | undefined): PropertySet {
         const res = new Map();
         this.list.forEach((propValue, descriptor) => {
-            let specifiedValue: UnfinalizedPropertyValue;
-            const parentValueRaw = parentSet?.get(descriptor.name);
-            const parentValue =
-                parentValueRaw === undefined
-                    ? descriptor.initialValue()
-                    : new SimplePropertyValue(descriptor.name, parentValueRaw);
-            if (
-                propValue instanceof Inherit ||
-                (descriptor.inherited &&
-                    (propValue === undefined || propValue instanceof Unset))
-            ) {
-                specifiedValue = parentValue;
-            } else if (
-                propValue instanceof Initial ||
-                propValue === undefined ||
-                propValue instanceof Unset
-            ) {
-                specifiedValue = descriptor.initialValue();
-            } else if (propValue instanceof SimplePropertyValue) {
-                specifiedValue = propValue;
-            } else {
-                throw new Error(`unrecognized value ${propValue}`);
+            if (!(descriptor instanceof SideShorthandPropertyDescriptor)) {
+                return;
             }
-            const computedValue = descriptor.computedValue(
-                parentValue,
-                specifiedValue,
+            const computed = toComputedValue(parentSet, descriptor, propValue);
+            computed.apply(this);
+        });
+        this.list.forEach((propValue, descriptor) => {
+            if (descriptor instanceof SideShorthandPropertyDescriptor) {
+                return;
+            }
+            res.set(
+                descriptor,
+                toComputedValue(parentSet, descriptor, propValue),
             );
-            res.set(descriptor, computedValue);
         });
         return res;
     }
