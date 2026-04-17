@@ -281,17 +281,29 @@ export class NormalShorthandPropertyDescriptor extends ShorthandPropertyDescript
                         if (v === undefined) {
                             res = undefined;
                         } else {
-                            res = new SimplePropertyValue(desc.name, v);
+                            res = new ShorthandPropertyValue(desc.name, [
+                                new SimplePropertyValue(
+                                    desc.topPropertyDescriptor.name,
+                                    v,
+                                ),
+                                new SimplePropertyValue(
+                                    desc.rightPropertyDescriptor.name,
+                                    v,
+                                ),
+                                new SimplePropertyValue(
+                                    desc.bottomPropertyDescriptor.name,
+                                    v,
+                                ),
+                                new SimplePropertyValue(
+                                    desc.leftPropertyDescriptor.name,
+                                    v,
+                                ),
+                            ]);
                         }
                     } else {
                         res = desc.parse(ts);
                     }
                     if (res !== undefined) {
-                        if (!(res instanceof SimplePropertyValue)) {
-                            throw new Error(
-                                "res must be SimplePropertyValue at this point",
-                            );
-                        }
                         got.set(desc.name, res);
                         ts.skipWhitespaces();
                         continue mainLoop;
@@ -307,12 +319,7 @@ export class NormalShorthandPropertyDescriptor extends ShorthandPropertyDescript
         // Fill unpopulated ones with initial values.
         for (const desc of this.propertyDescriptors) {
             if (!got.has(desc.name)) {
-                // EXCEPTION: If desc is side shorthand, treat it as single value instead.
-                //            (obviously we can't have shorthands inside shorthand)
-                const initialValue =
-                    desc instanceof SideShorthandPropertyDescriptor
-                        ? desc.topPropertyDescriptor.initialValue()
-                        : desc.initialValue();
+                const initialValue = desc.initialValue();
                 got.set(desc.name, initialValue);
             }
         }
