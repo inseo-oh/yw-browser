@@ -220,3 +220,7 @@ export function parseLength(
     ts.cursor = oldCursor;
     return undefined;
 }
+
+export function serializeLength(length: Length): string {
+    return `${length.value}${toASCIILowercase(length.unit)}`;
+}
