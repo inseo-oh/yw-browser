@@ -22,6 +22,7 @@ export function registerPropertyDescriptor(
 }
 
 export interface UnfinalizedPropertyValue {
+    descriptor: PropertyDescriptor;
     apply(set: UnfinalizedPropertySet): void;
     propertyName(): string;
     serialize(): string;
