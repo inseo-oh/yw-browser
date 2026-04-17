@@ -21,6 +21,91 @@ export function registerPropertyDescriptor(
     }
 }
 
+export interface UnfinalizedPropertyValue {
+    apply(set: UnfinalizedPropertySet): void;
+    propertyName(): string;
+    serialize(): string;
+}
+export class SimplePropertyValue<T> implements UnfinalizedPropertyValue {
+    descriptor: PropertyDescriptor;
+    value: T;
+
+    constructor(property: string, value: T) {
+        if (
+            value instanceof SimplePropertyValue ||
+            value instanceof ShorthandPropertyValue
+        ) {
+            throw new TypeError(
+                "attempted to put PropertyValue inside SimplePropertyValue",
+            );
+        }
+        this.descriptor = getPropertyDescriptor(property);
+        this.value = value;
+    }
+
+    apply(set: UnfinalizedPropertySet): void {
+        set.list.set(this.descriptor, this);
+    }
+
+    propertyName(): string {
+        return this.descriptor.name;
+    }
+    serialize(): string {
+        return this.descriptor.serializeValue(this);
+    }
+}
+export abstract class GlobalKeywordPropertyValue implements UnfinalizedPropertyValue {
+    descriptor: PropertyDescriptor;
+
+    constructor(property: string) {
+        this.descriptor = getPropertyDescriptor(property);
+    }
+
+    apply(set: UnfinalizedPropertySet): void {
+        set.list.set(this.descriptor, this);
+    }
+
+    propertyName(): string {
+        return this.descriptor.name;
+    }
+    abstract serialize(): string;
+}
+export class Inherit extends GlobalKeywordPropertyValue {
+    serialize(): string {
+        return `inherit`;
+    }
+}
+export class Unset extends GlobalKeywordPropertyValue {
+    serialize(): string {
+        return `unset`;
+    }
+}
+export class Initial extends GlobalKeywordPropertyValue {
+    serialize(): string {
+        return `initial`;
+    }
+}
+export class ShorthandPropertyValue implements UnfinalizedPropertyValue {
+    descriptor: PropertyDescriptor;
+    values: UnfinalizedPropertyValue[];
+
+    constructor(property: string, values: UnfinalizedPropertyValue[]) {
+        this.descriptor = getPropertyDescriptor(property);
+        this.values = values;
+    }
+    apply(set: UnfinalizedPropertySet): void {
+        this.values.forEach((value) => {
+            value.apply(set);
+        });
+    }
+    propertyName(): string {
+        return this.descriptor.name;
+    }
+    serialize(): string {
+        return `${this.values.map((v) => v.serialize()).join(",")}`;
+    }
+}
+
 export interface PropertyDescriptor {
     name: string;
     inherited: boolean;
@@ -90,91 +175,6 @@ export class SimplePropertyDescriptor<T> implements PropertyDescriptor {
     }
     serializeValue(v: SimplePropertyValue<T>): string {
         return this.serializer(v.value);
-    }
-}
-export interface UnfinalizedPropertyValue {
-    apply(set: UnfinalizedPropertySet): void;
-    propertyName(): string;
-    serialize(): string;
-}
-export class SimplePropertyValue<T> implements UnfinalizedPropertyValue {
-    descriptor: PropertyDescriptor;
-    value: T;
-
-    constructor(property: string, value: T) {
-        if (
-            value instanceof SimplePropertyValue ||
-            value instanceof ShorthandPropertyValue
-        ) {
-            throw new TypeError(
-                "attempted to put PropertyValue inside SimplePropertyValue",
-            );
-        }
-        this.descriptor = getPropertyDescriptor(property);
-        this.value = value;
-    }
-
-    apply(set: UnfinalizedPropertySet): void {
-        set.list.set(this.descriptor, this);
-    }
-
-    propertyName(): string {
-        return this.descriptor.name;
-    }
-    serialize(): string {
-        return this.descriptor.serializeValue(this);
-    }
-}
-export abstract class GlobalKeywordPropertyValue implements UnfinalizedPropertyValue {
-    descriptor: PropertyDescriptor;
-
-    constructor(property: string) {
-        this.descriptor = getPropertyDescriptor(property);
-    }
-
-    apply(set: UnfinalizedPropertySet): void {
-        set.list.set(this.descriptor, this);
-    }
-
-    propertyName(): string {
-        return this.descriptor.name;
-    }
-    abstract serialize(): string;
-}
-export class Inherit extends GlobalKeywordPropertyValue {
-    serialize(): string {
-        return `inherit`;
-    }
-}
-export class Unset extends GlobalKeywordPropertyValue {
-    serialize(): string {
-        return `unset`;
-    }
-}
-export class Initial extends GlobalKeywordPropertyValue {
-    serialize(): string {
-        return `initial`;
-    }
-}
-
-export class ShorthandPropertyValue implements UnfinalizedPropertyValue {
-    descriptor: PropertyDescriptor;
-    values: UnfinalizedPropertyValue[];
-
-    constructor(property: string, values: UnfinalizedPropertyValue[]) {
-        this.descriptor = getPropertyDescriptor(property);
-        this.values = values;
-    }
-    apply(set: UnfinalizedPropertySet): void {
-        this.values.forEach((value) => {
-            value.apply(set);
-        });
-    }
-    propertyName(): string {
-        return this.descriptor.name;
-    }
-    serialize(): string {
-        return `${this.values.map((v) => v.serialize()).join(",")}`;
     }
 }
 export class NormalShorthandPropertyDescriptor implements PropertyDescriptor {
