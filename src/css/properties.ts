@@ -311,10 +311,7 @@ export class NormalShorthandPropertyDescriptor extends ShorthandPropertyDescript
                 //            (obviously we can't have shorthands inside shorthand)
                 const initialValue =
                     desc instanceof SideShorthandPropertyDescriptor
-                        ? new SimplePropertyValue(
-                              desc.name,
-                              desc.topPropertyDescriptor.initialValue(),
-                          )
+                        ? desc.topPropertyDescriptor.initialValue()
                         : desc.initialValue();
                 got.set(desc.name, initialValue);
             }
