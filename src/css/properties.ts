@@ -169,6 +169,112 @@ export class ShorthandPropertyValue implements UnfinalizedPropertyValue {
         return `${this.values.map((v) => v.serialize()).join(",")}`;
     }
 }
+export class NormalShorthandPropertyDescriptor implements PropertyDescriptor {
+    name: string;
+    propertyDescriptors: PropertyDescriptor[];
+    inherited: boolean;
+
+    constructor({
+        name,
+        names,
+        inherited,
+    }: {
+        name: string;
+        names: string[];
+        inherited: boolean;
+    }) {
+        this.name = name;
+        this.inherited = inherited;
+        this.propertyDescriptors = names.map(getPropertyDescriptor);
+    }
+    parse(ts: TokenStream): UnfinalizedPropertyValue | undefined {
+        const got = new Map<string, UnfinalizedPropertyValue>();
+        mainLoop: while (got.size !== this.propertyDescriptors.length) {
+            for (const desc of this.propertyDescriptors) {
+                if (!got.has(desc.name)) {
+                    ts.skipWhitespaces();
+                    // EXCEPTION: If desc is side shorthand, treat it as single value instead.
+                    //            (obviously we can't have shorthands inside shorthand)
+                    const res =
+                        desc instanceof SideShorthandPropertyDescriptor
+                            ? new SimplePropertyValue(
+                                  desc.name,
+                                  desc.innerValueParser(ts),
+                              )
+                            : desc.parse(ts);
+                    if (res !== undefined) {
+                        if (!(res instanceof SimplePropertyValue)) {
+                            throw new Error(
+                                "res must be SimplePropertyValue at this point",
+                            );
+                        }
+                        got.set(desc.name, res);
+                        ts.skipWhitespaces();
+                        continue mainLoop;
+                    }
+                }
+            }
+            // If we've iterated through all properties and still haven't found any, we exit.
+            break;
+        }
+        if (got.size === 0) {
+            return undefined;
+        }
+        // Fill unpopulated ones with initial values.
+        for (const desc of this.propertyDescriptors) {
+            if (!got.has(desc.name)) {
+                // EXCEPTION: If desc is side shorthand, treat it as single value instead.
+                //            (obviously we can't have shorthands inside shorthand)
+                const initialValue =
+                    desc instanceof SideShorthandPropertyDescriptor
+                        ? new SimplePropertyValue(
+                              desc.name,
+                              desc.topPropertyDescriptor.initialValue(),
+                          )
+                        : desc.initialValue();
+                got.set(desc.name, initialValue);
+            }
+        }
+        return new ShorthandPropertyValue(this.name, [...got.values()]);
+    }
+    computedValue(
+        parent: UnfinalizedPropertyValue,
+        value: UnfinalizedPropertyValue,
+    ): UnfinalizedPropertyValue {
+        if (!(parent instanceof ShorthandPropertyValue)) {
+            throw new TypeError("parent must be ShorthandPropertyValue");
+        }
+        if (!(value instanceof ShorthandPropertyValue)) {
+            throw new TypeError("value must be ShorthandPropertyValue");
+        }
+        return new ShorthandPropertyValue(
+            this.name,
+            value.values.map((propertyValue, i) => {
+                const parentValue = parent.values[i]!;
+                if (parentValue === undefined) {
+                    throw new TypeError(
+                        "parent and value must have same number of values",
+                    );
+                }
+                if (!(propertyValue instanceof SimplePropertyValue)) {
+                    throw new TypeError(
+                        "Only SimplePropertyValue is supported",
+                    );
+                }
+                return propertyValue.descriptor.computedValue(
+                    parentValue,
+                    propertyValue,
+                );
+            }),
+        );
+    }
+    initialValue(): UnfinalizedPropertyValue {
+        return new ShorthandPropertyValue(
+            this.name,
+            this.propertyDescriptors.map((d) => d.initialValue()),
+        );
+    }
+}
 export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
     name: string;
     topPropertyDescriptor: PropertyDescriptor;
@@ -176,7 +282,7 @@ export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
     bottomPropertyDescriptor: PropertyDescriptor;
     leftPropertyDescriptor: PropertyDescriptor;
     inherited: boolean;
-    #innerValueParser: SimplePropertyDescriptor<unknown>["valueParser"];
+    innerValueParser: SimplePropertyDescriptor<unknown>["valueParser"];
 
     constructor({
         name,
@@ -201,7 +307,7 @@ export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
             getPropertyDescriptor(bottomPropertyName);
         this.leftPropertyDescriptor = getPropertyDescriptor(leftPropertyName);
         if (this.topPropertyDescriptor instanceof SimplePropertyDescriptor) {
-            this.#innerValueParser = this.topPropertyDescriptor.valueParser;
+            this.innerValueParser = this.topPropertyDescriptor.valueParser;
         } else {
             throw new TypeError(
                 "only properties described by a SimplePropertyDescriptor is allowed",
@@ -209,12 +315,7 @@ export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
         }
     }
     parse(ts: TokenStream): UnfinalizedPropertyValue | undefined {
-        const values = commaSeparatedRepeation(
-            ts,
-            1,
-            4,
-            this.#innerValueParser,
-        );
+        const values = commaSeparatedRepeation(ts, 1, 4, this.innerValueParser);
         if (values === undefined) {
             return undefined;
         }
@@ -409,7 +510,12 @@ export class UnfinalizedPropertySet {
     finalize(parentSet: PropertySet | undefined): PropertySet {
         const res = new Map();
         this.list.forEach((propValue, descriptor) => {
-            if (!(descriptor instanceof SideShorthandPropertyDescriptor)) {
+            if (
+                !(
+                    descriptor instanceof NormalShorthandPropertyDescriptor ||
+                    descriptor instanceof SideShorthandPropertyDescriptor
+                )
+            ) {
                 return;
             }
             if (propValue === undefined) {
@@ -419,7 +525,10 @@ export class UnfinalizedPropertySet {
             computed.apply(this);
         });
         this.list.forEach((propValue, descriptor) => {
-            if (descriptor instanceof SideShorthandPropertyDescriptor) {
+            if (
+                descriptor instanceof NormalShorthandPropertyDescriptor ||
+                descriptor instanceof SideShorthandPropertyDescriptor
+            ) {
                 return;
             }
             const computed = toComputedValue(parentSet, descriptor, propValue);
