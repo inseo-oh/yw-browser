@@ -39,7 +39,11 @@ class PropertySetFinalizer {
             element.parent != null && element.parent instanceof Element
                 ? this.finalizeForElement(element.parent)
                 : undefined;
-        const result = this.input.get(element)!.finalize(parentPropertySet);
+        const input = this.input.get(element);
+        if (input === undefined) {
+            return new Map();
+        }
+        const result = input.finalize(parentPropertySet);
         this.output.set(element, result);
         return result;
     }
