@@ -275,13 +275,17 @@ export class NormalShorthandPropertyDescriptor extends ShorthandPropertyDescript
                     ts.skipWhitespaces();
                     // EXCEPTION: If desc is side shorthand, treat it as single value instead.
                     //            (obviously we can't have shorthands inside shorthand)
-                    const res =
-                        desc instanceof SideShorthandPropertyDescriptor
-                            ? new SimplePropertyValue(
-                                  desc.name,
-                                  desc.innerValueParser(ts),
-                              )
-                            : desc.parse(ts);
+                    let res;
+                    if (desc instanceof SideShorthandPropertyDescriptor) {
+                        const v = desc.innerValueParser(ts);
+                        if (v === undefined) {
+                            res = undefined;
+                        } else {
+                            res = new SimplePropertyValue(desc.name, v);
+                        }
+                    } else {
+                        res = desc.parse(ts);
+                    }
                     if (res !== undefined) {
                         if (!(res instanceof SimplePropertyValue)) {
                             throw new Error(
