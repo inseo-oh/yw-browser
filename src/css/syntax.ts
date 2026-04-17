@@ -9,7 +9,11 @@ import IOQueue, {
     decode as encodingDecode,
     type Encoding,
 } from "../encoding.js";
-import { isSurrogate, isASCIICaseInsensitiveMatch } from "../infra.js";
+import {
+    isSurrogate,
+    isASCIICaseInsensitiveMatch,
+    toASCIILowercase,
+} from "../infra.js";
 import { TextReader, toCodePoint } from "../utility.js";
 import { CSSStyleSheet, StyleDeclaration, StyleRule } from "./om.js";
 import {
@@ -1305,7 +1309,10 @@ export class TokenStream {
     expectIdent(i: string): boolean {
         const oldCursor = this.cursor;
         const token = this.expectToken("ident");
-        if (token === undefined || token.value !== i) {
+        if (
+            token === undefined ||
+            toASCIILowercase(token.value) !== toASCIILowercase(i)
+        ) {
             this.cursor = oldCursor;
             return false;
         }
