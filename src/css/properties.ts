@@ -240,17 +240,17 @@ export abstract class ShorthandPropertyDescriptor implements PropertyDescriptor 
 export class NormalShorthandPropertyDescriptor extends ShorthandPropertyDescriptor {
     constructor({
         name,
-        names,
+        propertyNames,
         inherited,
     }: {
         name: string;
-        names: string[];
+        propertyNames: string[];
         inherited: boolean;
     }) {
         super({
             name,
             inherited,
-            propertyDescriptors: names.map(getPropertyDescriptor),
+            propertyDescriptors: propertyNames.map(getPropertyDescriptor),
         });
     }
     parse(ts: TokenStream): UnfinalizedPropertyValue | undefined {
@@ -313,17 +313,17 @@ export class SideShorthandPropertyDescriptor extends ShorthandPropertyDescriptor
 
     constructor({
         name,
-        topName: topPropertyName,
-        rightName: rightPropertyName,
-        bottomName: bottomPropertyName,
-        leftName: leftPropertyName,
+        topPropertyName,
+        rightPropertyName,
+        bottomPropertyName,
+        leftPropertyName,
         inherited,
     }: {
         name: string;
-        topName: string;
-        rightName: string;
-        bottomName: string;
-        leftName: string;
+        topPropertyName: string;
+        rightPropertyName: string;
+        bottomPropertyName: string;
+        leftPropertyName: string;
         inherited: boolean;
     }) {
         super({
