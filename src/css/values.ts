@@ -140,6 +140,10 @@ export function parsePercentage(ts: TokenStream): Percentage | undefined {
     return { value: per.value, unit: "%" };
 }
 
+export function serializePercentage(percentage: Percentage): string {
+    return `${percentage.value}%`;
+}
+
 //==============================================================================
 // CSS Values and Units Module Level 3 - 4.6.
 //==============================================================================
@@ -158,6 +162,17 @@ export function parseLengthOrPercentage(
         return len;
     }
     return parsePercentage(ts);
+}
+
+export function serializeLengthOrPercentage(
+    lengthOrPercentage: Length | Percentage,
+): string {
+    switch (lengthOrPercentage.unit) {
+        case "%":
+            return serializePercentage(lengthOrPercentage);
+        default:
+            return serializeLength(lengthOrPercentage);
+    }
 }
 
 //==============================================================================
