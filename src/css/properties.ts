@@ -30,6 +30,7 @@ export interface PropertyDescriptor {
         value: UnfinalizedPropertyValue,
     ): UnfinalizedPropertyValue;
     parse(ts: TokenStream): UnfinalizedPropertyValue | undefined;
+    serializeValue(v: UnfinalizedPropertyValue): string;
 }
 export class SimplePropertyDescriptor<T> implements PropertyDescriptor {
     name: string;
@@ -37,22 +38,26 @@ export class SimplePropertyDescriptor<T> implements PropertyDescriptor {
     valueParser: (ts: TokenStream) => T | undefined;
     initial: () => T;
     computed: (parent: T, value: T) => T;
+    serializer: (v: T) => string;
 
     constructor({
         name,
         inherited,
+        serializer = (v): string => `${v}`,
         valueParser,
         initial,
         computed,
     }: {
         name: string;
         inherited: boolean;
+        serializer?: (v: T) => string;
         valueParser: (ts: TokenStream) => T | undefined;
         initial: () => T;
         computed: (parent: T, value: T) => T;
     }) {
         this.name = name;
         this.inherited = inherited;
+        this.serializer = serializer;
         this.valueParser = valueParser;
         this.initial = initial;
         this.computed = computed;
@@ -82,6 +87,9 @@ export class SimplePropertyDescriptor<T> implements PropertyDescriptor {
             return undefined;
         }
         return new SimplePropertyValue(this.name, v);
+    }
+    serializeValue(v: SimplePropertyValue<T>): string {
+        return this.serializer(v.value);
     }
 }
 export interface UnfinalizedPropertyValue {
@@ -114,7 +122,7 @@ export class SimplePropertyValue<T> implements UnfinalizedPropertyValue {
         return this.descriptor.name;
     }
     serialize(): string {
-        return `${this.value}`;
+        return this.descriptor.serializeValue(this);
     }
 }
 export abstract class GlobalKeywordPropertyValue implements UnfinalizedPropertyValue {
@@ -273,6 +281,9 @@ export class NormalShorthandPropertyDescriptor implements PropertyDescriptor {
             this.name,
             this.propertyDescriptors.map((d) => d.initialValue()),
         );
+    }
+    serializeValue(v: UnfinalizedPropertyValue): string {
+        return v.serialize();
     }
 }
 export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
@@ -444,6 +455,9 @@ export class SideShorthandPropertyDescriptor implements PropertyDescriptor {
             this.bottomPropertyDescriptor.initialValue(),
             this.leftPropertyDescriptor.initialValue(),
         ]);
+    }
+    serializeValue(v: UnfinalizedPropertyValue): string {
+        return v.serialize();
     }
 }
 
