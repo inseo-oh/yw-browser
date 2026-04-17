@@ -95,7 +95,7 @@ function filterCodepoints(input: string): string {
     let remaining = input;
     while (remaining.length !== 0) {
         if (remaining.startsWith("\r\n")) {
-            /* CR followed by LF */
+            // CR followed by LF
             remaining = remaining.substring(2);
         } else if (remaining.startsWith("\r") || remaining.startsWith("\n")) {
             res += "\n";
@@ -1610,7 +1610,7 @@ export class TokenStream {
                     decls.push(decl);
                 }
             } else {
-                /* PARSE ERROR */
+                // PARSE ERROR
                 while (true) {
                     const tempToken = this.consumeNextInputToken();
                     if (tempToken === undefined) {
