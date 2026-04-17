@@ -184,16 +184,16 @@ export abstract class ShorthandPropertyDescriptor implements PropertyDescriptor 
 
     constructor({
         name,
-        propertyDescriptors,
+        propertyNames,
         inherited,
     }: {
         name: string;
-        propertyDescriptors: PropertyDescriptor[];
+        propertyNames: string[];
         inherited: boolean;
     }) {
         this.name = name;
         this.inherited = inherited;
-        this.propertyDescriptors = propertyDescriptors;
+        this.propertyDescriptors = propertyNames.map(getPropertyDescriptor);
     }
     abstract parse(ts: TokenStream): UnfinalizedPropertyValue | undefined;
     computedValue(
@@ -250,7 +250,7 @@ export class NormalShorthandPropertyDescriptor extends ShorthandPropertyDescript
         super({
             name,
             inherited,
-            propertyDescriptors: propertyNames.map(getPropertyDescriptor),
+            propertyNames,
         });
     }
     parse(ts: TokenStream): UnfinalizedPropertyValue | undefined {
@@ -318,28 +318,31 @@ export class SideShorthandPropertyDescriptor extends ShorthandPropertyDescriptor
     }: {
         name: string;
         propertyNames: {
-            top: string,
-            right: string,
-            bottom: string,
-            left: string,
-        }
+            top: string;
+            right: string;
+            bottom: string;
+            left: string;
+        };
         inherited: boolean;
     }) {
         super({
             name,
             inherited,
-            propertyDescriptors: [
-                getPropertyDescriptor(propertyNames.top),
-                getPropertyDescriptor(propertyNames.right),
-                getPropertyDescriptor(propertyNames.bottom),
-                getPropertyDescriptor(propertyNames.left),
+            propertyNames: [
+                propertyNames.top,
+                propertyNames.right,
+                propertyNames.bottom,
+                propertyNames.left,
             ],
         });
         this.inherited = inherited;
         this.topPropertyDescriptor = getPropertyDescriptor(propertyNames.top);
-        this.rightPropertyDescriptor = getPropertyDescriptor(propertyNames.right);
-        this.bottomPropertyDescriptor =
-            getPropertyDescriptor(propertyNames.bottom);
+        this.rightPropertyDescriptor = getPropertyDescriptor(
+            propertyNames.right,
+        );
+        this.bottomPropertyDescriptor = getPropertyDescriptor(
+            propertyNames.bottom,
+        );
         this.leftPropertyDescriptor = getPropertyDescriptor(propertyNames.left);
         if (this.topPropertyDescriptor instanceof SimplePropertyDescriptor) {
             this.innerValueParser = this.topPropertyDescriptor.valueParser;
