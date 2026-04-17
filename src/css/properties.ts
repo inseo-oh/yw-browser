@@ -39,6 +39,9 @@ export class SimplePropertyValue<T> implements UnfinalizedPropertyValue {
                 "attempted to put PropertyValue inside SimplePropertyValue",
             );
         }
+        if (value === undefined) {
+            throw new TypeError("value cannot be undefined");
+        }
         this.descriptor = getPropertyDescriptor(property);
         this.value = value;
     }
