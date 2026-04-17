@@ -979,6 +979,7 @@ function normalizeIntoTokenStream(input: TokenStreamInput): TokenStream {
 
     // S3.
     if (typeof input === "string") {
+        input = filterCodepoints(input);
         return new TokenStream(tokenize(input));
     }
 
