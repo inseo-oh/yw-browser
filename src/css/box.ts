@@ -28,7 +28,7 @@ export function parseMargin(ts: TokenStream): Margin | undefined {
 }
 export function serializeMargin(margin: Margin): string {
     if (margin === "auto") {
-        return "margin";
+        return margin;
     }
     return serializeLengthOrPercentage(margin);
 }
