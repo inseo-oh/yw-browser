@@ -262,7 +262,7 @@ export class StyleDeclaration {
     }
 
     serialize(): string {
-        let res = `${this.value.propertyName()}:${this.value.serialize()}`;
+        let res = `${this.value.propertyName()}:${this.value.descriptor.serializeValue(this.value)}`;
         if (this.important) {
             res += "!important";
         }

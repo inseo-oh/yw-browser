@@ -25,7 +25,6 @@ export interface UnfinalizedPropertyValue {
     descriptor: PropertyDescriptor;
     apply(set: UnfinalizedPropertySet): void;
     propertyName(): string;
-    serialize(): string;
 }
 export class SimplePropertyValue<T> implements UnfinalizedPropertyValue {
     descriptor: PropertyDescriptor;
@@ -104,9 +103,6 @@ export class ShorthandPropertyValue implements UnfinalizedPropertyValue {
     }
     propertyName(): string {
         return this.descriptor.name;
-    }
-    serialize(): string {
-        return `${this.values.map((v) => v.serialize()).join(",")}`;
     }
 }
 
@@ -245,9 +241,7 @@ export abstract class ShorthandPropertyDescriptor implements PropertyDescriptor 
             ...this.hiddenPropertyDescriptors.map((d) => d.initialValue()),
         ]);
     }
-    serializeValue(v: UnfinalizedPropertyValue): string {
-        return v.serialize();
-    }
+    abstract serializeValue(v: UnfinalizedPropertyValue): string;
 }
 export class NormalShorthandPropertyDescriptor extends ShorthandPropertyDescriptor {
     constructor({
@@ -325,6 +319,25 @@ export class NormalShorthandPropertyDescriptor extends ShorthandPropertyDescript
             }
         }
         return new ShorthandPropertyValue(this.name, [...got.values()]);
+    }
+    serializeValue(v: ShorthandPropertyValue): string {
+        return v.values
+            .map((v) => {
+                if (v.descriptor instanceof SideShorthandPropertyDescriptor) {
+                    // For nested side shorthands, only serialize the first value.
+                    if (!(v instanceof ShorthandPropertyValue)) {
+                        throw new Error(
+                            "v must be ShorthandPropertyValue at this point",
+                        );
+                    }
+                    return v.descriptor.topPropertyDescriptor.serializeValue(
+                        v.values[0]!,
+                    );
+                } else {
+                    return v.descriptor.serializeValue(v);
+                }
+            })
+            .join(",");
     }
 }
 export class SideShorthandPropertyDescriptor extends ShorthandPropertyDescriptor {
@@ -469,6 +482,9 @@ export class SideShorthandPropertyDescriptor extends ShorthandPropertyDescriptor
                 throw new Error("unreachable");
         }
         return new ShorthandPropertyValue(this.name, res);
+    }
+    serializeValue(v: ShorthandPropertyValue): string {
+        return `${v.values.map((v) => v.descriptor.serializeValue(v)).join(",")}`;
     }
 }
 
