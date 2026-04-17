@@ -313,35 +313,34 @@ export class SideShorthandPropertyDescriptor extends ShorthandPropertyDescriptor
 
     constructor({
         name,
-        topPropertyName,
-        rightPropertyName,
-        bottomPropertyName,
-        leftPropertyName,
+        propertyNames,
         inherited,
     }: {
         name: string;
-        topPropertyName: string;
-        rightPropertyName: string;
-        bottomPropertyName: string;
-        leftPropertyName: string;
+        propertyNames: {
+            top: string,
+            right: string,
+            bottom: string,
+            left: string,
+        }
         inherited: boolean;
     }) {
         super({
             name,
             inherited,
             propertyDescriptors: [
-                getPropertyDescriptor(topPropertyName),
-                getPropertyDescriptor(rightPropertyName),
-                getPropertyDescriptor(bottomPropertyName),
-                getPropertyDescriptor(leftPropertyName),
+                getPropertyDescriptor(propertyNames.top),
+                getPropertyDescriptor(propertyNames.right),
+                getPropertyDescriptor(propertyNames.bottom),
+                getPropertyDescriptor(propertyNames.left),
             ],
         });
         this.inherited = inherited;
-        this.topPropertyDescriptor = getPropertyDescriptor(topPropertyName);
-        this.rightPropertyDescriptor = getPropertyDescriptor(rightPropertyName);
+        this.topPropertyDescriptor = getPropertyDescriptor(propertyNames.top);
+        this.rightPropertyDescriptor = getPropertyDescriptor(propertyNames.right);
         this.bottomPropertyDescriptor =
-            getPropertyDescriptor(bottomPropertyName);
-        this.leftPropertyDescriptor = getPropertyDescriptor(leftPropertyName);
+            getPropertyDescriptor(propertyNames.bottom);
+        this.leftPropertyDescriptor = getPropertyDescriptor(propertyNames.left);
         if (this.topPropertyDescriptor instanceof SimplePropertyDescriptor) {
             this.innerValueParser = this.topPropertyDescriptor.valueParser;
         } else {
