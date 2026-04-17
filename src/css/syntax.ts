@@ -1537,7 +1537,6 @@ export class TokenStream {
                         break;
                     }
                     if (tempToken.kind === "semicolon") {
-                        this.reconsumeCurrentInputToken();
                         break;
                     }
                     tokens.push(tempToken);
@@ -1599,7 +1598,6 @@ export class TokenStream {
                         break;
                     }
                     if (tempToken.kind === "semicolon") {
-                        this.reconsumeCurrentInputToken();
                         break;
                     }
                     tokens.push(tempToken);
