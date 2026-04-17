@@ -180,20 +180,28 @@ export class SimplePropertyDescriptor<T> implements PropertyDescriptor {
 export abstract class ShorthandPropertyDescriptor implements PropertyDescriptor {
     name: string;
     propertyDescriptors: PropertyDescriptor[];
+    hiddenPropertyDescriptors: PropertyDescriptor[];
     inherited: boolean;
 
+    // Hidden properties are properties that gets initialized and inherited,
+    // but are not part of the property syntax.
     constructor({
         name,
         propertyNames,
+        hiddenPropertyNames,
         inherited,
     }: {
         name: string;
         propertyNames: string[];
+        hiddenPropertyNames: string[];
         inherited: boolean;
     }) {
         this.name = name;
         this.inherited = inherited;
         this.propertyDescriptors = propertyNames.map(getPropertyDescriptor);
+        this.hiddenPropertyDescriptors = hiddenPropertyNames.map(
+            getPropertyDescriptor,
+        );
     }
     abstract parse(ts: TokenStream): UnfinalizedPropertyValue | undefined;
     computedValue(
@@ -228,10 +236,10 @@ export abstract class ShorthandPropertyDescriptor implements PropertyDescriptor 
         );
     }
     initialValue(): UnfinalizedPropertyValue {
-        return new ShorthandPropertyValue(
-            this.name,
-            this.propertyDescriptors.map((d) => d.initialValue()),
-        );
+        return new ShorthandPropertyValue(this.name, [
+            ...this.propertyDescriptors.map((d) => d.initialValue()),
+            ...this.hiddenPropertyDescriptors.map((d) => d.initialValue()),
+        ]);
     }
     serializeValue(v: UnfinalizedPropertyValue): string {
         return v.serialize();
@@ -241,16 +249,19 @@ export class NormalShorthandPropertyDescriptor extends ShorthandPropertyDescript
     constructor({
         name,
         propertyNames,
+        hiddenPropertyNames = [],
         inherited,
     }: {
         name: string;
         propertyNames: string[];
+        hiddenPropertyNames?: string[];
         inherited: boolean;
     }) {
         super({
             name,
             inherited,
             propertyNames,
+            hiddenPropertyNames,
         });
     }
     parse(ts: TokenStream): UnfinalizedPropertyValue | undefined {
@@ -314,6 +325,7 @@ export class SideShorthandPropertyDescriptor extends ShorthandPropertyDescriptor
     constructor({
         name,
         propertyNames,
+        hiddenPropertyNames = [],
         inherited,
     }: {
         name: string;
@@ -323,6 +335,7 @@ export class SideShorthandPropertyDescriptor extends ShorthandPropertyDescriptor
             bottom: string;
             left: string;
         };
+        hiddenPropertyNames?: string[];
         inherited: boolean;
     }) {
         super({
@@ -334,6 +347,7 @@ export class SideShorthandPropertyDescriptor extends ShorthandPropertyDescriptor
                 propertyNames.bottom,
                 propertyNames.left,
             ],
+            hiddenPropertyNames,
         });
         this.inherited = inherited;
         this.topPropertyDescriptor = getPropertyDescriptor(propertyNames.top);
