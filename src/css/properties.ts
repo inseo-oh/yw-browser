@@ -117,12 +117,12 @@ export interface PropertyDescriptor {
     parse(ts: TokenStream): UnfinalizedPropertyValue | undefined;
     serializeValue(v: UnfinalizedPropertyValue): string;
 }
-export class SimplePropertyDescriptor<T> implements PropertyDescriptor {
+export class SimplePropertyDescriptor<T, U> implements PropertyDescriptor {
     name: string;
     inherited: boolean;
     valueParser: (ts: TokenStream) => T | undefined;
     initial: () => T;
-    computed: (parent: T, value: T) => T;
+    computed: (parent: U, value: T) => U;
     serializer: (v: T) => string;
 
     constructor({
@@ -138,7 +138,7 @@ export class SimplePropertyDescriptor<T> implements PropertyDescriptor {
         serializer?: (v: T) => string;
         valueParser: (ts: TokenStream) => T | undefined;
         initial: () => T;
-        computed: (parent: T, value: T) => T;
+        computed: (parent: U, value: T) => U;
     }) {
         this.name = name;
         this.inherited = inherited;
@@ -345,7 +345,7 @@ export class SideShorthandPropertyDescriptor extends ShorthandPropertyDescriptor
     rightPropertyDescriptor: PropertyDescriptor;
     bottomPropertyDescriptor: PropertyDescriptor;
     leftPropertyDescriptor: PropertyDescriptor;
-    innerValueParser: SimplePropertyDescriptor<unknown>["valueParser"];
+    innerValueParser: SimplePropertyDescriptor<unknown, unknown>["valueParser"];
 
     constructor({
         name,
