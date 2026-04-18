@@ -6,7 +6,7 @@ import { commaSeparatedRepeation } from "./values.js";
 
 export const PROPERTY_DESCRIPTORS: Map<string, PropertyDescriptor> = new Map();
 
-function getPropertyDescriptor(name: string): PropertyDescriptor {
+export function getPropertyDescriptor(name: string): PropertyDescriptor {
     const desc = PROPERTY_DESCRIPTORS.get(name);
     if (desc === undefined) {
         throw new Error(`No such property named ${name}`);
