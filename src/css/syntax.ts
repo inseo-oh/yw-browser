@@ -1909,7 +1909,7 @@ function parseStyleRule(rule: ASTQualifiedRule): StyleRule | undefined {
         if (tk.kind === "ast-declaration") {
             const desc = PROPERTY_DESCRIPTORS.get(tk.name);
             if (desc === undefined) {
-                console.warn(`Unrecognized property ${desc}`);
+                console.warn(`Unrecognized property ${tk.name}`);
                 continue;
             }
             const ts = new TokenStream(tk.value);
