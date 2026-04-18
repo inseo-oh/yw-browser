@@ -13,7 +13,7 @@ export function repeation<T>(
     ts: TokenStream,
     minRepeats: number,
     maxRepeats: number | "unlimited",
-    parser: (ts: TokenStream) => T,
+    parser: (ts: TokenStream) => T | undefined,
 ): T[] | undefined {
     const oldCursor = ts.cursor;
     const res = [];
@@ -40,7 +40,7 @@ export function commaSeparatedRepeation<T>(
     ts: TokenStream,
     minRepeats: number,
     maxRepeats: number | "unlimited",
-    parser: (ts: TokenStream) => T,
+    parser: (ts: TokenStream) => T | undefined,
 ): T[] | undefined {
     const oldCursor = ts.cursor;
     const res = [];
