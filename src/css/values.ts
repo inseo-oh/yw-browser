@@ -113,10 +113,23 @@ export function parseNumber(ts: TokenStream): number | undefined {
 // https://www.w3.org/TR/css-values-3/#typedef-dimension
 export type Dimension = { value: number; unit: string };
 
-export function parseDimension(ts: TokenStream): Dimension | undefined {
+export function parseDimension(
+    ts: TokenStream,
+    {
+        minValue,
+        maxValue,
+    }: {
+        minValue?: number | undefined;
+        maxValue?: number | undefined;
+    },
+): Dimension | undefined {
     const oldCursor = ts.cursor;
     const dim = ts.expectToken("dimension");
-    if (dim === undefined) {
+    if (
+        dim === undefined ||
+        (minValue !== undefined && dim.value < minValue) ||
+        (maxValue !== undefined && maxValue < dim.value)
+    ) {
         ts.cursor = oldCursor;
         return undefined;
     }
@@ -224,18 +237,17 @@ export function parseLength(
         maxValue,
     }: {
         allowZeroShorthand?: boolean;
-        minValue?: number;
-        maxValue?: number;
+        minValue?: number | undefined;
+        maxValue?: number | undefined;
     },
 ): Length | undefined {
     const oldCursor = ts.cursor;
-    const dim = parseDimension(ts);
-    if (
-        dim === undefined ||
-        (minValue !== undefined && dim.value < minValue) ||
-        (maxValue !== undefined && maxValue < dim.value)
-    ) {
-        if (dim === undefined && parseInteger(ts) === 0 && allowZeroShorthand) {
+    const dim = parseDimension(ts, {
+        minValue,
+        maxValue,
+    });
+    if (dim === undefined) {
+        if (parseInteger(ts) === 0 && allowZeroShorthand) {
             return { value: 0, unit: "px" };
         }
         ts.cursor = oldCursor;
