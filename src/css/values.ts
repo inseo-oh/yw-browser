@@ -144,6 +144,13 @@ export function serializePercentage(percentage: Percentage): string {
     return `${percentage.value}%`;
 }
 
+export function resolvePercentage(
+    percentage: Percentage,
+    relativeTo: number,
+): number {
+    return (percentage.value * relativeTo) / 100;
+}
+
 //==============================================================================
 // CSS Values and Units Module Level 3 - 4.6.
 //==============================================================================
@@ -172,6 +179,19 @@ export function serializeLengthOrPercentage(
             return serializePercentage(lengthOrPercentage);
         default:
             return serializeLength(lengthOrPercentage);
+    }
+}
+
+export function resolveLengthOrPercentage(
+    lengthOrPercentage: Length | Percentage,
+    elementFontSize: number,
+    relativeTo: number,
+): number {
+    switch (lengthOrPercentage.unit) {
+        case "%":
+            return resolvePercentage(lengthOrPercentage, relativeTo);
+        default:
+            return resolveLength(lengthOrPercentage, elementFontSize);
     }
 }
 
@@ -234,6 +254,32 @@ export function parseLength(
     }
     ts.cursor = oldCursor;
     return undefined;
+}
+
+export function resolveLength(length: Length, elementFontSize: number): number {
+    const cmPx = 96 / 2.54;
+    const mmPx = cmPx / 10; // 1mm = 1/10 of 1cm
+    const inPx = cmPx * 2.54; // 1in = 2.54cm
+    const pcPx = inPx / 6; // 1pc = 1/6 of 1in
+    const ptPx = inPx / 72; // 1pt = 1/72 of 1in
+    switch (length.unit) {
+        case "em":
+            return length.value * elementFontSize;
+        case "ex":
+            throw new Error("Not implemented yet");
+        case "cm":
+            return length.value * cmPx;
+        case "mm":
+            return length.value * mmPx;
+        case "in":
+            return length.value * inPx;
+        case "pc":
+            return length.value * pcPx;
+        case "pt":
+            return length.value * ptPx;
+        case "px":
+            return length.value;
+    }
 }
 
 export function serializeLength(length: Length): string {
