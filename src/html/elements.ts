@@ -62,6 +62,8 @@ export function elementInterfaceForHTML(name: string): ElementInterface {
             return (n, a) => new HTMLLinkElement(n, a);
         case "pre":
             return (n, a) => new HTMLPreElement(n, a);
+        case "img":
+            return (n, a) => new HTMLImageElement(n, a);
 
         // S5.
         // TODO
@@ -117,6 +119,19 @@ export class HTMLLinkElement extends HTMLElement {}
 
 // https://html.spec.whatwg.org/multipage/grouping-content.html#htmlpreelement
 export class HTMLPreElement extends HTMLElement {}
+
+//==========================================================================
+// HTML Standard - 4.8.3.
+//==========================================================================
+
+export class HTMLImageElement extends HTMLElement {
+    //======================================================================
+    // HTML Standard - 4.8.4.
+    //======================================================================
+
+    // https://html.spec.whatwg.org/multipage/images.html#source-set
+    sourceSet: null[] = []; // STUB
+}
 
 //==========================================================================
 // HTML Standard - 13.1.2.
