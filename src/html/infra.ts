@@ -24,7 +24,7 @@ function matchesAboutBlank(url: URL): boolean {
 //==============================================================================
 
 // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url
-export function documentBaseURL(document: Document): URL | null {
+export function documentBaseURL(document: Document): URL {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.03.07.)
 
     // S1.
@@ -49,13 +49,15 @@ export function documentBaseURL(document: Document): URL | null {
 }
 
 // https://html.spec.whatwg.org/multipage/urls-and-fetching.html#fallback-base-url
-function fallbackBaseURL(document: Document): URL | null {
+function fallbackBaseURL(document: Document): URL {
     // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.03.07.)
 
     // S1.
     if (document.isIframeSrcdocDocument) {
         // S1-1.
-        console.assert(document.aboutBaseURL != null);
+        if (document.aboutBaseURL === null) {
+            throw new Error("aboutBaseURL should not be null at this point");
+        }
 
         // S1-2.
         return document.aboutBaseURL;
