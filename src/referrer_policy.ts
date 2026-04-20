@@ -4,6 +4,8 @@
 //==========================================================================
 // Referrer Policy - 3.
 //==========================================================================
+
+// https://www.w3.org/TR/referrer-policy/#referrer-policies
 export type ReferrerPolicy =
     | ""
     | "no-referrer"
