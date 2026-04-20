@@ -205,6 +205,19 @@ class CSSStyleSheetSet {
 }
 
 //==============================================================================
+// CSS Object Model - 6.3.2.
+//==============================================================================
+
+export function associatedCSSStyleSheet(node: Node): CSSStyleSheet | undefined {
+    for (const sheet of documentOrShadowRootCSSStyleSheets()) {
+        if (sheet.ownerNode === node) {
+            return sheet;
+        }
+    }
+    return undefined;
+}
+
+//==============================================================================
 // Below doesn't follow the spec.. because spec wasn't very helpful in this case.
 // Maybe I'll rewrite these when CSSOM becomes more mature.
 //==============================================================================
