@@ -2,7 +2,60 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 import { Element, type Document } from "../dom.js";
-import { HTML_NAMESPACE } from "../infra.js";
+import { HTML_NAMESPACE, toASCIILowercase } from "../infra.js";
+
+//==============================================================================
+// HTML Standard - 2.3.3.
+//==============================================================================
+
+// https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#enumerated-attribute
+export function enumeratedAttribute<T>(
+    element: Element,
+    attributeName: string,
+    {
+        missingValueDefault,
+        emptyValueDefault,
+        invalidValueDefault,
+    }: {
+        missingValueDefault?: T;
+        emptyValueDefault?: T;
+        invalidValueDefault?: T;
+    },
+    tryMatch: (value: string) => T | undefined,
+): T | undefined {
+    // NOTE: All the step numbers(S#.) are based on spec from when this was initially written(2026.02.05)
+
+    // S1.
+    const attrValue = element.attribute(null, attributeName);
+    if (attrValue === undefined) {
+        // S1-1.
+        if (missingValueDefault !== undefined) {
+            return missingValueDefault;
+        }
+
+        // S1-2.
+        return undefined;
+    }
+
+    // S2.
+    const res = tryMatch(toASCIILowercase(attrValue));
+    if (res !== undefined) {
+        return res;
+    }
+
+    // S3.
+    if (emptyValueDefault !== undefined && attrValue === "") {
+        return emptyValueDefault;
+    }
+
+    // S4.
+    if (invalidValueDefault !== undefined) {
+        return invalidValueDefault;
+    }
+
+    // S5.
+    return undefined;
+}
 
 //==============================================================================
 // HTML Standard - 2.4.
