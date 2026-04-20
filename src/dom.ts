@@ -12,6 +12,7 @@ import {
     lookupCustomElementDefinition,
     tryUpgradeElement,
 } from "./html/custom_elements.js";
+import { PolicyContainer } from "./html/loading.js";
 import { type TokenFor } from "./html/parsing/token.js";
 import {
     HTML_NAMESPACE,
@@ -596,6 +597,9 @@ export class Document extends Node {
 
     // https://html.spec.whatwg.org/multipage/dom.html#concept-document-about-base-url
     aboutBaseURL: URL | null = null;
+
+    // https://html.spec.whatwg.org/multipage/dom.html#concept-document-policy-container
+    policyContainer: PolicyContainer = new PolicyContainer();
 
     //==========================================================================
     // HTML Standard - 13.2.6.4.1.
